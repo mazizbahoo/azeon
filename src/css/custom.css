@@ -221,11 +221,17 @@ pre {
   background: var(--az-bg);
 }
 
+.theme-doc-sidebar-container .menu {
+  padding: 10px !important;
+}
+
 .menu__link {
   font-family: var(--ifm-font-family-monospace);
   font-size: 0.76rem;
   letter-spacing: 0.01em;
   color: var(--az-text);
+  border-radius: 8px !important;
+  padding: 10px !important;
 }
 
 .menu__link:hover {
