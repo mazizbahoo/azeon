@@ -80,7 +80,6 @@ function PhaseCard({ phase }) {
         boxShadow: hovered && isLive
           ? `0 0 28px ${phase.color}22, inset 0 0 28px ${phase.color}06`
           : undefined,
-        cursor: isLive ? 'pointer' : 'default',
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}

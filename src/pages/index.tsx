@@ -217,7 +217,6 @@ function PhaseCard({ phase }: { phase: Phase }) {
       style={{
         borderColor: hovered && isLive ? phase.color : undefined,
         boxShadow: hovered && isLive ? `0 0 28px ${phase.color}22, inset 0 0 28px ${phase.color}06` : undefined,
-        cursor: isLive ? 'pointer' : 'default',
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
