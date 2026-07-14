@@ -106,7 +106,7 @@ This gives you a clear picture of what satisfying the formula actually means. Yo
 When clauses push against each other, when satisfying one forces you to violate another, things get hard. The difficulty of SAT is exactly this: finding one assignment that threads through all the requirements at once without breaking any of them.
 
 <Tabs>
-  <TabItem value="easy" label="🟢 Constraints that agree" default>
+  <TabItem value="easy" label="Constraints that agree" default>
 
 $$\phi = (x_1) \wedge (x_1 \vee x_2) \wedge (x_1 \vee \neg x_2)$$
 
@@ -115,7 +115,7 @@ The first clause demands $x_1 = \text{true}$. Once that is set, the other two cl
 The search space here is $2^2 = 4$ possible assignments, and the first one you try works.
 
   </TabItem>
-  <TabItem value="medium" label="🟡 Constraints that interact">
+  <TabItem value="medium" label="Constraints that interact">
 
 $$\phi = (x_1 \vee x_2) \wedge (\neg x_1 \vee x_3) \wedge (\neg x_2 \vee \neg x_3)$$
 
@@ -128,7 +128,7 @@ So if $x_1$ is true, clause 2 forces $x_3 = \text{true}$, which means clause 3 f
 Notice that you had to follow a chain of forced decisions before you could confirm it. That is what makes SAT interesting.
 
   </TabItem>
-  <TabItem value="hard" label="🔴 Constraints that contradict">
+  <TabItem value="hard" label="Constraints that contradict">
 
 $$\phi = (x_1) \wedge (\neg x_1)$$
 

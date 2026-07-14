@@ -155,6 +155,7 @@ export default function TuringMachine() {
         width: '100%',
         maxWidth: '100%',
         overflow: 'hidden',
+        boxShadow: 'var(--az-card-shadow)',
       }}
     >
 

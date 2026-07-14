@@ -69,7 +69,7 @@ One important thing about this definition: it does not matter much which reasona
 Let's look at actual problems that are provably inside $\mathcal{P}$.
 
 <Tabs>
-  <TabItem value="sorting" label="📋 Sorting" default>
+  <TabItem value="sorting" label="Sorting" default>
 
     **The problem:** Given a list of $n$ numbers, arrange them in ascending order.
 
@@ -80,7 +80,7 @@ Let's look at actual problems that are provably inside $\mathcal{P}$.
     Here is what makes sorting clearly inside $\mathcal{P}$: the number of steps grows gently as the list gets longer. A list of 1000 numbers takes roughly 10000 steps. A list of one million numbers takes roughly 20 million steps. That is a 1000x increase in input leading to roughly a 2000x increase in work. Completely manageable. If you instead tried every possible arrangement of the list to find the sorted one, that would be $n!$ possibilities: a number with thousands of digits for $n = 1000$. You would never finish.
 
   </TabItem>
-  <TabItem value="search" label="🔍 Binary Search">
+  <TabItem value="search" label="Binary Search">
 
     **The problem:** Given a sorted list of $n$ numbers and a target value, decide whether the target appears in the list.
 
@@ -93,7 +93,7 @@ Let's look at actual problems that are provably inside $\mathcal{P}$.
     $O(\log n)$ is even better than linear. It is very much inside $\mathcal{P}$.
 
   </TabItem>
-  <TabItem value="path" label="🗺️ Shortest Path">
+  <TabItem value="path" label="Shortest Path">
 
     **The problem:** Given a graph of cities connected by roads with distances, find the shortest route from city A to city B.
 
@@ -104,7 +104,7 @@ Let's look at actual problems that are provably inside $\mathcal{P}$.
     You might wonder: if shortest path is in $\mathcal{P}$, why is the Traveling Salesman Problem so hard? We will get there in Phase 2. The short version is that shortest path asks you to go from A to B. TSP asks you to visit every city exactly once and return home. That one addition changes everything.
 
   </TabItem>
-  <TabItem value="primality" label="🔢 Primality Testing">
+  <TabItem value="primality" label="Primality Testing">
 
     **The problem:** Given a number $n$, decide whether it is prime.
 

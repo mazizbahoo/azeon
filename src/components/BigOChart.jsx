@@ -152,6 +152,7 @@ function Inner() {
       borderRadius: 24,
       padding: '28px 16px 20px',
       margin: '2rem 0',
+      boxShadow: 'var(--az-card-shadow)',
     }}>
       <div style={{
         fontFamily: "'JetBrains Mono', monospace",

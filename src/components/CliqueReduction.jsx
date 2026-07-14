@@ -143,7 +143,7 @@ function Inner() {
   const NODE_R = Math.min(Math.max(14, dims.w * 0.038), 22);
 
   return (
-    <div style={{ fontFamily: mono, margin: '2rem 0' }}>
+    <div style={{ fontFamily: mono, margin: '2rem 0', boxShadow: 'var(--az-card-shadow)', borderRadius: 24 }}>
 
       {/* Title bar */}
       <div style={{

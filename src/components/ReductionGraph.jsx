@@ -4,14 +4,14 @@ import { useColorMode } from '@docusaurus/theme-common';
 
 /* ── graph definition ────────────────────────────────────── */
 
-const N     = 6;
-const EDGES = [[0,1],[0,2],[1,3],[2,3],[3,4],[4,5],[2,5]];
+const N = 6;
+const EDGES = [[0, 1], [0, 2], [1, 3], [2, 3], [3, 4], [4, 5], [2, 5]];
 const CANVAS_H = 240;
 
 function buildNodes(w) {
   const cx = w / 2;
   const cy = CANVAS_H / 2;
-  const r  = Math.min(w, CANVAS_H) * 0.33;
+  const r = Math.min(w, CANVAS_H) * 0.33;
   return Array.from({ length: N }, (_, i) => {
     const a = (i * 2 * Math.PI / N) - Math.PI / 2;
     return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
@@ -30,26 +30,26 @@ function isValidIS(sel) {
 function drawGraph(canvas, nodes, selected, isLeft, dark) {
   if (!canvas) return;
   const dpr = window.devicePixelRatio || 1;
-  const w   = canvas.offsetWidth || 260;
-  canvas.width  = w * dpr;
+  const w = canvas.offsetWidth || 260;
+  canvas.width = w * dpr;
   canvas.height = CANVAS_H * dpr;
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
 
-  const cover   = new Set(Array.from({ length: N }, (_, i) => i).filter(i => !selected.has(i)));
+  const cover = new Set(Array.from({ length: N }, (_, i) => i).filter(i => !selected.has(i)));
   const validIS = isValidIS(selected);
 
-  const PURPLE      = '#825dce';
+  const PURPLE = '#825dce';
   const PURPLE_FILL = 'rgba(130,87,229,0.22)';
-  const PURPLE_DIM  = 'rgba(130,87,229,0.12)';
-  const INVALID     = '#c85555';
-  const INVALID_FILL= 'rgba(200,85,85,0.18)';
-  const NODE_BG     = dark ? 'rgb(13, 13, 13)' : 'rgb(248, 248, 255)';
-  const NODE_STR    = dark ? 'rgb(31, 31, 31)' : 'rgb(219, 219, 230)';
-  const EDGE_BASE   = dark ? 'rgb(31, 31, 31)' : 'rgb(219, 219, 230)';
-  const EDGE_WATCH  = '#825dce';
+  const PURPLE_DIM = 'rgba(130,87,229,0.12)';
+  const INVALID = '#c85555';
+  const INVALID_FILL = 'rgba(200,85,85,0.18)';
+  const NODE_BG = dark ? 'rgb(13, 13, 13)' : 'rgb(248, 248, 255)';
+  const NODE_STR = dark ? 'rgb(31, 31, 31)' : 'rgb(219, 219, 230)';
+  const EDGE_BASE = dark ? 'rgb(31, 31, 31)' : 'rgb(219, 219, 230)';
+  const EDGE_WATCH = '#825dce';
   const EDGE_UNWATCHED = '#c85555';
-  const TEXT_MUT    = dark ? 'rgb(244, 244, 255)' : 'rgb(4, 4, 4)';
+  const TEXT_MUT = dark ? 'rgb(244, 244, 255)' : 'rgb(4, 4, 4)';
 
   ctx.clearRect(0, 0, w, CANVAS_H);
 
@@ -62,11 +62,11 @@ function drawGraph(canvas, nodes, selected, isLeft, dark) {
     if (!isLeft) {
       const watched = cover.has(a) || cover.has(b);
       ctx.strokeStyle = watched ? EDGE_WATCH : EDGE_UNWATCHED;
-      ctx.lineWidth   = watched ? 1.5 : 2;
+      ctx.lineWidth = watched ? 1.5 : 2;
       ctx.setLineDash(watched ? [] : [4, 3]);
     } else {
       ctx.strokeStyle = EDGE_BASE;
-      ctx.lineWidth   = 1.2;
+      ctx.lineWidth = 1.2;
       ctx.setLineDash([]);
     }
     ctx.stroke();
@@ -82,12 +82,12 @@ function drawGraph(canvas, nodes, selected, isLeft, dark) {
     let fill, stroke, lw, textColor;
 
     if (isLeft) {
-      if (inIS && validIS)  { fill = PURPLE_FILL; stroke = PURPLE;  lw = 2; textColor = PURPLE;  }
-      else if (inIS)        { fill = INVALID_FILL; stroke = INVALID; lw = 2; textColor = INVALID; }
-      else                  { fill = NODE_BG;      stroke = NODE_STR; lw = 1; textColor = TEXT_MUT; }
+      if (inIS && validIS) { fill = PURPLE_FILL; stroke = PURPLE; lw = 2; textColor = PURPLE; }
+      else if (inIS) { fill = INVALID_FILL; stroke = INVALID; lw = 2; textColor = INVALID; }
+      else { fill = NODE_BG; stroke = NODE_STR; lw = 1; textColor = TEXT_MUT; }
     } else {
-      if (inVC) { fill = PURPLE_DIM; stroke = PURPLE;  lw = 2; textColor = PURPLE;  }
-      else      { fill = NODE_BG;    stroke = NODE_STR; lw = 1; textColor = TEXT_MUT; }
+      if (inVC) { fill = PURPLE_DIM; stroke = PURPLE; lw = 2; textColor = PURPLE; }
+      else { fill = NODE_BG; stroke = NODE_STR; lw = 1; textColor = TEXT_MUT; }
     }
 
     ctx.beginPath();
@@ -102,15 +102,15 @@ function drawGraph(canvas, nodes, selected, isLeft, dark) {
 
     /* camera icon on right panel if in cover */
     if (!isLeft && inVC) {
-      ctx.font         = '13px var(--ifm-font-family-monospace, monospace)';
-      ctx.fillStyle    = PURPLE;
-      ctx.textAlign    = 'center';
+      ctx.font = '13px var(--ifm-font-family-monospace, monospace)';
+      ctx.fillStyle = PURPLE;
+      ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('⬡', x, y);
     } else {
-      ctx.font         = '500 13px var(--ifm-font-family-monospace, monospace)';
-      ctx.fillStyle    = textColor;
-      ctx.textAlign    = 'center';
+      ctx.font = '500 13px var(--ifm-font-family-monospace, monospace)';
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(String.fromCharCode(65 + i), x, y);
     }
@@ -126,7 +126,7 @@ function Inner() {
   const c1Ref = useRef(null);
   const c2Ref = useRef(null);
   const [selected, setSelected] = useState(new Set());
-  const [nodes, setNodes]       = useState([]);
+  const [nodes, setNodes] = useState([]);
 
   const measure = useCallback(() => {
     const w = c1Ref.current?.offsetWidth || 260;
@@ -142,7 +142,7 @@ function Inner() {
 
   useEffect(() => {
     if (!nodes.length) return;
-    drawGraph(c1Ref.current, nodes, selected, true,  dark);
+    drawGraph(c1Ref.current, nodes, selected, true, dark);
     drawGraph(c2Ref.current, nodes, selected, false, dark);
   }, [nodes, selected, dark]);
 
@@ -166,10 +166,10 @@ function Inner() {
     }
   }, [nodes]);
 
-  const cover   = new Set(Array.from({ length: N }, (_, i) => i).filter(i => !selected.has(i)));
+  const cover = new Set(Array.from({ length: N }, (_, i) => i).filter(i => !selected.has(i)));
   const validIS = isValidIS(selected);
-  const k       = selected.size;
-  const nk      = N - k;
+  const k = selected.size;
+  const nk = N - k;
   const uncovered = EDGES.filter(([a, b]) => !cover.has(a) && !cover.has(b));
 
   /* insight text using camera/roads framing */
@@ -187,25 +187,25 @@ function Inner() {
   }
 
   /* design tokens */
-  const PURPLE  = 'var(--az-accent)';
-  const mono    = 'var(--ifm-font-family-monospace)';
-  const bdr     = 'var(--az-border)';
-  const bdrSub  = 'var(--az-border-subtle)';
+  const PURPLE = 'var(--az-accent)';
+  const mono = 'var(--ifm-font-family-monospace)';
+  const bdr = 'var(--az-border)';
+  const bdrSub = 'var(--az-border-subtle)';
   const surface = 'var(--az-surface)';
-  const raised  = 'var(--az-elevated)';
-  const tMut    = 'var(--az-text)';
-  const acDim   = 'var(--az-accent-dim)';
-  const acBdr   = 'var(--az-accent-border)';
+  const raised = 'var(--az-elevated)';
+  const tMut = 'var(--az-text)';
+  const acDim = 'var(--az-accent-dim)';
+  const acBdr = 'var(--az-accent-border)';
   const insightBdr = (!validIS && k > 0) ? '#c85555' : (k > 0 ? PURPLE : bdr);
 
   const BADGES = [
-    { dot: PURPLE,                           label: 'Independent set city (no roads between them)' },
-    { dot: 'rgba(94,53,177,0.35)',           label: 'Vertex cover city (camera placed here)',       bordered: true },
-    { dot: '#c85555',                        label: 'Invalid — two selected cities share a road'   },
+    { dot: PURPLE, label: 'Independent set city (no roads between them)' },
+    { dot: 'rgba(94,53,177,0.35)', label: 'Vertex cover city (camera placed here)', bordered: true },
+    { dot: '#c85555', label: 'Invalid — two selected cities share a road' },
   ];
 
   return (
-    <div style={{ fontFamily: mono, margin: '2rem 0' }}>
+    <div style={{ fontFamily: mono, margin: '2rem 0', boxShadow: 'var(--az-card-shadow)', borderRadius: 24, padding: '16px', background: surface, border: `1px solid ${bdr}` }}>
 
       {/* legend */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1.1rem' }}>
@@ -229,8 +229,8 @@ function Inner() {
       {/* canvases */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
         {[
-          { ref: c1Ref, label: 'Click cities — Independent Set',        onClick: handleClick, cursor: 'pointer' },
-          { ref: c2Ref, label: 'Camera placements — Vertex Cover',       onClick: null,        cursor: 'default'  },
+          { ref: c1Ref, label: 'Click cities — Independent Set', onClick: handleClick, cursor: 'pointer' },
+          { ref: c2Ref, label: 'Camera placements — Vertex Cover', onClick: null, cursor: 'default' },
         ].map(({ ref, label, onClick, cursor }) => (
           <div key={label} style={{ border: `0.5px solid ${bdr}`, borderRadius: 12, overflow: 'hidden' }}>
             <div style={{
@@ -252,7 +252,7 @@ function Inner() {
       {/* stats */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
         {[
-          { val: k,  label: `cities with no roads between them (k = ${k})`,         sublabel: 'Independent Set size'  },
+          { val: k, label: `cities with no roads between them (k = ${k})`, sublabel: 'Independent Set size' },
           { val: nk, label: `cities with cameras — every road watched (n − k = ${nk})`, sublabel: 'Vertex Cover size' },
         ].map(({ val, label, sublabel }) => (
           <div key={sublabel} style={{

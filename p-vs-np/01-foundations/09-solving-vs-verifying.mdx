@@ -51,28 +51,28 @@ The person who solved it and the person who checks it are not doing the same thi
 The same gap shows up in every problem we have talked about in this series.
 
 <Tabs>
-  <TabItem value="sudoku" label="🧩 Sudoku" default>
+  <TabItem value="sudoku" label="Sudoku" default>
 
 **Solving:** You start with a partially filled grid. You try a number in one cell, follow the consequences through the grid, hit a contradiction somewhere, erase it, and try something else. For a generalized $n \times n$ Sudoku, the number of possible completions grows exponentially with $n$. Even expert solvers using elimination techniques are working against a fundamentally large search space.
 
 **Verifying:** Someone hands you a completed grid. You scan each row: nine distinct numbers, no repeats. Each column: same check. Each $3 \times 3$ box: same check. For a standard grid, this is done in under a minute. For a generalized $n \times n$ grid, it runs in $O(n^2)$ time. Polynomial. Fast. Completely manageable regardless of how large the grid is.
 
   </TabItem>
-  <TabItem value="tsp" label="🗺️ Traveling Salesman">
+  <TabItem value="tsp" label="Traveling Salesman">
 
 **Solving:** You have $n$ cities. You need to find the shortest route that visits every one exactly once and returns home. The number of possible routes is $(n-1)!$. For $n = 20$ cities, that is over $10^{17}$ routes. Nobody checks them all. We use clever approximations, but no polynomial-time exact algorithm is known.
 
 **Verifying:** Someone hands you a specific route and claims it has total distance less than $k$. You add up the distances along that route and check whether every city appears exactly once. This takes $O(n)$ time. You are just walking the route they gave you and adding numbers.
 
   </TabItem>
-  <TabItem value="subset" label="➕ Subset Sum">
+  <TabItem value="subset" label="Subset Sum">
 
 **Solving:** Given a set of integers, find a subset that adds up to exactly zero. The number of possible subsets is $2^n$. Post 6 showed what $2^n$ looks like for large $n$. At $n = 100$, you are looking at more subsets than there are atoms in the observable universe. No polynomial-time algorithm is known.
 
 **Verifying:** Someone hands you a specific subset and claims it adds to zero. You add the numbers in that subset. This takes $O(n)$ time. Done.
 
   </TabItem>
-  <TabItem value="math" label="📝 Math Homework">
+  <TabItem value="math" label="Math Homework">
 
 **Solving:** Blank page. You try an approach. Maybe it works, maybe it does not. You are constructing the answer from nothing, step by step, without knowing in advance whether the direction you picked will lead somewhere.
 

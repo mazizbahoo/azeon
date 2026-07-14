@@ -125,7 +125,7 @@ Stack those logical rules up for every single step of the verifier's run and you
 That is the reduction. Convert any $\mathcal{NP}$ problem into "can this verifier accept?" and then convert that into a SAT formula.
 
 <Tabs>
-  <TabItem value="sudoku" label="🧩 The Sudoku Version" default>
+  <TabItem value="sudoku" label="The Sudoku Version" default>
 
 Suppose the $\mathcal{NP}$ problem is Sudoku. The verifier checks whether a completed grid is valid: every row, column, and box has nine distinct digits.
 
@@ -136,7 +136,7 @@ The formula is satisfiable if and only if there is an assignment of digits to ce
 "Does this Sudoku have a solution?" converts directly into "is this SAT formula satisfiable?" Same answer, different language. The same argument applies to any $\mathcal{NP}$ problem, because any $\mathcal{NP}$ problem has a polynomial-time verifier, and any polynomial-time verifier can be encoded as a Boolean formula.
 
   </TabItem>
-  <TabItem value="size" label="📐 Why the Formula Stays Small">
+  <TabItem value="size" label="Why the Formula Stays Small">
 
 A reasonable worry: won't encoding an entire Turing machine computation produce an astronomically large formula?
 

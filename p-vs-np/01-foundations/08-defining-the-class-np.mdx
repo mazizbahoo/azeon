@@ -73,7 +73,7 @@ This is the same asymmetry I noticed when I was learning to solve the cube. Chec
 Let's look at several real problems that live in $\mathcal{NP}$, and for each one, identify what the certificate is.
 
 <Tabs>
-  <TabItem value="sudoku" label="🧩 Sudoku" default>
+  <TabItem value="sudoku" label="Sudoku" default>
 
 **The problem:** Given a partially filled Sudoku grid, does a valid completion exist?
 
@@ -84,7 +84,7 @@ Let's look at several real problems that live in $\mathcal{NP}$, and for each on
 **Why finding is hard:** The number of ways to fill in the blank cells grows exponentially with the grid size. For a standard $9 \times 9$ Sudoku, the space is still manageable with good techniques. For a generalized $n \times n$ Sudoku, the problem is NP-Complete, meaning it is among the hardest problems in $\mathcal{NP}$. We will revisit that term properly in Phase 2.
 
   </TabItem>
-  <TabItem value="tsp" label="🗺️ Traveling Salesman">
+  <TabItem value="tsp" label="Traveling Salesman">
 
 **The problem:** Given a list of $n$ cities with distances between them, does there exist a route that visits every city exactly once and returns home, with total distance at most $k$?
 
@@ -95,7 +95,7 @@ Let's look at several real problems that live in $\mathcal{NP}$, and for each on
 **Why finding is hard:** The number of possible routes is $(n-1)!$, which is factorial growth. For $n = 20$ cities, that is over $1.2 \times 10^{17}$ possible tours. No polynomial-time algorithm for finding the shortest route is known, and most researchers believe none exists.
 
   </TabItem>
-  <TabItem value="coloring" label="🎨 Graph Coloring">
+  <TabItem value="coloring" label="Graph Coloring">
 
 **The problem:** Given a graph with $n$ vertices, can every vertex be assigned one of three colors such that no two adjacent vertices share a color?
 
@@ -106,7 +106,7 @@ Let's look at several real problems that live in $\mathcal{NP}$, and for each on
 **Why finding is hard:** There is no known polynomial-time algorithm for determining whether a graph is 3-colorable. The problem is, again, NP-Complete. Finding the coloring from scratch requires exploring a space that grows exponentially.
 
   </TabItem>
-  <TabItem value="subset-sum" label="➕ Subset Sum">
+  <TabItem value="subset-sum" label="Subset Sum">
 
 **The problem:** Given a set of integers, does some subset of them add up to exactly zero?
 

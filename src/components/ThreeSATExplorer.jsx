@@ -180,6 +180,7 @@ function Inner() {
       padding: '1.25rem',
       margin: '1.75rem 0',
       fontFamily: mono,
+      boxShadow: 'var(--az-card-shadow)',
     }}>
 
       {/* header */}
