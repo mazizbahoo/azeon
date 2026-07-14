@@ -247,15 +247,15 @@ pre {
 }
 
 .menu__link--active,
-.menu__list-item--active > .menu__list-item-collapsible,
+.menu__list-item--active>.menu__list-item-collapsible,
 .menu__list-item-collapsible:has(.menu__link--active) {
   color: var(--az-accent) !important;
   font-weight: 500;
   background: var(--az-accent-dim) !important;
 }
 
-.menu__list-item--active > .menu__list-item-collapsible > .menu__link,
-.menu__list-item-collapsible:has(.menu__link--active) > .menu__link {
+.menu__list-item--active>.menu__list-item-collapsible>.menu__link,
+.menu__list-item-collapsible:has(.menu__link--active)>.menu__link {
   color: var(--az-accent) !important;
 }
 
@@ -1569,7 +1569,7 @@ a[rel='tag'] {
   transition: background 0.2s ease, border-color 0.2s ease !important;
   text-decoration: none !important;
   font-weight: normal !important;
-  text-transform: capitalize !important;
+  text-transform: uppercase !important;
 }
 
 a[rel='tag']:hover {
@@ -1590,15 +1590,15 @@ div:has(> b):has(> ul.margin-left--sm) {
 
 div:has(> b):has(> ul.margin-left--sm)>b {
   white-space: nowrap;
-  padding-top: 0.25rem;
-  /* Optical alignment with the pill background */
+  padding-top: 0rem;
 }
 
 div:has(> b):has(> ul.margin-left--sm)>ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-left: 0.75rem !important;
+  gap: 0.3rem;
+  margin: 0 0 0 0.75rem !important;
+  padding: 0 !important;
 }
 
 div:has(> b):has(> ul.margin-left--sm)>ul>li {
