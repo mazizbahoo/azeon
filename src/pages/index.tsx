@@ -32,7 +32,7 @@ const PHASES: Phase[] = [
   { num: '01', title: 'Foundations', slug: '/p-vs-np/foundations', color: 'var(--az-phase-01)', desc: 'Algorithms, Turing machines, Big-O notation, and the formal definitions of P and NP.', publishedPosts: 10, totalPosts: 10 },
   { num: '02', title: 'NP-Completeness', slug: '/p-vs-np/np-completeness', color: 'var(--az-phase-02)', desc: 'Reductions, Cook-Levin theorem, SAT, TSP, Graph Coloring, Sudoku, and the NP-Complete zoo.', publishedPosts: 5, totalPosts: 14 },
   { num: '03', title: 'Complexity Zoo', slug: '/p-vs-np/complexity-zoo', color: 'var(--az-phase-03)', desc: "coNP, PSPACE, EXP, randomized algorithms, quantum computing, and Shor's algorithm.", publishedPosts: 0, totalPosts: 10 },
-  { num: '04', title: 'Failed Proofs', slug: '/p-vs-np/failed-proofs', color: 'var(--az-phase-04)', desc: 'Relativization, Natural Proofs, Algebrization, GCT — every barrier that blocks a proof.', publishedPosts: 0, totalPosts: 16 },
+  { num: '04', title: 'Failed Proofs', slug: '/p-vs-np/failed-proofs', color: 'var(--az-phase-04)', desc: 'Relativization, Natural Proofs, Algebrization, GCT and every barrier that blocks a proof.', publishedPosts: 0, totalPosts: 16 },
   { num: '05', title: 'Real-World Impact', slug: '/p-vs-np/real-world-impact', color: 'var(--az-phase-05)', desc: 'RSA encryption, supply chains, protein folding, AI, and the cost of NP-Hardness.', publishedPosts: 0, totalPosts: 12 },
   { num: '06', title: 'Heuristics', slug: '/p-vs-np/heuristics', color: 'var(--az-phase-06)', desc: 'Approximation algorithms, greedy strategies, simulated annealing, and genetic algorithms.', publishedPosts: 0, totalPosts: 12 },
   { num: '07', title: 'Final Verdict', slug: '/p-vs-np/final-verdict', color: 'var(--az-phase-07)', desc: 'The scientific consensus, the consequences of both outcomes, open research, and what comes next.', publishedPosts: 0, totalPosts: 6 },
@@ -59,14 +59,14 @@ const ACHIEVEMENTS = [
 const SAFE_ITEMS = [
   'Your bank account stays encrypted',
   'Passwords remain unbreakable',
-  'Hard problems stay hard — by law of math',
+  'Hard problems stay hard by law of math',
   'The internet keeps functioning',
   'This is what 99% of experts believe',
 ];
 
 const DANGER_ITEMS = [
   'All encryption collapses overnight',
-  'Banks, governments, crypto — gone',
+  'Banks, governments, crypto, all gone',
   'Drug discovery becomes instant',
   'AI generates perfect art and code',
   'The $1M prize becomes irrelevant',
@@ -408,7 +408,7 @@ function AboutSection() {
             </p>
             <p className="az-body">
               Azeon is my attempt to do something different: instead of waiting until I understand
-              something fully before writing about it, I document the process in real time — the
+              something fully before writing about it, I document the process in real time along with the
               confusion, the wrong turns, the analogies that finally make something click.
             </p>
             <p className="az-body">

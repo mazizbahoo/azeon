@@ -6,7 +6,7 @@
   "link": {
     "type": "generated-index",
     "title": "Phase 2: NP-Completeness",
-    "description": "This phase introduces NP-Complete problems — the hardest problems inside NP, where if you solve one, you solve them all. We cover reductions, the Cook-Levin theorem, SAT, and a gallery of famous NP-Complete problems including the Traveling Salesman, Graph Coloring, Sudoku, and Minesweeper.",
+    "description": "This phase introduces NP-Complete problems, the hardest problems inside NP, where if you solve one, you solve them all. We cover reductions, the Cook-Levin theorem, SAT, and a gallery of famous NP-Complete problems including the Traveling Salesman, Graph Coloring, Sudoku, and Minesweeper.",
     "slug": "/np-completeness",
     "keywords": ["NP-complete", "SAT", "reductions", "Cook-Levin", "TSP", "graph coloring"]
   }

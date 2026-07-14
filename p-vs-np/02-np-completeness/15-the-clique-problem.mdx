@@ -102,15 +102,15 @@ Checking every pair between Clause 1 (nodes 1, 2, 3) and Clause 2 (nodes 4, 5, 6
 
 | Node A | Node B | Same variable, opposite sign? | Edge? |
 |--------|--------|-------------------------------|-------|
-| $x_1$ (node 1) | $\neg x_1$ (node 4) | Yes — both $x_1$, opposite sign | **No edge** |
-| $x_1$ (node 1) | $x_2$ (node 5) | No — different variables | **Edge** |
-| $x_1$ (node 1) | $\neg x_3$ (node 6) | No — different variables | **Edge** |
-| $\neg x_2$ (node 2) | $\neg x_1$ (node 4) | No — different variables | **Edge** |
-| $\neg x_2$ (node 2) | $x_2$ (node 5) | Yes — both $x_2$, opposite sign | **No edge** |
-| $\neg x_2$ (node 2) | $\neg x_3$ (node 6) | No — different variables | **Edge** |
-| $x_3$ (node 3) | $\neg x_1$ (node 4) | No — different variables | **Edge** |
-| $x_3$ (node 3) | $x_2$ (node 5) | No — different variables | **Edge** |
-| $x_3$ (node 3) | $\neg x_3$ (node 6) | Yes — both $x_3$, opposite sign | **No edge** |
+| $x_1$ (node 1) | $\neg x_1$ (node 4) | Yes, both $x_1$, opposite sign | **No edge** |
+| $x_1$ (node 1) | $x_2$ (node 5) | No, different variables | **Edge** |
+| $x_1$ (node 1) | $\neg x_3$ (node 6) | No, different variables | **Edge** |
+| $\neg x_2$ (node 2) | $\neg x_1$ (node 4) | No, different variables | **Edge** |
+| $\neg x_2$ (node 2) | $x_2$ (node 5) | Yes, both $x_2$, opposite sign | **No edge** |
+| $\neg x_2$ (node 2) | $\neg x_3$ (node 6) | No, different variables | **Edge** |
+| $x_3$ (node 3) | $\neg x_1$ (node 4) | No, different variables | **Edge** |
+| $x_3$ (node 3) | $x_2$ (node 5) | No, different variables | **Edge** |
+| $x_3$ (node 3) | $\neg x_3$ (node 6) | Yes, both $x_3$, opposite sign | **No edge** |
 
 6 edges, 3 missing (the contradictory pairs).
 
@@ -122,13 +122,13 @@ Checking every pair between Clause 1 (nodes 1, 2, 3) and Clause 3 (nodes 7, 8, 9
 | Node A | Node B | Same variable, opposite sign? | Edge? |
 |--------|--------|-------------------------------|-------|
 | $x_1$ (node 1) | $x_1$ (node 7) | Same literal (no contradiction) | **Edge** |
-| $x_1$ (node 1) | $x_2$ (node 8) | No — different variables | **Edge** |
-| $x_1$ (node 1) | $x_3$ (node 9) | No — different variables | **Edge** |
-| $\neg x_2$ (node 2) | $x_1$ (node 7) | No — different variables | **Edge** |
-| $\neg x_2$ (node 2) | $x_2$ (node 8) | Yes — both $x_2$, opposite sign | **No edge** |
-| $\neg x_2$ (node 2) | $x_3$ (node 9) | No — different variables | **Edge** |
-| $x_3$ (node 3) | $x_1$ (node 7) | No — different variables | **Edge** |
-| $x_3$ (node 3) | $x_2$ (node 8) | No — different variables | **Edge** |
+| $x_1$ (node 1) | $x_2$ (node 8) | No, different variables | **Edge** |
+| $x_1$ (node 1) | $x_3$ (node 9) | No, different variables | **Edge** |
+| $\neg x_2$ (node 2) | $x_1$ (node 7) | No, different variables | **Edge** |
+| $\neg x_2$ (node 2) | $x_2$ (node 8) | Yes, both $x_2$, opposite sign | **No edge** |
+| $\neg x_2$ (node 2) | $x_3$ (node 9) | No, different variables | **Edge** |
+| $x_3$ (node 3) | $x_1$ (node 7) | No, different variables | **Edge** |
+| $x_3$ (node 3) | $x_2$ (node 8) | No, different variables | **Edge** |
 | $x_3$ (node 3) | $x_3$ (node 9) | Same literal (no contradiction) | **Edge** |
 
 8 edges, 1 missing ($\neg x_2$ vs $x_2$).
@@ -140,15 +140,15 @@ Checking every pair between Clause 2 (nodes 4, 5, 6) and Clause 3 (nodes 7, 8, 9
 
 | Node A | Node B | Same variable, opposite sign? | Edge? |
 |--------|--------|-------------------------------|-------|
-| $\neg x_1$ (node 4) | $x_1$ (node 7) | Yes — both $x_1$, opposite sign | **No edge** |
-| $\neg x_1$ (node 4) | $x_2$ (node 8) | No — different variables | **Edge** |
-| $\neg x_1$ (node 4) | $x_3$ (node 9) | No — different variables | **Edge** |
-| $x_2$ (node 5) | $x_1$ (node 7) | No — different variables | **Edge** |
+| $\neg x_1$ (node 4) | $x_1$ (node 7) | Yes, both $x_1$, opposite sign | **No edge** |
+| $\neg x_1$ (node 4) | $x_2$ (node 8) | No, different variables | **Edge** |
+| $\neg x_1$ (node 4) | $x_3$ (node 9) | No, different variables | **Edge** |
+| $x_2$ (node 5) | $x_1$ (node 7) | No, different variables | **Edge** |
 | $x_2$ (node 5) | $x_2$ (node 8) | Same literal (no contradiction) | **Edge** |
-| $x_2$ (node 5) | $x_3$ (node 9) | No — different variables | **Edge** |
-| $\neg x_3$ (node 6) | $x_1$ (node 7) | No — different variables | **Edge** |
-| $\neg x_3$ (node 6) | $x_2$ (node 8) | No — different variables | **Edge** |
-| $\neg x_3$ (node 6) | $x_3$ (node 9) | Yes — both $x_3$, opposite sign | **No edge** |
+| $x_2$ (node 5) | $x_3$ (node 9) | No, different variables | **Edge** |
+| $\neg x_3$ (node 6) | $x_1$ (node 7) | No, different variables | **Edge** |
+| $\neg x_3$ (node 6) | $x_2$ (node 8) | No, different variables | **Edge** |
+| $\neg x_3$ (node 6) | $x_3$ (node 9) | Yes, both $x_3$, opposite sign | **No edge** |
 
 7 edges, 2 missing.
 

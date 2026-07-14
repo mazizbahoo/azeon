@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: "Reductions"
-description: If you can solve one problem, can you solve another? Reductions are the tool that lets us answer that question precisely — and they are the key to everything in Phase 2.
+description: If you can solve one problem, can you solve another? Reductions are the tool that lets us answer that question precisely, and they are the key to everything in Phase 2.
 tags: [np-completeness, reductions, polynomial-time, complexity, p-vs-np]
 ---
 
@@ -9,7 +9,7 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import ReductionGraph from '@site/src/components/ReductionGraph';
 
-# Reductions — Comparing the Difficulty of Problems
+# Reductions: Comparing the Difficulty of Problems
 
 The first time I heard the word "reduction" in the context of complexity theory, my brain immediately went somewhere wrong.
 
@@ -65,7 +65,7 @@ The notation $A \leq_P B$ looks like "less than or equal to" on purpose. It mean
 
 Here is why. If I have a fast solver for $B$, I can solve $A$ fast too. I convert any $A$-instance to a $B$-instance in polynomial time, run the fast $B$-solver, and read the answer. Two polynomial operations composed is still polynomial.
 
-Flip that around, and you get the statement that matters most in this series. If $A$ cannot be solved in polynomial time, and $A$ reduces to $B$, then $B$ cannot be solved in polynomial time either. You cannot reduce a genuinely hard problem into an easy one — not when the conversion itself is restricted to polynomial time. The hardness flows upward from $A$ to $B$.
+Flip that around, and you get the statement that matters most in this series. If $A$ cannot be solved in polynomial time, and $A$ reduces to $B$, then $B$ cannot be solved in polynomial time either. You cannot reduce a genuinely hard problem into an easy one: not when the conversion itself is restricted to polynomial time. The hardness flows upward from $A$ to $B$.
 
 :::caution The Direction Always Trips People Up
 When $A \leq_P B$, the problem on the right ($B$) is the harder one.
@@ -127,7 +127,7 @@ This composability is what makes the structure of $\mathcal{NP}$ so remarkable. 
 
 ## A Reduction Between Two Graph Problems
 
-The Maximum-to-Sorting reduction was almost too simple — the same list, one extra step, done. The reductions in Phase 2 look more like the one I am about to show you. So I want to walk through it slowly, starting from words I am going to define properly.
+The Maximum-to-Sorting reduction was almost too simple: the same list, one extra step, done. The reductions in Phase 2 look more like the one I am about to show you. So I want to walk through it slowly, starting from words I am going to define properly.
 
 **What is a graph?** A graph is just a set of dots connected by lines. The dots are called nodes. The lines are called edges. That is the whole definition. Think of six cities on a map, with roads connecting some of them. The cities are nodes. The roads are edges.
 
@@ -141,21 +141,21 @@ Here is why.
 
 Pick any group of cities with no roads between them (an Independent Set). Now look at every city you did NOT pick. Claim: those leftover cities have a camera on at least one end of every road.
 
-Why? Take any road in the map. That road connects two cities. Could both of those cities be in your "no roads between them" group? No — because there is a road between them, which breaks the rule. So at least one of the two cities must be outside your group. That means at least one end of every road is covered by a leftover city. Every road is watched. The cities you did not pick form a Vertex Cover.
+Why? Take any road in the map. That road connects two cities. Could both of those cities be in your "no roads between them" group? No, because there is a road between them, which breaks the rule. So at least one of the two cities must be outside your group. That means at least one end of every road is covered by a leftover city. Every road is watched. The cities you did not pick form a Vertex Cover.
 
 The same logic works in reverse: if you have a Vertex Cover, the cities not in it form an Independent Set.
 
 So the two groups are always exact opposites. If you know one, you automatically know the other.
 
-The component below makes this visible. You have six cities (A through F) connected by roads. Click cities on the left to mark them as your Independent Set — cities with no roads between them, shown in purple. The right panel automatically shows the Vertex Cover — always the cities you did not pick. Watch how choosing your group on the left instantly forces the camera placements on the right.
+The component below makes this visible. You have six cities (A through F) connected by roads. Click cities on the left to mark them as your Independent Set: cities with no roads between them, shown in purple. The right panel automatically shows the Vertex Cover: always the cities you did not pick. Watch how choosing your group on the left instantly forces the camera placements on the right.
 
 <ReductionGraph />
 
-Now here is the reduction itself. Suppose someone asks: does this map have an Independent Set of size $k$ — meaning, $k$ cities with no roads between any of them?
+Now here is the reduction itself. Suppose someone asks: does this map have an Independent Set of size $k$, meaning, $k$ cities with no roads between any of them?
 
 Instead of solving that directly, I convert the question: does this map have a Vertex Cover of size $n - k$, where $n$ is the total number of cities?
 
-Same map. I just subtract $k$ from $n$ and ask the camera question instead of the strangers question. That is the entire conversion — one subtraction. And the answer carries over exactly, because the two groups are always opposites.
+Same map. I just subtract $k$ from $n$ and ask the camera question instead of the strangers question. That is the entire conversion: one subtraction. And the answer carries over exactly, because the two groups are always opposites.
 
 Same value, different currency.
 

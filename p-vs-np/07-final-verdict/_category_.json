@@ -6,7 +6,7 @@
   "link": {
     "type": "generated-index",
     "title": "Phase 7: Final Verdict",
-    "description": "The final phase. We explore the consequences of both possible answers — the collapse of cryptography if P=NP, the scientific consensus that P≠NP, and what open research avenues remain. This phase closes the Azeon documentation with a full index and a guide for readers who want to go further.",
+    "description": "The final phase. We explore the consequences of both possible answers: the collapse of cryptography if P=NP, the scientific consensus that P≠NP, and what open research avenues remain. This phase closes the Azeon documentation with a full index and a guide for readers who want to go further.",
     "slug": "/final-verdict",
     "keywords": ["P equals NP", "cryptography collapse", "research frontiers", "conclusion", "consensus"]
   }

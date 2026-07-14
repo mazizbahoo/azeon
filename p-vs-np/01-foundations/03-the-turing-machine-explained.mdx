@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: The Turing Machine
-description: Before we can talk about fast or slow algorithms, we need to agree on what computation even means — and that meaning comes from a deceptively simple thought experiment invented in 1936.
+description: Before we can talk about fast or slow algorithms, we need to agree on what computation even means, and that meaning comes from a deceptively simple thought experiment invented in 1936.
 tags: [foundations, p-vs-np, turing-machine, computation, beginners]
 ---
 
@@ -18,11 +18,11 @@ import TuringMachine from '@site/src/components/TuringMachine';
 
 ## I Had No Idea What This Was
 
-When I first encountered the term "Turing Machine," I nodded along and moved on. I assumed it was some old mechanical device — important once, irrelevant now. I'd look it up later.
+When I first encountered the term "Turing Machine," I nodded along and moved on. I assumed it was some old mechanical device: important once, irrelevant now. I'd look it up later.
 
 Then I actually looked it up, and I could not understand a single explanation I found. Every article threw symbols and jargon at me without ever stopping to explain what any of it *meant*.
 
-So I'm going to explain it the way I eventually understood it — starting from nothing, building it up one piece at a time, using plain words before any symbols appear.
+So I'm going to explain it the way I eventually understood it: starting from nothing, building it up one piece at a time, using plain words before any symbols appear.
 
 By the end of this post, you will understand what the Turing Machine is, what it does, and why it matters to everything that comes later in this series.
 
@@ -30,15 +30,15 @@ By the end of this post, you will understand what the Turing Machine is, what it
 
 ## Why We Need It
 
-Here's the problem Alan Turing was trying to solve in 1936 — and it's a stranger problem than it sounds.
+Here's the problem Alan Turing was trying to solve in 1936, and it's a stranger problem than it sounds.
 
-People had been doing "computation" for centuries. You follow a recipe. You do long division. You look someone up in a phone book. All of these are procedures — step-by-step instructions for getting from a question to an answer.
+People had been doing "computation" for centuries. You follow a recipe. You do long division. You look someone up in a phone book. All of these are procedures: step-by-step instructions for getting from a question to an answer.
 
 But what *counts* as a valid procedure? What makes something a legitimate, reliable, repeatable process rather than a vague set of guidelines?
 
 Nobody had a precise answer. And without a precise answer, you cannot reason about what is or isn't computable. You cannot prove "no procedure exists for this problem" if you haven't defined what a procedure is.
 
-Turing needed a definition so precise that a completely mindless machine — something with zero intelligence, zero intuition, zero ability to improvise — could follow it and still get the right answer. If a procedure could be written down that clearly, it counts as computable. If it can't, it doesn't.
+Turing needed a definition so precise that a completely mindless machine (something with zero intelligence, zero intuition, zero ability to improvise) could follow it and still get the right answer. If a procedure could be written down that clearly, it counts as computable. If it can't, it doesn't.
 
 He came up with the simplest possible machine that could still follow any procedure a human could follow.
 
@@ -50,13 +50,13 @@ The Turing Machine has four parts. Let's build them one at a time.
 
 ### Part 1: The Tape
 
-Imagine a long strip of paper — infinitely long in both directions — divided into squares. Each square holds exactly one symbol. For now, let's say each square can hold either `0`, `1`, or nothing (a blank square, which we'll write as `_`).
+Imagine a long strip of paper, infinitely long in both directions, divided into squares. Each square holds exactly one symbol. For now, let's say each square can hold either `0`, `1`, or nothing (a blank square, which we'll write as `_`).
 
 ```
 ... | _ | _ | 1 | 0 | 1 | 1 | 0 | _ | _ | ...
 ```
 
-This strip is where the input lives. If you want to ask the machine a question, you write the question on the tape before you turn the machine on. As the machine works, it also uses the tape as its scratch paper — reading from it, writing on it, erasing things.
+This strip is where the input lives. If you want to ask the machine a question, you write the question on the tape before you turn the machine on. As the machine works, it also uses the tape as its scratch paper: reading from it, writing on it, erasing things.
 
 Think of it as the machine's entire world. It has no RAM, no hard drive, no screen. Just this strip.
 
@@ -84,15 +84,15 @@ This one trips people up, so I want to be careful.
 
 The machine is always in exactly one **mode**. Mathematicians call this a *state*, but mode is easier to picture.
 
-Think of a traffic light. It is always in one of three modes: red, yellow, or green. At any given moment, it is in exactly one mode. And the mode determines what it does — red means stop, green means go.
+Think of a traffic light. It is always in one of three modes: red, yellow, or green. At any given moment, it is in exactly one mode. And the mode determines what it does: red means stop, green means go.
 
-The Turing Machine works exactly like this. It has a set of modes it can be in. At any moment, it's in exactly one of them. We label them $q_0$, $q_1$, $q_2$ — the numbers are just names, like naming the traffic light modes "mode A," "mode B," "mode C." They don't carry any mathematical meaning on their own.
+The Turing Machine works exactly like this. It has a set of modes it can be in. At any moment, it's in exactly one of them. We label them $q_0$, $q_1$, $q_2$: the numbers are just names, like naming the traffic light modes "mode A," "mode B," "mode C." They don't carry any mathematical meaning on their own.
 
 The mode is the machine's only form of memory. It has no variables, no notepad. The only way it carries information forward from one step to the next is by switching into a mode that encodes that information.
 
 There are two special modes every Turing Machine has:
-- A **start mode** — the machine always begins here
-- A **halt mode** — when the machine reaches this, it stops and the answer is ready
+- A **start mode**: the machine always begins here
+- A **halt mode**: when the machine reaches this, it stops and the answer is ready
 
 ### Part 4: The Rulebook
 
@@ -100,9 +100,9 @@ This is where everything comes together.
 
 The machine needs to know: *given the mode I'm currently in and the symbol I'm currently reading, what should I do?*
 
-The answer is in a **rulebook** — a list of plain if-then rules. Every rule has exactly this shape:
+The answer is in a **rulebook**: a list of plain if-then rules. Every rule has exactly this shape:
 
-> **If** I am in mode X **and** I am reading symbol Y —
+> **If** I am in mode X **and** I am reading symbol Y,
 > **then** write symbol Z, switch to mode W, and move left or right.
 
 That is the entire "intelligence" of the machine. When the machine runs, it looks up the matching rule every single step and follows it. No exceptions. No judgment calls. Pure mechanical execution.
@@ -123,7 +123,7 @@ The machine runs like this, over and over:
 1. Read the symbol under the head
 2. Find the rule that matches (current mode + symbol read)
 3. Write the new symbol, switch to the new mode, move one step
-4. Go back to step 1 — unless the current mode is the halt mode
+4. Go back to step 1, unless the current mode is the halt mode
 
 That's the entire machine. There is nothing else.
 :::
@@ -132,7 +132,7 @@ That's the entire machine. There is nothing else.
 
 ## A Complete Example: Is the Input All 1s?
 
-Let's watch the machine solve a simple problem: given a tape containing `0s` and `1s`, are they *all* `1s` — with no `0` anywhere?
+Let's watch the machine solve a simple problem: given a tape containing `0s` and `1s`, are they *all* `1s`, with no `0` anywhere?
 
 The tape we'll test:
 
@@ -140,7 +140,7 @@ The tape we'll test:
 1 | 1 | 0 | 1 | _
 ```
 
-The answer should be **no** — there's a `0` in position three.
+The answer should be **no**: there's a `0` in position three.
 
 <Tabs>
   <TabItem value="rulebook" label="📋 The Rulebook" default>
@@ -156,33 +156,33 @@ The answer should be **no** — there's a `0` in position three.
     **Three rules. That's the whole machine.**
 
     - See a `1`? Great. Don't change it. Stay in Checking mode. Move right. Keep going.
-    - See a blank `_`? You've reached the end without finding a `0`. Accept — all symbols were `1`.
-    - See a `0`? Stop immediately. Reject — not all symbols are `1`.
+    - See a blank `_`? You've reached the end without finding a `0`. Accept: all symbols were `1`.
+    - See a `0`? Stop immediately. Reject: not all symbols are `1`.
 
   </TabItem>
   <TabItem value="walkthrough" label="🔍 Step-by-Step">
 
     Tape: `| 1 | 1 | 0 | 1 | _ |`. Head starts at the leftmost square. Mode: Checking.
 
-    **Step 1** — Reading `1`. Rule: write `1`, stay in Checking, move right.
+    **Step 1**: Reading `1`. Rule: write `1`, stay in Checking, move right.
     ```
     1 | 1 | 0 | 1 | _
     ↑
     (Checking) → move right →
     ```
 
-    **Step 2** — Reading `1`. Same rule. Move right.
+    **Step 2**: Reading `1`. Same rule. Move right.
     ```
     1 | 1 | 0 | 1 | _
         ↑
     (Checking) → move right →
     ```
 
-    **Step 3** — Reading `0`. Rule: switch to Reject mode. Stop.
+    **Step 3**: Reading `0`. Rule: switch to Reject mode. Stop.
     ```
     1 | 1 | 0 | 1 | _
             ↑
-        (Reject — done)
+        (Reject: done)
     ```
 
     **Answer: No. The tape is not all 1s.**
@@ -194,7 +194,7 @@ The answer should be **no** — there's a `0` in position three.
 
 <TuringMachine />
 
-The machine had no variables. No index. No memory of previous steps except its current mode. Three rules, a tape, and a head — and it correctly answered the question every time.
+The machine had no variables. No index. No memory of previous steps except its current mode. Three rules, a tape, and a head, and it correctly answered the question every time.
 
 ---
 
@@ -204,16 +204,16 @@ Here is the part that matters most for $\mathcal{P}$ vs $\mathcal{NP}$.
 
 When we ask "how fast is this algorithm?" we are really asking: **how many steps does the Turing Machine take before it halts?**
 
-Each single operation counts as one step. Read a symbol — one step. Write a symbol — one step. Move left or right — one step.
+Each single operation counts as one step. Read a symbol: one step. Write a symbol: one step. Move left or right: one step.
 
 The total number of steps is the machine's **running time**. And since inputs can be different sizes, we ask: how does the step count grow as the input gets longer?
 
-In the "all 1s" example, on an input of $n$ symbols, the machine takes exactly $n$ steps — one per symbol, then it stops. That's the best case. We write this as $O(n)$, which just means "the number of steps grows in proportion to the input size."
+In the "all 1s" example, on an input of $n$ symbols, the machine takes exactly $n$ steps (one per symbol, then it stops). That's the best case. We write this as $O(n)$, which just means "the number of steps grows in proportion to the input size."
 
-Some machines take $n^2$ steps. Some take $2^n$ steps. The difference between those — between slow growth and explosive growth — is exactly what $\mathcal{P}$ vs $\mathcal{NP}$ is about. We'll build this up carefully in Posts #5 and #6.
+Some machines take $n^2$ steps. Some take $2^n$ steps. The difference between those, between slow growth and explosive growth, is exactly what $\mathcal{P}$ vs $\mathcal{NP}$ is about. We'll build this up carefully in Posts #5 and #6.
 
 :::note Why Steps and Not Seconds?
-If we measured speed in actual seconds, the same algorithm would look "faster" on a newer computer. That's not useful — we want speed to be a property of the problem itself, not of the hardware.
+If we measured speed in actual seconds, the same algorithm would look "faster" on a newer computer. That's not useful: we want speed to be a property of the problem itself, not of the hardware.
 
 Counting Turing Machine steps removes hardware from the picture entirely. A step is a step, regardless of the machine running it.
 :::
@@ -222,7 +222,7 @@ Counting Turing Machine steps removes hardware from the picture entirely. A step
 
 ## The One Thing No Machine Can Do
 
-Here is something Turing proved in the same 1936 paper — and it's one of the strangest results in all of mathematics.
+Here is something Turing proved in the same 1936 paper, and it's one of the strangest results in all of mathematics.
 
 **There are problems that no Turing Machine can ever solve.**
 
@@ -230,16 +230,16 @@ Not "we haven't found the algorithm yet." Not "it would take too long." *Provabl
 
 The most famous example is called the **Halting Problem**. The question is simply:
 
-> Given any program and any input, will the program eventually finish — or will it run forever?
+> Given any program and any input, will the program eventually finish, or will it run forever?
 
 It seems answerable. Just run the program and see. But here's the problem: what if the program runs for a very long time? You don't know whether to keep waiting or give up. Maybe it stops after a trillion steps. Maybe it never stops. You can't tell from the outside.
 
 Turing proved with an airtight argument that no algorithm can correctly answer this question for every possible program and input. The problem is simply outside the boundary of what computation can reach.
 
 :::caution What This Tells Us
-Computation has hard limits. There are questions that are unanswerable by any algorithm — not because we haven't tried hard enough, but because the mathematics proves it's impossible.
+Computation has hard limits. There are questions that are unanswerable by any algorithm, not because we haven't tried hard enough, but because the mathematics proves it's impossible.
 
-$\mathcal{P}$ vs $\mathcal{NP}$ is not one of those impossible questions. We know algorithms exist for both classes. The only question is how fast they need to be. But the Halting Problem proves that the boundary exists — that not everything is solvable.
+$\mathcal{P}$ vs $\mathcal{NP}$ is not one of those impossible questions. We know algorithms exist for both classes. The only question is how fast they need to be. But the Halting Problem proves that the boundary exists: that not everything is solvable.
 :::
 
 ---
@@ -249,7 +249,7 @@ $\mathcal{P}$ vs $\mathcal{NP}$ is not one of those impossible questions. We kno
 Here is the most important idea in this post:
 
 :::tip The Church–Turing Thesis
-Every computation that any physical computer can perform — in any programming language, on any hardware, in any era — can also be performed by a Turing Machine.
+Every computation that any physical computer can perform (in any programming language, on any hardware, in any era) can also be performed by a Turing Machine.
 
 This is not a proven theorem. It is a thesis backed by decades of evidence. Every model of computation ever invented has turned out to be equivalent to the Turing Machine in terms of what problems it can solve. Nobody has ever found a computation that a Turing Machine cannot do.
 
@@ -264,7 +264,7 @@ This is why we use Turing Machines to define $\mathcal{P}$ and $\mathcal{NP}$ in
 
 We now have a precise model of computation. A machine that reads symbols, follows rules, and counts steps.
 
-But there is a different version of this machine — one that doesn't follow a single path through a computation. Instead, it somehow explores all possible paths at once, and always picks the right one. It sounds impossible. It is entirely mathematical.
+But there is a different version of this machine: one that doesn't follow a single path through a computation. Instead, it somehow explores all possible paths at once, and always picks the right one. It sounds impossible. It is entirely mathematical.
 
 That machine is the **Nondeterministic Turing Machine**, and understanding it is the key to understanding what the $\mathcal{NP}$ in $\mathcal{P}$ vs $\mathcal{NP}$ actually means.
 

@@ -6,7 +6,7 @@
   "link": {
     "type": "generated-index",
     "title": "Phase 5: Real-World Impact",
-    "description": "P vs NP is not just a mathematical curiosity. This phase shows where the problem lives in the real world — from RSA encryption protecting your bank account, to supply chain logistics, to protein folding in drug discovery. Understanding the stakes makes the theory hit differently.",
+    "description": "P vs NP is not just a mathematical curiosity. This phase shows where the problem lives in the real world: from RSA encryption protecting your bank account, to supply chain logistics, to protein folding in drug discovery. Understanding the stakes makes the theory hit differently.",
     "slug": "/real-world-impact",
     "keywords": ["RSA", "cryptography", "TSP", "logistics", "machine learning", "protein folding"]
   }

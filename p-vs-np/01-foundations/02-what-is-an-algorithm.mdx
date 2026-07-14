@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: What is an Algorithm?
-description: The word sounds intimidating. The definition is surprisingly close to something you already know — but with one twist that changes everything.
+description: The word sounds intimidating. The definition is surprisingly close to something you already know, but with one twist that changes everything.
 tags: [foundations, algorithms, beginners, definitions]
 ---
 
@@ -11,7 +11,7 @@ When I first heard the word *algorithm* in 9th class, I assumed it was one of th
 
 It doesn't.
 
-By the end of this post, I think you'll agree that you've understood algorithms intuitively for most of your life — you just didn't have the word for it. But we'll also find one twist in the formal definition that is genuinely strange, and that strangeness is going to matter a lot later when we talk about $\mathcal{P}$ vs $\mathcal{NP}$.
+By the end of this post, I think you'll agree that you've understood algorithms intuitively for most of your life, you just didn't have the word for it. But we'll also find one twist in the formal definition that is genuinely strange, and that strangeness is going to matter a lot later when we talk about $\mathcal{P}$ vs $\mathcal{NP}$.
 
 ---
 
@@ -19,7 +19,7 @@ By the end of this post, I think you'll agree that you've understood algorithms 
 
 Here's a question: what do you think an algorithm is?
 
-If your answer is something like *"a set of instructions"* — you're not wrong. That's actually pretty close to the truth. An algorithm is a **finite, step-by-step set of instructions that takes some input and produces some output**.
+If your answer is something like *"a set of instructions"*, you're not wrong. That's actually pretty close to the truth. An algorithm is a **finite, step-by-step set of instructions that takes some input and produces some output**.
 
 A recipe is an algorithm. You take ingredients (input), follow numbered steps (instructions), and end up with food (output).
 
@@ -27,7 +27,7 @@ The directions your GPS gives you are an algorithm. You start somewhere (input),
 
 The method you use to sort a deck of cards by number is an algorithm. Your personal strategy for doing long division is an algorithm.
 
-So why did the word feel so intimidating? Probably because in CS, we mean something slightly more precise — and that precision is where things get interesting.
+So why did the word feel so intimidating? Probably because in CS, we mean something slightly more precise, and that precision is where things get interesting.
 
 ---
 
@@ -36,10 +36,10 @@ So why did the word feel so intimidating? Probably because in CS, we mean someth
 For something to count as a proper algorithm, it needs to satisfy a few conditions:
 
 **1. It must be finite.**
-The steps have to end. An instruction list that says "repeat forever" is not an algorithm — it's a loop with no exit. A real algorithm must eventually stop and give you an answer.
+The steps have to end. An instruction list that says "repeat forever" is not an algorithm: it's a loop with no exit. A real algorithm must eventually stop and give you an answer.
 
 **2. It must be unambiguous.**
-Every step must be clear enough that there is no room for interpretation. "Add salt to taste" is not an algorithm step. "Add exactly 5 grams of salt" is. The instructions must be precise enough that a machine — or a person following them mechanically — could execute them without making any judgment calls.
+Every step must be clear enough that there is no room for interpretation. "Add salt to taste" is not an algorithm step. "Add exactly 5 grams of salt" is. The instructions must be precise enough that a machine, or a person following them mechanically, could execute them without making any judgment calls.
 
 **3. It must be general.**
 An algorithm solves a *class* of problems, not just one specific instance. "Find the largest number in *this* particular list" is not an algorithm. "Find the largest number in *any* list" is.
@@ -48,16 +48,16 @@ An algorithm solves a *class* of problems, not just one specific instance. "Find
 Given valid input, it must always return the right answer. Not sometimes. Always.
 
 :::note A Small But Important Clarification
-An algorithm is not a program. A program is one way of *expressing* an algorithm — written in a specific language, for a specific machine. The same algorithm can be written in Python, in C, in pseudocode, or described in plain English. The algorithm itself is the underlying *idea*, independent of how you write it down.
+An algorithm is not a program. A program is one way of *expressing* an algorithm, written in a specific language, for a specific machine. The same algorithm can be written in Python, in C, in pseudocode, or described in plain English. The algorithm itself is the underlying *idea*, independent of how you write it down.
 :::
 
 ---
 
 ## The Rubik's Cube Problem
 
-Here's where it gets personal for me — and where the definition starts to reveal something deeper.
+Here's where it gets personal for me, and where the definition starts to reveal something deeper.
 
-When I was learning to solve a Rubik's Cube, I was taught *algorithms*. In the cubing world, an "algorithm" means a specific sequence of moves — like $R\ U\ R'\ U'$ — that transforms the cube in a predictable way. You memorize them. You apply them. The cube responds exactly as expected every time.
+When I was learning to solve a Rubik's Cube, I was taught *algorithms*. In the cubing world, an "algorithm" means a specific sequence of moves (like $R\ U\ R'\ U'$) that transforms the cube in a predictable way. You memorize them. You apply them. The cube responds exactly as expected every time.
 
 That is a perfect real-world example of an algorithm. Fixed input (a scrambled configuration), fixed steps (the move sequence), fixed output (a specific change in the cube's state).
 
@@ -65,12 +65,12 @@ But here's something I noticed about myself: I can solve the Rubik's Cube withou
 
 So what's actually happening? Am I running an algorithm or not?
 
-The answer is: **yes, the algorithm is still there**. It's just been compiled into muscle memory. My hands execute the steps without my conscious mind narrating them. The algorithm hasn't disappeared — it's been *internalized* so deeply that it runs below the level of awareness.
+The answer is: **yes, the algorithm is still there**. It's just been compiled into muscle memory. My hands execute the steps without my conscious mind narrating them. The algorithm hasn't disappeared: it's been *internalized* so deeply that it runs below the level of awareness.
 
 This distinction matters for CS. A computer also doesn't "think" about the algorithms it runs. It executes them mechanically, step by step, without understanding. The algorithm exists independently of whether anyone is consciously aware of following it.
 
 :::tip The Key Insight
-An algorithm is not something you *feel* yourself doing. It's a precise specification of steps that, when followed exactly, always produces the correct output — whether executed by a human, a machine, or a pair of hands running on muscle memory.
+An algorithm is not something you *feel* yourself doing. It's a precise specification of steps that, when followed exactly, always produces the correct output, whether executed by a human, a machine, or a pair of hands running on muscle memory.
 :::
 
 ---
@@ -79,19 +79,19 @@ An algorithm is not something you *feel* yourself doing. It's a precise specific
 
 Let me show you a simple algorithm written out properly. Before I do, let me define the notation so nothing is confusing.
 
-When we write an algorithm formally, we need a way to talk about the input. Let's say our input is a list of numbers — for example: `[3, 7, 1, 9, 4]`.
+When we write an algorithm formally, we need a way to talk about the input. Let's say our input is a list of numbers, for example: `[3, 7, 1, 9, 4]`.
 
 We give that list a name: **L** (just a label, like naming a variable).
 
 The total number of elements in that list we call **n**. In our example, n = 5 because there are five numbers.
 
-To refer to individual elements inside the list, we use square brackets with a position number. **L[0]** means the first element of the list. **L[1]** means the second. **L[2]** means the third — and so on.
+To refer to individual elements inside the list, we use square brackets with a position number. **L[0]** means the first element of the list. **L[1]** means the second. **L[2]** means the third, and so on.
 
 :::note Why does counting start from 0?
 In most of computer science and programming, we start counting positions from 0, not 1. So the first element is at position 0, the second at position 1, and the last element of a list with n elements is at position n−1. It feels strange at first, but you get used to it quickly.
 :::
 
-The arrow symbol **←** just means "set this equal to." So `max ← L[0]` means *"let max be equal to the first element of the list."* It's the same as writing `max = L[0]` — we just use the arrow to make clear we're *assigning* a value, not *comparing* two things.
+The arrow symbol **←** just means "set this equal to." So `max ← L[0]` means *"let max be equal to the first element of the list."* It's the same as writing `max = L[0]`, we just use the arrow to make clear we're *assigning* a value, not *comparing* two things.
 
 Now the algorithm:
 
@@ -116,7 +116,7 @@ Output: The largest number in L
 
 3. Return max
    (Once we've looked at every number, whatever is stored in max
-   must be the largest. We're done — hand it back as the answer.)
+   must be the largest. We're done; hand it back as the answer.)
 ```
 
 Let's trace through a real example so this isn't abstract. Say our list is:
@@ -130,14 +130,14 @@ $$L = [3,\ 7,\ 1,\ 9,\ 4]$$
 - Step 2, looking at 4: Is 4 > 9? No. max stays 9.
 - Step 3: Return 9. ✓
 
-Correct. And it would work the same way for any list — ten numbers, a million numbers, it doesn't matter. That's what makes it an algorithm.
+Correct. And it would work the same way for any list: ten numbers, a million numbers, it doesn't matter. That's what makes it an algorithm.
 
 Now let's check it against our four conditions:
 
-- **Finite?** Yes — we look at each element exactly once, then stop.
-- **Unambiguous?** Yes — every step says exactly what to do with no judgment calls.
-- **General?** Yes — it works for any list of numbers, not just one specific list.
-- **Correct?** Yes — after checking every element, whatever is in `max` must be the largest.
+- **Finite?** Yes, we look at each element exactly once, then stop.
+- **Unambiguous?** Yes, every step says exactly what to do with no judgment calls.
+- **General?** Yes, it works for any list of numbers, not just one specific list.
+- **Correct?** Yes, after checking every element, whatever is in `max` must be the largest.
 
 ---
 
@@ -145,23 +145,23 @@ Now let's check it against our four conditions:
 
 We've been building toward something specific. Here's the first glimpse of it.
 
-$\mathcal{P}$ vs $\mathcal{NP}$ is fundamentally a question about algorithms — but not just whether algorithms *exist* for certain problems. It's a question about how *fast* those algorithms run.
+$\mathcal{P}$ vs $\mathcal{NP}$ is fundamentally a question about algorithms, but not just whether algorithms *exist* for certain problems. It's a question about how *fast* those algorithms run.
 
-The algorithm above looks at each element once. If the list has $n$ elements, it takes roughly $n$ steps. That's fast — it grows proportionally with the size of the input.
+The algorithm above looks at each element once. If the list has $n$ elements, it takes roughly $n$ steps. That's fast: it grows proportionally with the size of the input.
 
-But some problems seem to require algorithms that take an astronomically larger number of steps — steps that grow not proportionally to $n$, but *exponentially* with $n$. The gap between those two kinds of growth is one of the most dramatic things in all of mathematics, and it sits at the center of everything we're building toward.
+But some problems seem to require algorithms that take an astronomically larger number of steps: steps that grow not proportionally to $n$, but *exponentially* with $n$. The gap between those two kinds of growth is one of the most dramatic things in all of mathematics, and it sits at the center of everything we're building toward.
 
 Before we can talk about fast and slow, though, we need a precise language for measuring speed. That's what the next post is about.
 
 :::note Coming Up Next
-Post #3 introduces **Big-O notation** — the tool CS uses to describe how fast (or slow) an algorithm grows as its input gets larger. Once you have Big-O, the formal definitions of $\mathcal{P}$ and $\mathcal{NP}$ become much easier to state precisely.
+Post #3 introduces **Big-O notation**, the tool CS uses to describe how fast (or slow) an algorithm grows as its input gets larger. Once you have Big-O, the formal definitions of $\mathcal{P}$ and $\mathcal{NP}$ become much easier to state precisely.
 :::
 
 ---
 
 ## The One-Sentence Summary
 
-An algorithm is a **finite, unambiguous, general set of steps that takes an input and always produces a correct output** — and it exists independently of whether a human, a machine, or a pair of hands running on muscle memory is the one executing it.
+An algorithm is a **finite, unambiguous, general set of steps that takes an input and always produces a correct output**, and it exists independently of whether a human, a machine, or a pair of hands running on muscle memory is the one executing it.
 
 ---
 

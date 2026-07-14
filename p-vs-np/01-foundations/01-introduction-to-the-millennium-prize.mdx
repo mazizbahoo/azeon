@@ -1,6 +1,6 @@
 ---
 title: The Millennium Prize
-description: The story of a $1,000,000 question that has stumped every mathematician and computer scientist alive — and why one student decided to document the journey of understanding it.
+description: The story of a $1,000,000 question that has stumped every mathematician and computer scientist alive, and why one student decided to document the journey of understanding it.
 sidebar_position: 1
 tags: [foundations, p-vs-np, millennium-prize, beginners]
 ---
@@ -17,15 +17,15 @@ import TabItem from '@theme/TabItem';
 
 ## A Prize Nobody Has Claimed
 
-In the year 2000, a private foundation called the **Clay Mathematics Institute** sat down and made a list. Not a grocery list, and not a to-do list. They listed the **seven most important unsolved problems in all of mathematics** — problems so deep, so resistant to attack, that they had survived decades of effort from the most brilliant minds on Earth.
+In the year 2000, a private foundation called the **Clay Mathematics Institute** sat down and made a list. Not a grocery list, and not a to-do list. They listed the **seven most important unsolved problems in all of mathematics**: problems so deep, so resistant to attack, that they had survived decades of effort from the most brilliant minds on Earth.
 
 They called them the **Millennium Prize Problems**.
 
 Then they did something extraordinary: they put a **\$1,000,000 bounty** on each one.
 
-Two and a half decades have passed since that announcement. Six of those problems remain completely unsolved. One was solved — by a Russian mathematician named Grigori Perelman, who famously **turned down the money** because he didn't care about it.
+Two and a half decades have passed since that announcement. Six of those problems remain completely unsolved. One was solved by a Russian mathematician named Grigori Perelman, who famously **turned down the money** because he didn't care about it.
 
-The problem we care about — **P versus NP** — still stands. Untouched. Unclaimed.
+The problem we care about, **P versus NP**, still stands. Untouched. Unclaimed.
 
 :::info What is the Clay Mathematics Institute?
 The Clay Mathematics Institute (CMI) is a non-profit organization founded in 1998 by businessman Landon T. Clay and mathematician Arthur Jaffe. Its mission is to increase and disseminate mathematical knowledge. The Millennium Prize Problems were announced on May 24, 2000, at a conference in Paris.
@@ -49,10 +49,10 @@ That one sentence is the million-dollar question.
 
 It sounds almost too simple, right? Like something you could answer over breakfast. But beneath it sits one of the deepest questions about the nature of computation, logic, and even human creativity itself.
 
-Don't worry about what $\mathcal{P}$ and $\mathcal{NP}$ formally mean just yet — we'll build those definitions carefully across the next several posts. For now, think of them as two boxes:
+Don't worry about what $\mathcal{P}$ and $\mathcal{NP}$ formally mean just yet, we'll build those definitions carefully across the next several posts. For now, think of them as two boxes:
 
-- $\mathcal{P}$ — the box of problems a computer can **solve** fast
-- $\mathcal{NP}$ — the box of problems a computer can **verify** fast
+- $\mathcal{P}$: the box of problems a computer can **solve** fast
+- $\mathcal{NP}$: the box of problems a computer can **verify** fast
 
 The question is: **are these two boxes actually the same box?**
 
@@ -63,27 +63,27 @@ Let's make this concrete with two things you already know.
 
     Imagine someone hands you a **completed** Sudoku puzzle and says: *"Is this correct?"*
 
-    Your job is easy. You scan each row — nine numbers, no repeats. Each column — same check. Each $3 \times 3$ box — same again. Done. Even if the grid were $100 \times 100$, the number of cells you need to inspect grows predictably — roughly proportional to $n^2$ for an $n \times n$ grid. That kind of growth is manageable. Fast. Computers handle it effortlessly.
+    Your job is easy. You scan each row: nine numbers, no repeats. Each column: same check. Each $3 \times 3$ box: same again. Done. Even if the grid were $100 \times 100$, the number of cells you need to inspect grows predictably, roughly proportional to $n^2$ for an $n \times n$ grid. That kind of growth is manageable. Fast. Computers handle it effortlessly.
 
-    This is **verification** — given a finished answer, confirming it's right. It takes what we call *polynomial time*, written as $O(n^2)$ here. You'll learn exactly what that means in Post #5, but the short version is: fast enough to be practical.
+    This is **verification**: given a finished answer, confirming it's right. It takes what we call *polynomial time*, written as $O(n^2)$ here. You'll learn exactly what that means in Post #5, but the short version is: fast enough to be practical.
 
   </TabItem>
   <TabItem value="sudoku-solve" label="🧩 Solving a Sudoku Puzzle">
 
     Now imagine you're handed a **blank** Sudoku grid with only five or six numbers already filled in.
 
-    Suddenly everything changes. You have to *find* the answer, not just check one. You try a number in one cell, follow the chain of consequences, hit a contradiction several moves later, erase everything, and start again. The number of possible board states grows in a way that is not $n^2$ — it's exponential, something closer to $O(2^{n^2})$ in the worst case for large grids. That means for a generalized $n \times n$ Sudoku, the number of combinations explodes so violently that no computer on Earth could brute-force its way through all of them in any reasonable time.
+    Suddenly everything changes. You have to *find* the answer, not just check one. You try a number in one cell, follow the chain of consequences, hit a contradiction several moves later, erase everything, and start again. The number of possible board states grows in a way that is not $n^2$: it's exponential, something closer to $O(2^{n^2})$ in the worst case for large grids. That means for a generalized $n \times n$ Sudoku, the number of combinations explodes so violently that no computer on Earth could brute-force its way through all of them in any reasonable time.
 
-    This is **solving** — building the answer from scratch. It appears to require *exponential time*. And the gap between $n^2$ and $2^{n^2}$ is not a small gap. It is one of the most dramatic differences in all of mathematics.
+    This is **solving**: building the answer from scratch. It appears to require *exponential time*. And the gap between $n^2$ and $2^{n^2}$ is not a small gap. It is one of the most dramatic differences in all of mathematics.
 
   </TabItem>
   <TabItem value="cube-verify" label="🟧 Verifying a Rubik's Cube">
 
-    Someone hands you a Rubik's Cube and claims every face is a single solid color. **Checking this takes roughly two seconds.** You rotate the cube, glance at all six faces, and confirm — yes, solved. Green: ✓. White: ✓. Red, blue, orange, yellow: ✓ ✓ ✓ ✓.
+    Someone hands you a Rubik's Cube and claims every face is a single solid color. **Checking this takes roughly two seconds.** You rotate the cube, glance at all six faces, and confirm: yes, solved. Green: ✓. White: ✓. Red, blue, orange, yellow: ✓ ✓ ✓ ✓.
 
-    It doesn't matter *how* the cube got to that state. There are exactly $6$ faces with $9$ stickers each — $54$ stickers total — and you check all of them in constant time. Formally, verification here is $O(1)$: the work doesn't grow at all as the puzzle scales in complexity.
+    It doesn't matter *how* the cube got to that state. There are exactly $6$ faces with $9$ stickers each, $54$ stickers total, and you check all of them in constant time. Formally, verification here is $O(1)$: the work doesn't grow at all as the puzzle scales in complexity.
 
-    *(By the way — I can personally verify a Rubik's Cube solution in under 45 seconds. The solving part took considerably longer to learn.)*
+    *(By the way, I can personally verify a Rubik's Cube solution in under 45 seconds. The solving part took considerably longer to learn.)*
 
   </TabItem>
   <TabItem value="cube-solve" label="🟧 Solving a Rubik's Cube">
@@ -96,29 +96,29 @@ Let's make this concrete with two things you already know.
     \frac{8! \times 3^8 \times 12! \times 2^{12}}{12} = 43{,}252{,}003{,}274{,}489{,}856{,}000 \text{ possible states}
     $$
 
-    That is roughly $4.3 \times 10^{19}$ — forty-three quintillion. If you tried every possible sequence of moves at random, you would statistically never solve it in your lifetime, even with help from a computer. Expert speedcubers don't brute-force it — they've memorized structured *algorithms* that reduce the chaos into manageable steps.
+    That is roughly $4.3 \times 10^{19}$ (forty-three quintillion). If you tried every possible sequence of moves at random, you would statistically never solve it in your lifetime, even with help from a computer. Expert speedcubers don't brute-force it: they've memorized structured *algorithms* that reduce the chaos into manageable steps.
 
-    Here's what makes this profound: we know mathematically that any scrambled cube can be solved in **at most 20 moves**. This was proven in 2010. Twenty moves — yet *finding* those 20 moves from a scrambled position, without a memorized method, is genuinely hard. The gap between *knowing a solution exists* and *finding that solution* is enormous.
+    Here's what makes this profound: we know mathematically that any scrambled cube can be solved in **at most 20 moves**. This was proven in 2010. Twenty moves, yet *finding* those 20 moves from a scrambled position, without a memorized method, is genuinely hard. The gap between *knowing a solution exists* and *finding that solution* is enormous.
 
     This is exactly the gap $\mathcal{P}$ vs $\mathcal{NP}$ is asking about.
 
   </TabItem>
 </Tabs>
 
-Both analogies point to the same underlying tension: **checking an answer and finding an answer feel like completely different kinds of work**. The P vs NP question is asking whether that feeling is mathematically real — or whether there's always a shortcut hiding somewhere that makes finding as easy as checking.
+Both analogies point to the same underlying tension: **checking an answer and finding an answer feel like completely different kinds of work**. The P vs NP question is asking whether that feeling is mathematically real, or whether there's always a shortcut hiding somewhere that makes finding as easy as checking.
 
 ---
 
 ## Two Worlds, Two Outcomes
 
-This question isn't just a piece of pure mathematics that lives only in journals and lecture halls. The answer — whichever way it falls — would reshape our world.
+This question isn't just a piece of pure mathematics that lives only in journals and lecture halls. The answer, whichever way it falls, would reshape our world.
 
 :::tip If $\mathcal{P} \neq \mathcal{NP}$ (the common belief)
-This means solving is *genuinely harder* than verifying. Some problems are fundamentally difficult, and no amount of clever programming will change that. This result — the one most experts expect — actually *protects* us. Every time you buy something online, your credit card number is kept safe by the mathematical assumption that $\mathcal{P} \neq \mathcal{NP}$. The encryption holding together the internet depends on this being true.
+This means solving is *genuinely harder* than verifying. Some problems are fundamentally difficult, and no amount of clever programming will change that. This result, the one most experts expect, actually *protects* us. Every time you buy something online, your credit card number is kept safe by the mathematical assumption that $\mathcal{P} \neq \mathcal{NP}$. The encryption holding together the internet depends on this being true.
 :::
 
 :::danger If $\mathcal{P} = \mathcal{NP}$ (the world-changing scenario)
-This means every problem whose solution can be checked quickly could also be *solved* quickly. Drug discovery, supply chains, artificial intelligence, financial markets — all of these involve problems we currently approximate or brute-force. A proof that $\mathcal{P} = \mathcal{NP}$ would mean perfect solutions become easy to find. It would also mean every encryption scheme protecting your passwords, your bank, your private messages — would collapse overnight.
+This means every problem whose solution can be checked quickly could also be *solved* quickly. Drug discovery, supply chains, artificial intelligence, financial markets, all of these involve problems we currently approximate or brute-force. A proof that $\mathcal{P} = \mathcal{NP}$ would mean perfect solutions become easy to find. It would also mean every encryption scheme protecting your passwords, your bank, your private messages, would collapse overnight.
 :::
 
 ---
@@ -129,9 +129,9 @@ You might wonder: why hasn't anyone solved this yet? We have supercomputers. We 
 
 The answer is deeply humbling: **nobody even knows how to approach a proof**.
 
-It's not that we haven't tried hard enough. It's that every known proof technique runs into a wall. To prove $\mathcal{P} \neq \mathcal{NP}$, you'd need to show that *no possible algorithm* — not just the ones we've tried, but every algorithm that could ever be invented — can solve certain problems quickly. That's not a statement about code. It's a statement about the fundamental limits of logic itself.
+It's not that we haven't tried hard enough. It's that every known proof technique runs into a wall. To prove $\mathcal{P} \neq \mathcal{NP}$, you'd need to show that *no possible algorithm*, not just the ones we've tried, but every algorithm that could ever be invented, can solve certain problems quickly. That's not a statement about code. It's a statement about the fundamental limits of logic itself.
 
-Over the decades, researchers have identified multiple fundamental *barriers* — mathematical reasons why entire families of proof strategies are doomed to fail. We'll dissect all of them in Phase 4.
+Over the decades, researchers have identified multiple fundamental *barriers*: mathematical reasons why entire families of proof strategies are doomed to fail. We'll dissect all of them in Phase 4.
 
 :::caution A Warning About Amateur Proofs
 Every few years, someone announces they've solved P vs NP. These proofs almost always fail within days or weeks. The problem is subtle in ways that aren't obvious. Part of this documentation exists to help you understand *why* it's hard to prove, not just what it asks.
@@ -145,14 +145,14 @@ My name is Aziz, and I'm a first-year ICS student in Lahore, Pakistan.
 
 I didn't start this project because I know the answer. I started it because I encountered $\mathcal{P}$ vs $\mathcal{NP}$ and felt something rare: a problem so beautiful, so fundamental, so completely open that it made me want to understand everything around it.
 
-This documentation — called **Azeon** — is my structured, public attempt to do exactly that. It follows a curriculum I designed, starting from the very basics of what an algorithm is, all the way through the known barriers, the real-world consequences, and the open frontiers of research.
+This documentation, called **Azeon**, is my structured, public attempt to do exactly that. It follows a curriculum I designed, starting from the very basics of what an algorithm is, all the way through the known barriers, the real-world consequences, and the open frontiers of research.
 
 **A few promises I'm making to you as a reader:**
 
 - I will never assume you already know something without explaining it first.
 - I will use real analogies from everyday life, not textbook abstractions.
 - When I introduce a math expression like $O(n^2)$ or $2^n$, I will always explain it in plain words alongside it.
-- I will be honest when *I* am confused — this is a learning journal as much as a reference.
+- I will be honest when *I* am confused; this is a learning journal as much as a reference.
 - Every post will build on the last, so the order matters.
 
 ---
@@ -167,7 +167,7 @@ The Azeon project is divided into seven phases:
 | **Phase 2** | NP-Completeness | Reductions, SAT, graph problems, the hardest problems in $\mathcal{NP}$ |
 | **Phase 3** | Complexity Zoo | $\text{coNP}$, $\text{PSPACE}$, $\text{EXP}$, quantum computing |
 | **Phase 4** | Failed Proofs | Why every known proof technique fails, and what that tells us |
-| **Phase 5** | Real-World Impact | Cryptography, logistics, biology, AI — where this problem *lives* |
+| **Phase 5** | Real-World Impact | Cryptography, logistics, biology, AI: where this problem *lives* |
 | **Phase 6** | Heuristics | How engineers cope with $\mathcal{NP}$-Hard problems in practice |
 | **Phase 7** | Final Verdict | Consequences, consensus, and what the future of research looks like |
 
@@ -188,7 +188,7 @@ Some posts include code examples (usually in Python), but they are always option
 :::
 
 :::note This Is Not a Proof
-I am not claiming to solve $\mathcal{P}$ vs $\mathcal{NP}$. I am documenting my journey of understanding the problem. If, somewhere along the way, an idea occurs to me — I will write about it honestly, including why it probably fails.
+I am not claiming to solve $\mathcal{P}$ vs $\mathcal{NP}$. I am documenting my journey of understanding the problem. If, somewhere along the way, an idea occurs to me, I will write about it honestly, including why it probably fails.
 :::
 
 ---
@@ -197,7 +197,7 @@ I am not claiming to solve $\mathcal{P}$ vs $\mathcal{NP}$. I am documenting my 
 
 The next post starts from the very beginning: **What is an Algorithm?**
 
-If you think you already know the answer, you might be surprised. The formal definition of an algorithm is more interesting — and stranger — than it first appears.
+If you think you already know the answer, you might be surprised. The formal definition of an algorithm is more interesting, and stranger, than it first appears.
 
 See you there. 🚀
 

@@ -6,7 +6,7 @@
   "link": {
     "type": "generated-index",
     "title": "Phase 4: Failed Proofs",
-    "description": "Why can't the smartest people alive solve this? It's not stubbornness — it's barriers. This phase breaks down the Relativization Barrier, the Natural Proofs Barrier, and the Algebrization Barrier, plus GCT and diagonalization. Understanding why proofs fail is essential to understanding what a real proof would need to look like.",
+    "description": "Why can't the smartest people alive solve this? It's not stubbornness: it's barriers. This phase breaks down the Relativization Barrier, the Natural Proofs Barrier, and the Algebrization Barrier, plus GCT and diagonalization. Understanding why proofs fail is essential to understanding what a real proof would need to look like.",
     "slug": "/failed-proofs",
     "keywords": ["relativization", "natural proofs", "algebrization", "GCT", "oracles", "barriers"]
   }

@@ -277,7 +277,7 @@ A directed graph edge connects exactly two nodes. It can encode "if A is false, 
 The clean algorithm that solves 2-SAT simply does not generalize to 3-SAT. The problem becomes a search through the full exponential space of assignments, and that is where the NP-Completeness lives.
 
 <Tabs>
-  <TabItem value="2sat" label="2-SAT — In P" default>
+  <TabItem value="2sat" label="2-SAT: In P" default>
 
 **Formula:** $(x_1 \vee \neg x_2) \wedge (\neg x_1 \vee x_3) \wedge (\neg x_3 \vee x_2)$
 
@@ -292,7 +292,7 @@ Follow the chain: $x_1 \rightarrow x_3 \rightarrow x_2 \rightarrow x_1$. These t
 Check every clause: all satisfied. Solution found in polynomial time.
 
   </TabItem>
-  <TabItem value="3sat" label="3-SAT — NP-Complete">
+  <TabItem value="3sat" label="3-SAT: NP-Complete">
 
 **Formula:** $(x_1 \vee \neg x_2 \vee x_3) \wedge (\neg x_1 \vee x_2 \vee \neg x_3) \wedge (x_1 \vee x_2 \vee x_3)$
 

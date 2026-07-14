@@ -6,7 +6,7 @@
   "link": {
     "type": "generated-index",
     "title": "Phase 3: Complexity Zoo",
-    "description": "P and NP are not the only complexity classes. This phase explores the full 'zoo' — coNP, PSPACE, EXP, BPP, and BQP. We also examine quantum computing and its relationship to NP, busting the common myth that quantum computers will simply 'solve NP-Hard problems'.",
+    "description": "P and NP are not the only complexity classes. This phase explores the full 'zoo': coNP, PSPACE, EXP, BPP, and BQP. We also examine quantum computing and its relationship to NP, busting the common myth that quantum computers will simply 'solve NP-Hard problems'.",
     "slug": "/complexity-zoo",
     "keywords": ["coNP", "PSPACE", "EXP", "BPP", "BQP", "quantum computing", "Shor's algorithm"]
   }
