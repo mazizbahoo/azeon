@@ -106,7 +106,7 @@ function LiteralPill({ text, isHelper, accent, helperColor, dark, small = false 
 // ── Clause display ─────────────────────────────────────────────────────────
 
 function ClauseDisplay({ literals, helperVars, accent, helperColor, dark, small = false }) {
-  const tMut = dark ? 'rgba(231,233,234,0.40)' : 'rgba(13,10,26,0.38)';
+  const tMut = 'var(--az-text)';
 
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
@@ -142,7 +142,6 @@ function Arrow({ accent }) {
         fontFamily: 'var(--ifm-font-family-monospace)',
         fontSize: '0.6rem',
         color: accent,
-        opacity: 0.6,
         letterSpacing: '0.1em',
       }}>converts to</span>
       <span style={{ color: accent, fontSize: '1.1rem', lineHeight: 1 }}>→</span>
@@ -157,13 +156,14 @@ function Inner() {
   const dark = colorMode === 'dark';
 
   const [activeCase, setActiveCase] = useState('four');
+  const [hoveredTab, setHoveredTab] = useState(null);
 
   const accent      = 'var(--az-accent)';
   const helperColor = dark ? '#e07b45' : '#c0581a';
   const bdr         = 'var(--az-border)';
   const bdrSub      = 'var(--az-border-subtle)';
   const bg          = 'var(--az-surface)';
-  const bgSurf      = 'var(--az-surface)';
+  const bgSurf      = 'var(--az-elevated)';
   const bgEl        = 'var(--az-elevated)';
   const tPri        = 'var(--az-text)';
   const tMut        = 'var(--az-text)';
@@ -196,35 +196,41 @@ function Inner() {
 
       {/* case selector tabs */}
       <div style={{ display: 'flex', gap: 5, marginBottom: '1rem', flexWrap: 'wrap' }}>
-        {CASES.map(c => (
-          <button
-            key={c.id}
-            onClick={() => setActiveCase(c.id)}
-            style={{
-              flex: 1,
-              minWidth: 60,
-              fontFamily: mono,
-              fontSize: '0.65rem',
-              letterSpacing: '0.04em',
-              padding: '6px 4px',
-              borderRadius: 8,
-              border: `1px solid ${c.id === activeCase ? accent : bdr}`,
-              background: c.id === activeCase ? 'var(--az-accent-dim)' : 'transparent',
-              color: c.id === activeCase ? accent : tMut,
-              cursor: 'pointer',
-              transition: 'all 0.18s',
-            }}
-          >
-            {c.label}
-          </button>
-        ))}
+        {CASES.map(c => {
+          const isActive = c.id === activeCase;
+          const isHovered = hoveredTab === c.id;
+          return (
+            <button
+              key={c.id}
+              onClick={() => setActiveCase(c.id)}
+              onMouseEnter={() => setHoveredTab(c.id)}
+              onMouseLeave={() => setHoveredTab(null)}
+              style={{
+                flex: 1,
+                minWidth: 60,
+                fontFamily: mono,
+                fontSize: '0.65rem',
+                letterSpacing: '0.04em',
+                padding: '6px 4px',
+                borderRadius: 999,
+                border: `1px solid ${isActive ? accent : (isHovered ? bdrSub : bdr)}`,
+                background: isActive ? 'var(--az-accent-dim)' : (isHovered ? bgEl : 'transparent'),
+                color: isActive ? accent : tMut,
+                cursor: 'pointer',
+                transition: 'all 0.18s',
+              }}
+            >
+              {c.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* main conversion display */}
       <div style={{
         background: bgSurf,
         border: `1px solid ${bdrSub}`,
-        borderRadius: 24,
+        borderRadius: 12,
         padding: '1.1rem',
         marginBottom: '0.85rem',
       }}>
@@ -248,7 +254,6 @@ function Inner() {
             fontFamily: mono,
             fontSize: '0.62rem',
             color: tMut,
-            opacity: 0.6,
           }}>
             ({current.originalLiterals.length} literal{current.originalLiterals.length !== 1 ? 's' : ''})
           </span>
@@ -287,7 +292,6 @@ function Inner() {
                 fontFamily: mono,
                 fontSize: '0.58rem',
                 color: green,
-                opacity: 0.7,
               }}>
                 ✓ 3 literals
               </span>
@@ -333,7 +337,7 @@ function Inner() {
       {/* explanation */}
       <div style={{
         background: bgEl,
-        borderRadius: '0 24px 24px 0',
+        borderRadius: '0 12px 12px 0',
         borderLeft: `2px solid ${current.helperCount === 0 ? green : accent}`,
         padding: '10px 14px',
         fontSize: '0.7rem',
@@ -349,10 +353,10 @@ function Inner() {
       <div style={{
         background: dark ? 'rgba(166,124,255,0.06)' : 'rgba(94,53,177,0.04)',
         border: `1px solid ${dark ? 'rgba(166,124,255,0.15)' : 'rgba(94,53,177,0.12)'}`,
-        borderRadius: 24,
+        borderRadius: 12,
         padding: '10px 14px',
       }}>
-        <div style={{ fontSize: '0.58rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: accent, opacity: 0.7, marginBottom: 4 }}>
+        <div style={{ fontSize: '0.58rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: accent, marginBottom: 4 }}>
           General rule for k literals (k &gt; 3)
         </div>
         <div style={{ fontSize: '0.68rem', lineHeight: 1.7, color: tMut }}>
@@ -370,7 +374,6 @@ function Inner() {
         fontSize: '0.57rem',
         letterSpacing: '0.07em',
         color: tMut,
-        opacity: 0.5,
       }}>
         Click each tab to see how clauses of different sizes get converted
       </div>
