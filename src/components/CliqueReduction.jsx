@@ -44,9 +44,10 @@ const CLAUSE_NAMES = ['Clause 1', 'Clause 2', 'Clause 3'];
 
 function getNodePositions(w, h) {
   const cx = w / 2;
-  const cy = h / 2;
-  const groupRadius = Math.min(w, h) * 0.28;
-  const nodeRadius = Math.min(w, h) * 0.10;
+  const groupRadius = Math.min(w * 0.28, 140);
+  const nodeRadius = Math.min(w * 0.10, 50);
+  const paddingY = 40;
+  const cy = (paddingY / 2) + groupRadius + 2 * nodeRadius;
 
   // Each clause group is centered at 120° apart
   const groupAngles = [-90, 30, 150]; // degrees, starting top
@@ -88,7 +89,11 @@ function Inner() {
     if (!svgRef.current) return;
     const { width } = svgRef.current.getBoundingClientRect();
     const w = Math.max(300, width);
-    setDims({ w, h: Math.max(280, w * 0.82) });
+    const gR = Math.min(w * 0.28, 140);
+    const nR = Math.min(w * 0.10, 50);
+    const paddingY = 40;
+    const h = 1.5 * gR + 3.5 * nR + paddingY;
+    setDims({ w, h: Math.max(180, h) });
   }, []);
 
   useEffect(() => {
@@ -135,7 +140,7 @@ function Inner() {
     return !isEdgeHighlighted(a, b);
   };
 
-  const NODE_R = Math.max(14, dims.w * 0.038);
+  const NODE_R = Math.min(Math.max(14, dims.w * 0.038), 22);
 
   return (
     <div style={{ fontFamily: mono, margin: '2rem 0' }}>
@@ -209,13 +214,14 @@ function Inner() {
         ))}
       </div>
 
-      {/* SVG Graph */}
+      {/* SVG Graph and Insights */}
       <div style={{
         background: bg, border: `1px solid ${bdr}`, borderTop: 'none',
         borderRadius: '0 0 24px 24px',
-        padding: '8px 0 12px',
+        padding: '0',
         overflow: 'hidden',
       }}>
+
         <svg
           ref={svgRef}
           width="100%"
@@ -326,7 +332,7 @@ function Inner() {
         {/* Legend / hint */}
         <div style={{
           display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap',
-          paddingTop: 4, paddingBottom: 4,
+          paddingTop: 0, paddingBottom: 4,
         }}>
           {CLAUSE_COLORS.map((c, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -345,83 +351,88 @@ function Inner() {
             </div>
           )}
         </div>
+
+        {/* Insights at the bottom */}
+        <div style={{ padding: '0 16px', minHeight: 90, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          {/* Hover insight */}
+          {hovered !== null && !showClique && (() => {
+            const node = NODES[hovered];
+            const neighbors = EDGES
+              .filter(([a, b]) => a === hovered || b === hovered)
+              .map(([a, b]) => (a === hovered ? b : a))
+              .map(nid => NODES[nid]);
+            const noEdge = NODES.filter((n, nid) => {
+              if (n.clause === node.clause) return false;
+              if (nid === hovered) return false;
+              return !EDGES.some(([a, b]) =>
+                (a === hovered && b === nid) || (b === hovered && a === nid)
+              );
+            });
+            return (
+              <div style={{
+                marginBottom: 12,
+                background: bgEl,
+                borderRadius: '0 10px 10px 0',
+                borderLeft: `2px solid ${CLAUSE_COLORS[node.clause]}`,
+                padding: '10px 14px',
+                fontSize: '0.7rem',
+                lineHeight: 1.75,
+                color: tMut,
+              }}>
+                <span style={{ color: CLAUSE_COLORS[node.clause], fontWeight: 600 }}>
+                  {litLabel(node.lit)}
+                </span>{' '}
+                is from {CLAUSE_NAMES[node.clause]}.{' '}
+                It has edges to:{' '}
+                {neighbors.length > 0
+                  ? neighbors.map((n, i) => (
+                    <span key={n.id} style={{ color: CLAUSE_COLORS[n.clause] }}>
+                      {litLabel(n.lit)}{i < neighbors.length - 1 ? ', ' : ''}
+                    </span>
+                  ))
+                  : 'none'
+                }.{' '}
+                {noEdge.length > 0 && (
+                  <>
+                    No edges to:{' '}
+                    {noEdge.map((n, i) => (
+                      <span key={n.id} style={{ color: '#c85555' }}>
+                        {litLabel(n.lit)}{i < noEdge.length - 1 ? ', ' : ''}
+                      </span>
+                    ))} (contradictory — same variable, opposite sign).
+                  </>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* Clique explanation */}
+          {showClique && (
+            <div style={{
+              marginBottom: 12,
+              background: 'rgba(76,175,80,0.07)',
+              border: '1px solid rgba(76,175,80,0.28)',
+              borderRadius: 10,
+              padding: '10px 14px',
+              fontSize: '0.7rem',
+              lineHeight: 1.75,
+              color: tMut,
+            }}>
+              Assignment <span style={{ color: '#4caf50' }}>x₁=T, x₂=T, x₃=T</span> satisfies the formula.
+              The three highlighted nodes — one from each clause — form a{' '}
+              <span style={{ color: '#4caf50', fontWeight: 600 }}>3-clique</span>: every pair has an edge
+              (no contradictions between them). This is the proof in action: a satisfying assignment
+              always corresponds to a clique of size k.
+            </div>
+          )}
+
+          {hovered === null && !showClique && (
+            <div style={{ marginBottom: 12, textAlign: 'center', fontSize: '0.57rem', letterSpacing: '0.07em', color: tMut }}>
+              Hover any node to see its edges — or click "Show 3-Clique" to see the satisfying assignment
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* Hover insight */}
-      {hovered !== null && !showClique && (() => {
-        const node = NODES[hovered];
-        const neighbors = EDGES
-          .filter(([a, b]) => a === hovered || b === hovered)
-          .map(([a, b]) => (a === hovered ? b : a))
-          .map(nid => NODES[nid]);
-        const noEdge = NODES.filter((n, nid) => {
-          if (n.clause === node.clause) return false;
-          if (nid === hovered) return false;
-          return !EDGES.some(([a, b]) =>
-            (a === hovered && b === nid) || (b === hovered && a === nid)
-          );
-        });
-        return (
-          <div style={{
-            marginTop: 8,
-            background: bgEl,
-            borderRadius: '0 10px 10px 0',
-            borderLeft: `2px solid ${CLAUSE_COLORS[node.clause]}`,
-            padding: '10px 14px',
-            fontSize: '0.7rem',
-            lineHeight: 1.75,
-            color: tMut,
-          }}>
-            <span style={{ color: CLAUSE_COLORS[node.clause], fontWeight: 600 }}>
-              {litLabel(node.lit)}
-            </span>{' '}
-            is from {CLAUSE_NAMES[node.clause]}.{' '}
-            It has edges to: {neighbors.length > 0
-              ? neighbors.map(n => (
-                <span key={n.id} style={{ color: CLAUSE_COLORS[n.clause], marginRight: 4 }}>
-                  {litLabel(n.lit)}
-                </span>
-              ))
-              : 'none'
-            }.{' '}
-            {noEdge.length > 0 && (
-              <>
-                No edges to: {noEdge.map(n => (
-                  <span key={n.id} style={{ color: '#c85555', marginRight: 4 }}>
-                    {litLabel(n.lit)}
-                  </span>
-                ))} (contradictory — same variable, opposite sign).
-              </>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* Clique explanation */}
-      {showClique && (
-        <div style={{
-          marginTop: 8,
-          background: 'rgba(76,175,80,0.07)',
-          border: '1px solid rgba(76,175,80,0.28)',
-          borderRadius: 10,
-          padding: '10px 14px',
-          fontSize: '0.7rem',
-          lineHeight: 1.75,
-          color: tMut,
-        }}>
-          Assignment <span style={{ color: '#4caf50' }}>x₁=T, x₂=T, x₃=T</span> satisfies the formula.
-          The three highlighted nodes — one from each clause — form a{' '}
-          <span style={{ color: '#4caf50', fontWeight: 600 }}>3-clique</span>: every pair has an edge
-          (no contradictions between them). This is the proof in action: a satisfying assignment
-          always corresponds to a clique of size k.
-        </div>
-      )}
-
-      {!hovered && !showClique && (
-        <div style={{ marginTop: 6, textAlign: 'center', fontSize: '0.57rem', letterSpacing: '0.07em', color: tMut }}>
-          Hover any node to see its edges — or click "Show 3-Clique" to see the satisfying assignment
-        </div>
-      )}
     </div>
   );
 }
