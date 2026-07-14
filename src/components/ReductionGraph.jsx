@@ -39,17 +39,17 @@ function drawGraph(canvas, nodes, selected, isLeft, dark) {
   const cover   = new Set(Array.from({ length: N }, (_, i) => i).filter(i => !selected.has(i)));
   const validIS = isValidIS(selected);
 
-  const PURPLE      = '#5e35b1';
-  const PURPLE_FILL = dark ? 'rgba(94,53,177,0.22)' : 'rgba(94,53,177,0.12)';
-  const PURPLE_DIM  = dark ? 'rgba(94,53,177,0.13)' : 'rgba(94,53,177,0.07)';
+  const PURPLE      = '#825dce';
+  const PURPLE_FILL = 'rgba(130,87,229,0.22)';
+  const PURPLE_DIM  = 'rgba(130,87,229,0.12)';
   const INVALID     = '#c85555';
-  const INVALID_FILL= dark ? 'rgba(200,85,85,0.18)' : 'rgba(200,85,85,0.10)';
-  const NODE_BG     = dark ? '#0f0f0f' : '#ffffff';
-  const NODE_STR    = dark ? '#2f3336' : 'rgba(13,10,26,0.14)';
-  const EDGE_BASE   = dark ? 'rgba(255,255,255,0.09)' : 'rgba(13,10,26,0.11)';
-  const EDGE_WATCH  = dark ? 'rgba(94,53,177,0.55)'  : 'rgba(94,53,177,0.38)';
-  const EDGE_UNWATCHED = dark ? 'rgba(200,85,85,0.55)' : 'rgba(200,85,85,0.45)';
-  const TEXT_MUT    = dark ? 'rgba(231,233,234,0.38)' : 'rgba(13,10,26,0.30)';
+  const INVALID_FILL= 'rgba(200,85,85,0.18)';
+  const NODE_BG     = dark ? 'rgb(13, 13, 13)' : 'rgb(248, 248, 255)';
+  const NODE_STR    = dark ? 'rgb(31, 31, 31)' : 'rgb(219, 219, 230)';
+  const EDGE_BASE   = dark ? 'rgb(31, 31, 31)' : 'rgb(219, 219, 230)';
+  const EDGE_WATCH  = '#825dce';
+  const EDGE_UNWATCHED = '#c85555';
+  const TEXT_MUT    = dark ? 'rgb(244, 244, 255)' : 'rgb(4, 4, 4)';
 
   ctx.clearRect(0, 0, w, CANVAS_H);
 
@@ -185,15 +185,15 @@ function Inner() {
   }
 
   /* design tokens */
-  const PURPLE  = '#5e35b1';
+  const PURPLE  = 'var(--az-accent)';
   const mono    = 'var(--ifm-font-family-monospace)';
-  const bdr     = dark ? '#2f3336'                : 'rgba(13,10,26,0.10)';
-  const bdrSub  = dark ? 'rgba(47,51,54,0.5)'    : 'rgba(13,10,26,0.06)';
-  const surface = dark ? '#0f0f0f'                : '#ffffff';
-  const raised  = dark ? '#0f0f0f'                : '#f7f7fa';
-  const tMut    = dark ? 'rgba(231,233,234,0.50)' : 'rgba(13,10,26,0.45)';
-  const acDim   = dark ? 'rgba(94,53,177,0.12)'  : 'rgba(94,53,177,0.07)';
-  const acBdr   = 'rgba(94,53,177,0.20)';
+  const bdr     = 'var(--az-border)';
+  const bdrSub  = 'var(--az-border-subtle)';
+  const surface = 'var(--az-surface)';
+  const raised  = 'var(--az-elevated)';
+  const tMut    = 'var(--az-text)';
+  const acDim   = 'var(--az-accent-dim)';
+  const acBdr   = 'var(--az-accent-border)';
   const insightBdr = (!validIS && k > 0) ? '#c85555' : (k > 0 ? PURPLE : bdr);
 
   const BADGES = [
@@ -230,7 +230,7 @@ function Inner() {
           { ref: c1Ref, label: 'Click cities — Independent Set',        onClick: handleClick, cursor: 'pointer' },
           { ref: c2Ref, label: 'Camera placements — Vertex Cover',       onClick: null,        cursor: 'default'  },
         ].map(({ ref, label, onClick, cursor }) => (
-          <div key={label} style={{ border: `0.5px solid ${bdr}`, borderRadius: 12, overflow: 'hidden' }}>
+          <div key={label} style={{ border: `0.5px solid ${bdr}`, borderRadius: 24, overflow: 'hidden' }}>
             <div style={{
               padding: '6px 12px', fontSize: '0.58rem', letterSpacing: '0.09em',
               color: tMut, borderBottom: `0.5px solid ${bdrSub}`, background: raised,
@@ -254,7 +254,7 @@ function Inner() {
           { val: nk, label: `cities with cameras — every road watched (n − k = ${nk})`, sublabel: 'Vertex Cover size' },
         ].map(({ val, label, sublabel }) => (
           <div key={sublabel} style={{
-            background: acDim, borderRadius: 8,
+            background: acDim, borderRadius: 16,
             border: `0.5px solid ${acBdr}`, padding: '10px 14px',
           }}>
             <div style={{ fontSize: '1.5rem', fontWeight: 500, color: PURPLE, lineHeight: 1.2, marginBottom: 2 }}>
@@ -269,11 +269,11 @@ function Inner() {
 
       {/* insight */}
       <div style={{
-        background: raised, borderRadius: 8,
-        padding: '11px 14px', borderRadius: 0,
+        background: raised,
+        padding: '11px 14px',
         fontSize: '0.7rem', lineHeight: 1.75, color: tMut,
         borderLeft: `2px solid ${insightBdr}`,
-        borderRadius: '0 8px 8px 0',
+        borderRadius: '0 16px 16px 0',
       }}>
         {insight}
       </div>

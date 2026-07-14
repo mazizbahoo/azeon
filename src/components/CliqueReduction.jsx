@@ -6,8 +6,8 @@ import { useColorMode } from '@docusaurus/theme-common';
 
 // φ = (x₁ ∨ ¬x₂ ∨ x₃) ∧ (¬x₁ ∨ x₂ ∨ ¬x₃) ∧ (x₁ ∨ x₂ ∨ x₃)
 const CLAUSES = [
-  [{ var: 1, neg: false }, { var: 2, neg: true },  { var: 3, neg: false }],
-  [{ var: 1, neg: true },  { var: 2, neg: false }, { var: 3, neg: true  }],
+  [{ var: 1, neg: false }, { var: 2, neg: true }, { var: 3, neg: false }],
+  [{ var: 1, neg: true }, { var: 2, neg: false }, { var: 3, neg: true }],
   [{ var: 1, neg: false }, { var: 2, neg: false }, { var: 3, neg: false }],
 ];
 
@@ -68,16 +68,7 @@ function getNodePositions(w, h) {
 }
 
 /* ── Satisfying assignment → clique highlighting ──────────────── */
-// x₁=T, x₂=T, x₃=T satisfies all three clauses
-// node 0 (x₁ in C1), node 4 (x₂ in C2), node 6 (x₁ in C3)
-// Actually let's find a proper clique: pick one literal per clause that's consistent
-// x₁=T, x₂=T, x₃=T:
-// C1: x₁ true → node 0
-// C2: x₂ true → node 4
-// C3: x₁ true → node 6
-// Check: node 0 (x₁) and node 4 (x₂) — not contradictory → edge exists ✓
-// node 0 (x₁) and node 6 (x₁) — same literal → edge exists ✓
-// node 4 (x₂) and node 6 (x₁) — not contradictory → edge exists ✓
+
 const EXAMPLE_CLIQUE = [0, 4, 6]; // 3-clique for x₁=T,x₂=T,x₃=T
 
 /* ── Main Inner component ──────────────────────────────────────── */
@@ -109,15 +100,15 @@ function Inner() {
   const positions = getNodePositions(dims.w, dims.h);
 
   // Design tokens
-  const accent      = dark ? '#a67cff' : '#5e35b1';
-  const bg          = dark ? '#0f0f0f' : '#ffffff';
-  const bgEl        = dark ? '#16181c' : '#f7f7fa';
-  const bdr         = dark ? '#2f3336' : 'rgba(94,53,177,0.14)';
-  const bdrSub      = dark ? '#1e2124' : 'rgba(13,10,26,0.07)';
-  const tPri        = dark ? '#e7e9ea' : '#0d0a1a';
-  const tMut        = dark ? 'rgba(231,233,234,0.45)' : 'rgba(13,10,26,0.45)';
-  const mono        = 'var(--ifm-font-family-monospace)';
-  const edgeDefault = dark ? 'rgba(255,255,255,0.07)' : 'rgba(13,10,26,0.08)';
+  const accent = 'var(--az-accent)';
+  const bg = 'var(--az-surface)';
+  const bgEl = 'var(--az-elevated)';
+  const bdr = 'var(--az-border)';
+  const bdrSub = 'var(--az-border-subtle)';
+  const tPri = 'var(--az-text)';
+  const tMut = 'var(--az-text)';
+  const mono = 'var(--ifm-font-family-monospace)';
+  const edgeDefault = 'var(--az-border)';
 
   const isNodeHighlighted = (nid) => {
     if (showClique) return EXAMPLE_CLIQUE.includes(nid);
@@ -152,7 +143,7 @@ function Inner() {
       <div style={{
         background: bg,
         border: `1px solid ${bdr}`,
-        borderRadius: '16px 16px 0 0',
+        borderRadius: '24px 24px 0 0',
         padding: '10px 16px',
         display: 'flex',
         alignItems: 'center',
@@ -161,7 +152,7 @@ function Inner() {
         gap: 8,
         borderBottom: `1px solid ${bdrSub}`,
       }}>
-        <span style={{ fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: dark ? 'rgba(166,124,255,0.55)' : 'rgba(94,53,177,0.55)' }}>
+        <span style={{ fontSize: '0.58rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: accent }}>
           // 3-SAT → Clique Reduction
         </span>
         <div style={{ display: 'flex', gap: 6 }}>
@@ -171,7 +162,7 @@ function Inner() {
               fontFamily: mono, fontSize: '0.62rem', letterSpacing: '0.04em',
               padding: '4px 12px', borderRadius: 7,
               border: `1px solid ${!showClique ? accent : bdr}`,
-              background: !showClique ? (dark ? 'rgba(166,124,255,0.12)' : 'rgba(94,53,177,0.08)') : 'transparent',
+              background: !showClique ? 'var(--az-accent-dim)' : 'transparent',
               color: !showClique ? accent : tMut,
               cursor: 'pointer', transition: 'all 0.18s',
             }}
@@ -206,7 +197,7 @@ function Inner() {
             <span style={{
               fontSize: '0.75rem', fontFamily: mono,
               color: CLAUSE_COLORS[ci],
-              background: dark ? `${CLAUSE_COLORS[ci]}14` : `${CLAUSE_COLORS[ci]}10`,
+              background: 'var(--az-elevated)',
               border: `1px solid ${CLAUSE_COLORS[ci]}44`,
               borderRadius: 6, padding: '2px 8px',
             }}>
@@ -222,7 +213,7 @@ function Inner() {
       {/* SVG Graph */}
       <div style={{
         background: bg, border: `1px solid ${bdr}`, borderTop: 'none',
-        borderRadius: '0 0 16px 16px',
+        borderRadius: '0 0 24px 24px',
         padding: '8px 0 12px',
         overflow: 'hidden',
       }}>
@@ -275,13 +266,13 @@ function Inner() {
                 key={node.id}
                 onMouseEnter={() => !showClique && setHovered(node.id)}
                 onMouseLeave={() => setHovered(null)}
-                style={{ cursor: showClique ? 'default' : 'pointer', transition: 'opacity 0.2s' }}
-                opacity={opacity}
+                style={{ cursor: showClique ? 'default' : 'pointer' }}
               >
                 <circle
                   cx={p.x} cy={p.y} r={NODE_R}
                   fill={fillColor}
                   stroke={isClique ? '#4caf50' : strokeColor}
+                  strokeOpacity={opacity}
                   strokeWidth={strokeW}
                   style={{ transition: 'all 0.2s' }}
                 />
@@ -302,6 +293,7 @@ function Inner() {
                   fontSize={Math.max(9, NODE_R * 0.58)}
                   fontFamily={mono}
                   fontWeight={isHov || isClique ? 600 : 400}
+                  fillOpacity={opacity}
                   fill={isClique ? '#4caf50' : isHov ? color : strokeColor}
                   style={{ pointerEvents: 'none', userSelect: 'none' }}
                 >

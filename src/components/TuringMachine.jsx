@@ -114,16 +114,16 @@ export default function TuringMachine() {
 
   /* ── Design tokens — CSS custom properties from updated theme ── */
   const mono   = 'var(--ifm-font-family-monospace)';
-  const accent = 'var(--az-accent)';       // #a67cff dark / #5e35b1 light
-  const acDim  = 'var(--az-accent-dim)';   // rgba(166,124,255,0.20) dark / rgba(94,53,177,0.12) light
-  const primary= 'var(--az-primary)';      // same as accent
-  const bgBase = 'var(--az-bg-base)';      // #000000 dark / #ffffff light
-  const bgSurf = 'var(--az-bg-surface)';   // #0f0f0f dark / #ffffff light
-  const bgElev = 'var(--az-bg-elevated)';  // #1a1a1a dark / #f7f7fa light
-  const tPri   = 'var(--az-text-primary)'; // #e7e9ea dark / #0d0a1a light
-  const tMuted = 'var(--az-text-muted)';   // rgba(231,233,234,0.52) dark / rgba(13,10,26,0.48) light
-  const bdr    = 'var(--az-border)';       // #2f3336 dark / rgba(94,53,177,0.18) light
-  const bdrS   = 'var(--az-border-subtle)';// #1e2124 dark / rgba(13,10,26,0.09) light
+  const accent = 'var(--az-accent)';
+  const acDim  = 'var(--az-accent-dim)';
+  const primary= 'var(--az-accent)';
+  const bgBase = 'var(--az-surface)';
+  const bgSurf = 'var(--az-surface)';
+  const bgElev = 'var(--az-elevated)';
+  const tPri   = 'var(--az-text)';
+  const tMuted = 'var(--az-text)';
+  const bdr    = 'var(--az-border)';
+  const bdrS   = 'var(--az-border-subtle)';
 
   /* ── Mode badge colors — semantic, intentionally hardcoded ── */
   const modeBg  = s.mode === 'Accept' ? 'rgba(76,175,80,0.12)'
@@ -147,7 +147,7 @@ export default function TuringMachine() {
         fontFamily: mono,
         background: bgSurf,
         border: `1px solid ${bdr}`,
-        borderRadius: 16,
+        borderRadius: 24,
         padding: '1.5rem',
         margin: '2rem 0',
         boxSizing: 'border-box',

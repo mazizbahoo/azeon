@@ -158,15 +158,15 @@ function Inner() {
 
   const [activeCase, setActiveCase] = useState('four');
 
-  const accent      = dark ? '#a67cff' : '#5e35b1';
+  const accent      = 'var(--az-accent)';
   const helperColor = dark ? '#e07b45' : '#c0581a';
-  const bdr         = dark ? '#2f3336' : 'rgba(94,53,177,0.14)';
-  const bdrSub      = dark ? '#1e2124' : 'rgba(13,10,26,0.07)';
-  const bg          = dark ? '#0f0f0f' : '#ffffff';
-  const bgSurf      = dark ? '#0f0f0f' : '#ffffff';
-  const bgEl        = dark ? '#1a1a1a' : '#ffffff';
-  const tPri        = dark ? '#e7e9ea' : '#0d0a1a';
-  const tMut        = dark ? 'rgba(231,233,234,0.45)' : 'rgba(13,10,26,0.45)';
+  const bdr         = 'var(--az-border)';
+  const bdrSub      = 'var(--az-border-subtle)';
+  const bg          = 'var(--az-surface)';
+  const bgSurf      = 'var(--az-surface)';
+  const bgEl        = 'var(--az-elevated)';
+  const tPri        = 'var(--az-text)';
+  const tMut        = 'var(--az-text)';
   const mono        = 'var(--ifm-font-family-monospace)';
   const green       = '#4caf50';
 
@@ -176,7 +176,7 @@ function Inner() {
     <div style={{
       background: bg,
       border: `1px solid ${bdr}`,
-      borderRadius: 16,
+      borderRadius: 24,
       padding: '1.25rem',
       margin: '1.75rem 0',
       fontFamily: mono,
@@ -187,7 +187,7 @@ function Inner() {
         fontSize: '0.58rem',
         letterSpacing: '0.16em',
         textTransform: 'uppercase',
-        color: dark ? 'rgba(166,124,255,0.5)' : 'rgba(94,53,177,0.5)',
+        color: 'var(--az-accent)',
         textAlign: 'center',
         marginBottom: '0.9rem',
       }}>
@@ -209,7 +209,7 @@ function Inner() {
               padding: '6px 4px',
               borderRadius: 8,
               border: `1px solid ${c.id === activeCase ? accent : bdr}`,
-              background: c.id === activeCase ? dark ? 'rgba(166,124,255,0.12)' : 'rgba(94,53,177,0.08)' : 'transparent',
+              background: c.id === activeCase ? 'var(--az-accent-dim)' : 'transparent',
               color: c.id === activeCase ? accent : tMut,
               cursor: 'pointer',
               transition: 'all 0.18s',
@@ -224,7 +224,7 @@ function Inner() {
       <div style={{
         background: bgSurf,
         border: `1px solid ${bdrSub}`,
-        borderRadius: 12,
+        borderRadius: 24,
         padding: '1.1rem',
         marginBottom: '0.85rem',
       }}>
@@ -333,7 +333,7 @@ function Inner() {
       {/* explanation */}
       <div style={{
         background: bgEl,
-        borderRadius: '0 10px 10px 0',
+        borderRadius: '0 24px 24px 0',
         borderLeft: `2px solid ${current.helperCount === 0 ? green : accent}`,
         padding: '10px 14px',
         fontSize: '0.7rem',
@@ -349,7 +349,7 @@ function Inner() {
       <div style={{
         background: dark ? 'rgba(166,124,255,0.06)' : 'rgba(94,53,177,0.04)',
         border: `1px solid ${dark ? 'rgba(166,124,255,0.15)' : 'rgba(94,53,177,0.12)'}`,
-        borderRadius: 10,
+        borderRadius: 24,
         padding: '10px 14px',
       }}>
         <div style={{ fontSize: '0.58rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: accent, opacity: 0.7, marginBottom: 4 }}>

@@ -56,11 +56,11 @@ const GATES = [
 ────────────────────────────────────────────────────────── */
 
 function GateSVG({ type, a, b, color, dark }) {
-  const wire   = dark ? '#2f3336' : 'rgba(13,10,26,0.18)';
-  const wireLo = dark ? '#3a3f44' : 'rgba(13,10,26,0.10)';
-  const body   = dark ? '#0f0f0f' : '#f7f7fa';
+  const wire   = 'var(--az-border)';
+  const wireLo = 'var(--az-border-subtle)';
+  const body   = 'var(--az-surface)';
   const active = color;
-  const text   = dark ? '#e7e9ea' : '#0d0a1a';
+  const text   = 'var(--az-text)';
 
   const aLive = a;
   const bLive = type === 'NOT' ? false : b;
@@ -127,12 +127,12 @@ function GatePanel({ dark }) {
   const serif  = 'DM Serif Display, Georgia, serif';
   const accent = gate.color;
 
-  const bdr    = dark ? '#2f3336' : 'rgba(94,53,177,0.14)';
-  const bdrSub = dark ? '#1e2124' : 'rgba(13,10,26,0.07)';
-  const bg     = dark ? '#0f0f0f' : '#ffffff';
-  const bgEl   = dark ? '#1a1a1a' : '#f7f7fa';
-  const tPri   = dark ? '#e7e9ea' : '#0d0a1a';
-  const tMut   = dark ? 'rgba(231,233,234,0.45)' : 'rgba(13,10,26,0.45)';
+  const bdr    = 'var(--az-border)';
+  const bdrSub = 'var(--az-border-subtle)';
+  const bg     = 'var(--az-surface)';
+  const bgEl   = 'var(--az-elevated)';
+  const tPri   = 'var(--az-text)';
+  const tMut   = 'var(--az-text)';
 
   function ToggleBtn({ val, onToggle, label }) {
     return (
@@ -321,12 +321,12 @@ function SATPanel({ dark }) {
   const accent = dark ? '#a67cff' : '#5e35b1';
   const green  = '#4caf50';
   const red    = '#c85555';
-  const bdr    = dark ? '#2f3336' : 'rgba(94,53,177,0.14)';
-  const bdrSub = dark ? '#1e2124' : 'rgba(13,10,26,0.07)';
-  const bg     = dark ? '#0f0f0f' : '#ffffff';
-  const bgEl   = dark ? '#1a1a1a' : '#f7f7fa';
-  const tPri   = dark ? '#e7e9ea' : '#0d0a1a';
-  const tMut   = dark ? 'rgba(231,233,234,0.45)' : 'rgba(13,10,26,0.45)';
+  const bdr    = 'var(--az-border)';
+  const bdrSub = 'var(--az-border-subtle)';
+  const bg     = 'var(--az-surface)';
+  const bgEl   = 'var(--az-elevated)';
+  const tPri   = 'var(--az-text)';
+  const tMut   = 'var(--az-text)';
 
   const clauseResults = CLAUSES.map(c => evalClause(c, vals));
   const allSat = clauseResults.every(Boolean);
@@ -451,11 +451,11 @@ function Inner() {
 
   const [tab, setTab] = useState(0);
 
-  const mono   = 'JetBrains Mono, monospace';
-  const accent = dark ? '#a67cff' : '#5e35b1';
-  const bdr    = dark ? '#2f3336' : 'rgba(94,53,177,0.14)';
-  const bg     = dark ? '#0f0f0f' : '#ffffff';
-  const tMut   = dark ? 'rgba(231,233,234,0.45)' : 'rgba(13,10,26,0.45)';
+  const mono   = 'var(--ifm-font-family-monospace)';
+  const accent = 'var(--az-accent)';
+  const bdr    = 'var(--az-border)';
+  const bg     = 'var(--az-surface)';
+  const tMut   = 'var(--az-text)';
 
   const TABS = ['⊙ Logic Gates', '⊛ SAT Formula'];
 
@@ -463,7 +463,7 @@ function Inner() {
     <div style={{
       background: bg,
       border: `1px solid ${bdr}`,
-      borderRadius: 16,
+      borderRadius: 24,
       padding: '1.25rem',
       margin: '1.75rem 0',
       fontFamily: mono,
@@ -473,7 +473,7 @@ function Inner() {
         fontSize: '0.58rem',
         letterSpacing: '0.16em',
         textTransform: 'uppercase',
-        color: dark ? 'rgba(166,124,255,0.5)' : 'rgba(94,53,177,0.5)',
+        color: 'var(--az-accent)',
         textAlign: 'center',
         marginBottom: '0.9rem',
       }}>
