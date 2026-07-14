@@ -80,6 +80,7 @@ function Inner() {
   const svgRef = useRef(null);
   const [dims, setDims] = useState({ w: 400, h: 360 });
   const [hovered, setHovered] = useState(null);
+  const [hoveredBtn, setHoveredBtn] = useState(null);
   const [showClique, setShowClique] = useState(false);
   const [step, setStep] = useState(0); // 0=full graph, 1=step through edge building
 
@@ -156,32 +157,30 @@ function Inner() {
           // 3-SAT → Clique Reduction
         </span>
         <div style={{ display: 'flex', gap: 6 }}>
-          <button
-            onClick={() => { setShowClique(false); }}
-            style={{
-              fontFamily: mono, fontSize: '0.62rem', letterSpacing: '0.04em',
-              padding: '4px 12px', borderRadius: 7,
-              border: `1px solid ${!showClique ? accent : bdr}`,
-              background: !showClique ? 'var(--az-accent-dim)' : 'transparent',
-              color: !showClique ? accent : tMut,
-              cursor: 'pointer', transition: 'all 0.18s',
-            }}
-          >
-            Full Graph
-          </button>
-          <button
-            onClick={() => { setShowClique(true); setHovered(null); }}
-            style={{
-              fontFamily: mono, fontSize: '0.62rem', letterSpacing: '0.04em',
-              padding: '4px 12px', borderRadius: 7,
-              border: `1px solid ${showClique ? '#4caf50' : bdr}`,
-              background: showClique ? 'rgba(76,175,80,0.10)' : 'transparent',
-              color: showClique ? '#4caf50' : tMut,
-              cursor: 'pointer', transition: 'all 0.18s',
-            }}
-          >
-            Show 3-Clique
-          </button>
+          {[
+            { id: 'full', label: 'Full Graph', onClick: () => { setShowClique(false); }, active: !showClique, color: accent, bgActive: 'var(--az-accent-dim)' },
+            { id: 'clique', label: 'Show 3-Clique', onClick: () => { setShowClique(true); setHovered(null); }, active: showClique, color: '#4caf50', bgActive: 'rgba(76,175,80,0.10)' }
+          ].map(btn => {
+            const isHovered = hoveredBtn === btn.id;
+            return (
+              <button
+                key={btn.id}
+                onClick={btn.onClick}
+                onMouseEnter={() => setHoveredBtn(btn.id)}
+                onMouseLeave={() => setHoveredBtn(null)}
+                style={{
+                  fontFamily: mono, fontSize: '0.62rem', letterSpacing: '0.04em',
+                  padding: '4px 12px', borderRadius: 999,
+                  border: `1px solid ${btn.active ? btn.color : (isHovered ? bdrSub : bdr)}`,
+                  background: btn.active ? btn.bgActive : (isHovered ? bgEl : 'transparent'),
+                  color: btn.active ? btn.color : tMut,
+                  cursor: 'pointer', transition: 'all 0.18s',
+                }}
+              >
+                {btn.label}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -199,12 +198,12 @@ function Inner() {
               color: CLAUSE_COLORS[ci],
               background: 'var(--az-elevated)',
               border: `1px solid ${CLAUSE_COLORS[ci]}44`,
-              borderRadius: 6, padding: '2px 8px',
+              borderRadius: 999, padding: '2px 10px',
             }}>
               ({clause.map(l => litLabel(l)).join(' ∨ ')})
             </span>
             {ci < CLAUSES.length - 1 && (
-              <span style={{ fontSize: '0.7rem', color: tMut, opacity: 0.5 }}>∧</span>
+              <span style={{ fontSize: '0.7rem', color: tMut }}>∧</span>
             )}
           </React.Fragment>
         ))}
@@ -230,11 +229,12 @@ function Inner() {
             const highlighted = isEdgeHighlighted(a, b);
             const dimmed = isEdgeDimmed(a, b);
             const cliqueEdge = showClique && highlighted;
+            const hovColor = (highlighted && hovered !== null) ? CLAUSE_COLORS[NODES[hovered].clause] : accent;
             return (
               <line
                 key={ei}
                 x1={pa.x} y1={pa.y} x2={pb.x} y2={pb.y}
-                stroke={cliqueEdge ? '#4caf50' : highlighted ? accent : edgeDefault}
+                stroke={cliqueEdge ? '#4caf50' : highlighted ? hovColor : edgeDefault}
                 strokeWidth={cliqueEdge ? 2.5 : highlighted ? 2 : 1}
                 opacity={dimmed ? 0.12 : (hovered === null && !showClique) ? 0.55 : highlighted ? 1 : 0.12}
                 style={{ transition: 'all 0.2s' }}
@@ -268,6 +268,11 @@ function Inner() {
                 onMouseLeave={() => setHovered(null)}
                 style={{ cursor: showClique ? 'default' : 'pointer' }}
               >
+                <circle
+                  cx={p.x} cy={p.y} r={NODE_R}
+                  fill={bg}
+                  stroke="none"
+                />
                 <circle
                   cx={p.x} cy={p.y} r={NODE_R}
                   fill={fillColor}
@@ -308,7 +313,6 @@ function Inner() {
                     fontSize={9}
                     fontFamily={mono}
                     fill={color}
-                    opacity={0.55}
                     style={{ pointerEvents: 'none', userSelect: 'none' }}
                   >
                     {CLAUSE_NAMES[node.clause]}
@@ -414,7 +418,7 @@ function Inner() {
       )}
 
       {!hovered && !showClique && (
-        <div style={{ marginTop: 6, textAlign: 'center', fontSize: '0.57rem', letterSpacing: '0.07em', color: tMut, opacity: 0.5 }}>
+        <div style={{ marginTop: 6, textAlign: 'center', fontSize: '0.57rem', letterSpacing: '0.07em', color: tMut }}>
           Hover any node to see its edges — or click "Show 3-Clique" to see the satisfying assignment
         </div>
       )}
