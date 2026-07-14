@@ -57,6 +57,7 @@ export default function TuringMachine() {
   const [cellWidth, setCellWidth] = useState(52);
   const intervalRef  = useRef(null);
   const containerRef = useRef(null);
+  const [hoveredBtn, setHoveredBtn] = useState(null);
   const done = s.mode === 'Accept' || s.mode === 'Reject';
 
   /* ── Responsive ── */
@@ -117,7 +118,7 @@ export default function TuringMachine() {
   const accent = 'var(--az-accent)';
   const acDim  = 'var(--az-accent-dim)';
   const primary= 'var(--az-accent)';
-  const bgBase = 'var(--az-surface)';
+  const bgBase = 'var(--az-bg)';
   const bgSurf = 'var(--az-surface)';
   const bgElev = 'var(--az-elevated)';
   const tPri   = 'var(--az-text)';
@@ -239,19 +240,31 @@ export default function TuringMachine() {
           { label: '← Back',  onClick: doBack,     disabled: !s.history.length, isPrimary: false },
           { label: 'Step →',  onClick: doStep,     disabled: done,              isPrimary: true  },
           { label: running ? '⏸ Pause' : '▶ Run', onClick: toggleRun, disabled: done, isPrimary: false },
-        ].map(({ label, onClick, disabled, isPrimary }) => (
-          <button key={label} onClick={onClick} disabled={disabled} style={{
-            fontFamily: mono, fontSize: 12, letterSpacing: '0.04em',
-            padding: '7px 16px', borderRadius: 10,
-            cursor: disabled ? 'default' : 'pointer',
-            border: `1px solid ${isPrimary ? primary : bdr}`,
-            background: isPrimary ? primary : bgBase,
-            color: isPrimary ? '#fff' : tPri,
-            opacity: disabled ? 0.35 : 1,
-            transition: 'all 0.15s',
-            flexShrink: 0,
-          }}>{label}</button>
-        ))}
+        ].map(({ label, onClick, disabled, isPrimary }) => {
+          const isHovered = hoveredBtn === label && !disabled;
+          return (
+            <button
+              key={label}
+              onClick={onClick}
+              disabled={disabled}
+              onMouseEnter={() => setHoveredBtn(label)}
+              onMouseLeave={() => setHoveredBtn(null)}
+              style={{
+                fontFamily: mono, fontSize: 12, letterSpacing: '0.04em',
+                padding: '7px 16px', borderRadius: 10,
+                cursor: disabled ? 'default' : 'pointer',
+                border: `1px solid ${isPrimary ? primary : (isHovered ? 'var(--az-border-subtle)' : bdr)}`,
+                background: isPrimary ? primary : (isHovered ? bgElev : bgBase),
+                color: isPrimary ? '#fff' : tPri,
+                opacity: disabled ? 0.35 : (isHovered && isPrimary ? 0.85 : 1),
+                transition: 'all 0.15s',
+                flexShrink: 0,
+              }}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {/* ── Log ── */}
