@@ -69,6 +69,7 @@ const config: Config = {
     docs: {
       sidebar: {
         hideable: true,  // ← correct key
+        autoCollapseCategories: true,
       },
     },
     navbar: {

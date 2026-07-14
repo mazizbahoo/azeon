@@ -225,24 +225,38 @@ pre {
   padding: 10px !important;
 }
 
-.menu__link {
+.menu__link,
+.menu__list-item-collapsible,
+.menu__caret {
   font-family: var(--ifm-font-family-monospace);
   font-size: 0.76rem;
   letter-spacing: 0.01em;
   color: var(--az-text);
-  border-radius: 8px !important;
+  border-radius: 12px !important;
+}
+
+.menu__link {
   padding: 10px !important;
 }
 
-.menu__link:hover {
-  background: var(--az-elevated);
+.menu__link:hover,
+.menu__list-item-collapsible:hover,
+.menu__caret:hover {
+  background: var(--az-accent-dim) !important;
   color: var(--az-text);
 }
 
-.menu__link--active {
+.menu__link--active,
+.menu__list-item--active > .menu__list-item-collapsible,
+.menu__list-item-collapsible:has(.menu__link--active) {
   color: var(--az-accent) !important;
   font-weight: 500;
-  background: var(--az-accent-dim);
+  background: var(--az-accent-dim) !important;
+}
+
+.menu__list-item--active > .menu__list-item-collapsible > .menu__link,
+.menu__list-item-collapsible:has(.menu__link--active) > .menu__link {
+  color: var(--az-accent) !important;
 }
 
 /* ── Breadcrumbs ─────────────────────────────────────── */
