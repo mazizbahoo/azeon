@@ -72,6 +72,7 @@
   --ifm-color-primary-lightest: #825dce;
   --ifm-background-color: var(--az-bg);
   --ifm-navbar-background-color: var(--az-bg);
+  --ifm-navbar-height: 60px;
   --ifm-footer-background-color: var(--az-bg);
   --ifm-code-font-size: 87%;
   --docusaurus-highlighted-code-line-bg: var(--az-highlight-bg);
@@ -112,7 +113,7 @@
   --ifm-table-head-color: var(--az-text);
   --ifm-table-cell-color: var(--az-text);
   --ifm-table-stripe-background: var(--az-surface);
-  --az-glass: rgba(0, 0, 0, 0.82);
+  --az-glass: rgba(4, 4, 4, 0.82);
   --az-border-hover: rgba(166, 124, 255, 0.55);
   --az-card-bg: var(--az-surface);
   --az-card-num: var(--az-border);
@@ -217,6 +218,7 @@ samp {
 
 .main-wrapper {
   background: var(--az-bg);
+  padding-top: var(--ifm-navbar-height, 60px);
 }
 
 /* Code Blocks */
@@ -307,6 +309,11 @@ samp {
 /* ── Navbar ───────────────────────────────────────────── */
 
 .navbar {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -317,7 +324,7 @@ samp {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--az-bg);
+  background: var(--az-glass);
   border-bottom: 1px solid var(--az-border);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
   backdrop-filter: blur(14px) saturate(180%);
