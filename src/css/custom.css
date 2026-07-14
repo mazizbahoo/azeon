@@ -1563,19 +1563,20 @@ div:has(> b):has(> ul.margin-left--sm) {
   align-items: flex-start;
 }
 
-div:has(> b):has(> ul.margin-left--sm) > b {
+div:has(> b):has(> ul.margin-left--sm)>b {
   white-space: nowrap;
-  padding-top: 0.25rem; /* Optical alignment with the pill background */
+  padding-top: 0.25rem;
+  /* Optical alignment with the pill background */
 }
 
-div:has(> b):has(> ul.margin-left--sm) > ul {
+div:has(> b):has(> ul.margin-left--sm)>ul {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
   margin-left: 0.75rem !important;
 }
 
-div:has(> b):has(> ul.margin-left--sm) > ul > li {
+div:has(> b):has(> ul.margin-left--sm)>ul>li {
   margin: 0 !important;
 }
 
