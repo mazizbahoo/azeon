@@ -695,15 +695,8 @@ pre {
   animation: az-fade-in-up 0.7s 0.15s ease forwards;
 }
 
-.az-hero__p {
-  color: var(--az-accent);
-  font-style: italic;
-  text-shadow: 0 0 55px var(--az-accent-glow);
-}
-
 .az-hero__np {
   color: var(--az-accent);
-  font-style: italic;
   text-shadow: 0 0 55px var(--az-accent-glow);
 }
 
@@ -716,7 +709,6 @@ pre {
   font-family: var(--ifm-font-family-monospace);
   font-size: clamp(0.82rem, 2vw, 1.2rem);
   color: var(--az-muted);
-  letter-spacing: 0.18em;
   margin-bottom: 1.5rem;
   opacity: 0;
   animation: az-fade-in-up 0.7s 0.25s ease forwards;
