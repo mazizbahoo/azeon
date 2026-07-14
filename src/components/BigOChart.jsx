@@ -19,27 +19,27 @@ function clamp(v) {
 
 function trueVal(key, n) {
   switch (key) {
-    case 'O(1)':       return 1;
-    case 'O(log n)':   return parseFloat(Math.log2(n).toFixed(2));
-    case 'O(n)':       return n;
+    case 'O(1)': return 1;
+    case 'O(log n)': return parseFloat(Math.log2(n).toFixed(2));
+    case 'O(n)': return n;
     case 'O(n log n)': return parseFloat((n * Math.log2(n)).toFixed(2));
-    case 'O(n²)':      return n * n;
-    case 'O(2ⁿ)':      return Math.pow(2, n);
-    case 'O(n!)':      return fact(n);
-    default:           return 0;
+    case 'O(n²)': return n * n;
+    case 'O(2ⁿ)': return Math.pow(2, n);
+    case 'O(n!)': return fact(n);
+    default: return 0;
   }
 }
 
 const CURVE_KEYS = ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)', 'O(n²)', 'O(2ⁿ)', 'O(n!)'];
 
 const CURVES = [
-  { key: 'O(1)',       color: '#4caf50', dash: '',    label: 'O(1) — Constant'           },
-  { key: 'O(log n)',   color: '#00e5ff', dash: '',    label: 'O(log n) — Logarithmic'    },
-  { key: 'O(n)',       color: '#a67cff', dash: '',    label: 'O(n) — Linear'             },
-  { key: 'O(n log n)', color: '#f5c542', dash: '',    label: 'O(n log n) — Linearithmic' },
-  { key: 'O(n²)',      color: '#ff8c00', dash: '',    label: 'O(n²) — Quadratic'         },
-  { key: 'O(2ⁿ)',      color: '#e0224e', dash: '6 3', label: 'O(2ⁿ) — Exponential'      },
-  { key: 'O(n!)',      color: '#ff69b4', dash: '3 3', label: 'O(n!) — Factorial'         },
+  { key: 'O(1)', color: '#4caf50', dash: '', label: 'O(1) — Constant' },
+  { key: 'O(log n)', color: '#00e5ff', dash: '', label: 'O(log n) — Logarithmic' },
+  { key: 'O(n)', color: '#a67cff', dash: '', label: 'O(n) — Linear' },
+  { key: 'O(n log n)', color: '#f5c542', dash: '', label: 'O(n log n) — Linearithmic' },
+  { key: 'O(n²)', color: '#ff8c00', dash: '', label: 'O(n²) — Quadratic' },
+  { key: 'O(2ⁿ)', color: '#e0224e', dash: '6 3', label: 'O(2ⁿ) — Exponential' },
+  { key: 'O(n!)', color: '#ff69b4', dash: '3 3', label: 'O(n!) — Factorial' },
 ];
 
 function buildData() {
@@ -47,8 +47,8 @@ function buildData() {
   for (let n = 1; n <= 10; n++) {
     const row = { n };
     CURVE_KEYS.forEach(key => {
-      row[key]             = clamp(trueVal(key, n));
-      row[`${key}_true`]   = trueVal(key, n);
+      row[key] = clamp(trueVal(key, n));
+      row[`${key}_true`] = trueVal(key, n);
       row[`${key}_capped`] = trueVal(key, n) > CAP;
     });
     rows.push(row);
@@ -72,14 +72,14 @@ function Inner() {
   // Dark mode: pure black base (#000000), surface #0f0f0f, elevated #1a1a1a
   // Light mode: pure white base (#ffffff), elevated #f7f7fa
   // Text: dark = #e7e9ea, light = #0d0a1a
-  const bgColor    = dark ? '#0f0f0f'                : '#ffffff';
-  const borderCol  = dark ? 'rgba(166,124,255,0.18)' : 'rgba(94,53,177,0.14)';
-  const tooltipBg  = dark ? '#1a1a1a'                : '#f7f7fa';
+  const bgColor = 'var(--az-surface)';
+  const borderCol = 'var(--az-border)';
+  const tooltipBg = dark ? '#1a1a1a' : '#f7f7fa';
   const tooltipBdr = dark ? 'rgba(166,124,255,0.28)' : 'rgba(94,53,177,0.20)';
-  const labelColor = dark ? '#e7e9ea'                : '#0d0a1a';
-  const gridColor  = dark ? 'rgba(231,233,234,0.05)' : 'rgba(13,10,26,0.07)';
-  const axisColor  = dark ? 'rgba(231,233,234,0.38)' : 'rgba(13,10,26,0.50)';
-  const accentCol  = dark ? 'rgba(166,124,255,0.48)' : 'rgba(94,53,177,0.50)';
+  const labelColor = 'var(--az-text)';
+  const gridColor = dark ? 'rgba(231,233,234,0.05)' : 'rgba(13,10,26,0.07)';
+  const axisColor = 'var(--az-text)';
+  const accentCol = 'var(--az-accent)';
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
@@ -106,9 +106,9 @@ function Inner() {
           n = {label}
         </div>
         {items.map(({ dataKey, color }) => {
-          const row     = DATA.find(d => d.n === label);
-          const tv      = row ? row[`${dataKey}_true`] : '—';
-          const isCap   = row ? row[`${dataKey}_capped`] : false;
+          const row = DATA.find(d => d.n === label);
+          const tv = row ? row[`${dataKey}_true`] : '—';
+          const isCap = row ? row[`${dataKey}_capped`] : false;
           const display = isCap
             ? `${Number(tv).toLocaleString()} ↑`
             : parseFloat(Number(tv).toFixed(2));
@@ -149,7 +149,7 @@ function Inner() {
     <div style={{
       background: bgColor,
       border: `1px solid ${borderCol}`,
-      borderRadius: 16,
+      borderRadius: 24,
       padding: '28px 16px 20px',
       margin: '2rem 0',
     }}>
@@ -173,7 +173,7 @@ function Inner() {
             dataKey="n"
             type="number"
             domain={[1, 10]}
-            ticks={[1,2,3,4,5,6,7,8,9,10]}
+            ticks={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
             label={{
               value: 'Input size (n)',
               position: 'insideBottom',
@@ -244,7 +244,6 @@ function Inner() {
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: '0.59rem',
         color: axisColor,
-        opacity: 0.5,
         textAlign: 'center',
         letterSpacing: '0.04em',
       }}>
