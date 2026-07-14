@@ -214,7 +214,7 @@ function Inner() {
                 padding: '6px 4px',
                 borderRadius: 999,
                 border: `1px solid ${isActive ? accent : (isHovered ? bdrSub : bdr)}`,
-                background: isActive ? 'var(--az-accent-dim)' : (isHovered ? bgEl : 'transparent'),
+                background: isActive ? 'var(--az-accent-dim)' : (isHovered ? bgEl : 'var(--az-bg)'),
                 color: isActive ? accent : tMut,
                 cursor: 'pointer',
                 transition: 'all 0.18s',

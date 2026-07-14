@@ -172,7 +172,7 @@ function Inner() {
                   fontFamily: mono, fontSize: '0.62rem', letterSpacing: '0.04em',
                   padding: '4px 12px', borderRadius: 999,
                   border: `1px solid ${btn.active ? btn.color : (isHovered ? bdrSub : bdr)}`,
-                  background: btn.active ? btn.bgActive : (isHovered ? bgEl : 'transparent'),
+                  background: btn.active ? btn.bgActive : (isHovered ? bgEl : 'var(--az-bg)'),
                   color: btn.active ? btn.color : tMut,
                   cursor: 'pointer', transition: 'all 0.18s',
                 }}

@@ -7,9 +7,9 @@ import { useColorMode } from '@docusaurus/theme-common';
 function evalGate(type, a, b) {
   switch (type) {
     case 'AND': return a && b;
-    case 'OR':  return a || b;
+    case 'OR': return a || b;
     case 'NOT': return !a;
-    default:    return false;
+    default: return false;
   }
 }
 
@@ -21,9 +21,9 @@ const GATES = [
     desc: 'True only when both inputs are true.',
     table: [
       { a: false, b: false, out: false },
-      { a: false, b: true,  out: false },
-      { a: true,  b: false, out: false },
-      { a: true,  b: true,  out: true  },
+      { a: false, b: true, out: false },
+      { a: true, b: false, out: false },
+      { a: true, b: true, out: true },
     ],
   },
   {
@@ -33,9 +33,9 @@ const GATES = [
     desc: 'True when at least one input is true.',
     table: [
       { a: false, b: false, out: false },
-      { a: false, b: true,  out: true  },
-      { a: true,  b: false, out: true  },
-      { a: true,  b: true,  out: true  },
+      { a: false, b: true, out: true },
+      { a: true, b: false, out: true },
+      { a: true, b: true, out: true },
     ],
   },
   {
@@ -44,8 +44,8 @@ const GATES = [
     color: '#b17a5e',
     desc: 'Flips the input. True becomes false, false becomes true.',
     table: [
-      { a: false, out: true  },
-      { a: true,  out: false },
+      { a: false, out: true },
+      { a: true, out: false },
     ],
     single: true,
   },
@@ -56,18 +56,18 @@ const GATES = [
 ────────────────────────────────────────────────────────── */
 
 function GateSVG({ type, a, b, color, dark }) {
-  const wire   = 'var(--az-border)';
+  const wire = 'var(--az-border)';
   const wireLo = 'var(--az-border-subtle)';
-  const body   = 'var(--az-surface)';
+  const body = 'var(--az-surface)';
   const active = color;
-  const text   = 'var(--az-text)';
+  const text = 'var(--az-text)';
 
   const aLive = a;
   const bLive = type === 'NOT' ? false : b;
   const outLive = evalGate(type, a, b);
 
-  const wireA   = aLive   ? active : wire;
-  const wireB   = bLive   ? active : wire;
+  const wireA = aLive ? active : wire;
+  const wireB = bLive ? active : wire;
   const wireOut = outLive ? active : wire;
 
   const mono = 'JetBrains Mono, monospace';
@@ -76,17 +76,17 @@ function GateSVG({ type, a, b, color, dark }) {
     return (
       <svg viewBox="0 0 200 80" style={{ width: '100%', maxWidth: 200 }}>
         {/* input wire */}
-        <line x1="10" y1="40" x2="70" y2="40" stroke={wireA} strokeWidth="2" />
+        <line x1="10" y1="40" x2="60" y2="40" stroke={wireA} strokeWidth="2" />
         {/* body */}
-        <path d="M70 18 L70 62 L118 40 Z" fill={body} stroke={aLive ? active : wireLo} strokeWidth="1.5" />
+        <path d="M60 15 L60 65 L125 40 Z" fill={body} stroke={aLive ? active : wireLo} strokeWidth="1.5" />
         {/* NOT circle */}
-        <circle cx="122" cy="40" r="6" fill={body} stroke={outLive ? active : wireLo} strokeWidth="1.5" />
+        <circle cx="130" cy="40" r="5" fill={body} stroke={outLive ? active : wireLo} strokeWidth="1.5" />
         {/* output wire */}
-        <line x1="128" y1="40" x2="188" y2="40" stroke={wireOut} strokeWidth="2" />
+        <line x1="135" y1="40" x2="188" y2="40" stroke={wireOut} strokeWidth="2" />
         {/* labels */}
-        <text x="36" y="35" textAnchor="middle" fontSize="11" fontFamily={mono} fill={aLive ? active : text} opacity={aLive ? 1 : 0.45}>{a ? 'T' : 'F'}</text>
-        <text x="162" y="35" textAnchor="middle" fontSize="11" fontFamily={mono} fill={outLive ? active : text} opacity={outLive ? 1 : 0.45}>{outLive ? 'T' : 'F'}</text>
-        <text x="94" y="44" textAnchor="middle" fontSize="13" fontFamily={mono} fill={text} opacity={0.5}>NOT</text>
+        <text x="35" y="35" textAnchor="middle" fontSize="11" fontFamily={mono} fill={aLive ? active : text}>{a ? 'T' : 'F'}</text>
+        <text x="165" y="35" textAnchor="middle" fontSize="11" fontFamily={mono} fill={outLive ? active : text}>{outLive ? 'T' : 'F'}</text>
+        <text x="83" y="44" textAnchor="middle" fontSize="12" fontFamily={mono} fill={text}>NOT</text>
       </svg>
     );
   }
@@ -99,17 +99,17 @@ function GateSVG({ type, a, b, color, dark }) {
       {/* body */}
       {type === 'AND'
         ? <path d="M70 15 L70 85 L105 85 Q135 85 135 50 Q135 15 105 15 Z" fill={body} stroke={(aLive && bLive) ? active : wireLo} strokeWidth="1.5" />
-        : <path d="M70 15 Q90 15 105 50 Q90 85 70 85 L70 85 Q100 70 115 50 Q100 30 70 15 Z M70 15 L95 15 Q125 15 135 50 Q125 85 95 85 L70 85" fill={body} stroke={(aLive || bLive) ? active : wireLo} strokeWidth="1.5" />
+        : <path d="M 70 15 Q 100 15 135 50 Q 100 85 70 85 Q 90 50 70 15 Z" fill={body} stroke={(aLive || bLive) ? active : wireLo} strokeWidth="1.5" />
       }
       {/* output wire */}
       <line x1="135" y1="50" x2="210" y2="50" stroke={wireOut} strokeWidth="2" />
       {/* input labels */}
-      <text x="36" y="26" textAnchor="middle" fontSize="11" fontFamily={mono} fill={aLive ? active : text} opacity={aLive ? 1 : 0.45}>{a ? 'T' : 'F'}</text>
-      <text x="36" y="66" textAnchor="middle" fontSize="11" fontFamily={mono} fill={bLive ? active : text} opacity={bLive ? 1 : 0.45}>{b ? 'T' : 'F'}</text>
+      <text x="36" y="26" textAnchor="middle" fontSize="11" fontFamily={mono} fill={aLive ? active : text}>{a ? 'T' : 'F'}</text>
+      <text x="36" y="66" textAnchor="middle" fontSize="11" fontFamily={mono} fill={bLive ? active : text}>{b ? 'T' : 'F'}</text>
       {/* output label */}
-      <text x="185" y="45" textAnchor="middle" fontSize="11" fontFamily={mono} fill={outLive ? active : text} opacity={outLive ? 1 : 0.45}>{outLive ? 'T' : 'F'}</text>
+      <text x="185" y="45" textAnchor="middle" fontSize="11" fontFamily={mono} fill={outLive ? active : text}>{outLive ? 'T' : 'F'}</text>
       {/* gate label */}
-      <text x="103" y="54" textAnchor="middle" fontSize="12" fontFamily={mono} fill={text} opacity={0.5}>{type}</text>
+      <text x="103" y="54" textAnchor="middle" fontSize="12" fontFamily={mono} fill={text}>{type}</text>
     </svg>
   );
 }
@@ -120,33 +120,37 @@ function GatePanel({ dark }) {
   const [gateIdx, setGateIdx] = useState(0);
   const [a, setA] = useState(false);
   const [b, setB] = useState(false);
+  const [hoveredBtn, setHoveredBtn] = useState(null);
 
-  const gate   = GATES[gateIdx];
-  const out    = evalGate(gate.type, a, gate.single ? false : b);
-  const mono   = 'JetBrains Mono, monospace';
-  const serif  = 'DM Serif Display, Georgia, serif';
+  const gate = GATES[gateIdx];
+  const out = evalGate(gate.type, a, gate.single ? false : b);
+  const mono = 'JetBrains Mono, monospace';
+  const serif = 'DM Serif Display, Georgia, serif';
   const accent = gate.color;
 
-  const bdr    = 'var(--az-border)';
+  const bdr = 'var(--az-border)';
   const bdrSub = 'var(--az-border-subtle)';
-  const bg     = 'var(--az-surface)';
-  const bgEl   = 'var(--az-elevated)';
-  const tPri   = 'var(--az-text)';
-  const tMut   = 'var(--az-text)';
+  const bg = 'var(--az-surface)';
+  const bgEl = 'var(--az-elevated)';
+  const tPri = 'var(--az-text)';
+  const tMut = 'var(--az-text)';
 
-  function ToggleBtn({ val, onToggle, label }) {
+  function ToggleBtn({ id, val, onToggle }) {
+    const isHovered = hoveredBtn === id;
     return (
       <button
         onClick={onToggle}
+        onMouseEnter={() => setHoveredBtn(id)}
+        onMouseLeave={() => setHoveredBtn(null)}
         style={{
           fontFamily: mono,
           fontSize: 13,
           fontWeight: 600,
           width: 52,
           height: 36,
-          borderRadius: 8,
-          border: `1px solid ${val ? accent : bdr}`,
-          background: val ? `${accent}22` : bg,
+          borderRadius: 999,
+          border: `1px solid ${val ? accent : (isHovered ? bdrSub : bdr)}`,
+          background: val ? `${accent}22` : (isHovered ? bgEl : 'var(--az-bg)'),
           color: val ? accent : tMut,
           cursor: 'pointer',
           transition: 'all 0.18s',
@@ -166,27 +170,32 @@ function GatePanel({ dark }) {
 
       {/* gate selector */}
       <div style={{ display: 'flex', gap: 6 }}>
-        {GATES.map((g, i) => (
-          <button
-            key={g.type}
-            onClick={() => setGateIdx(i)}
-            style={{
-              flex: 1,
-              fontFamily: mono,
-              fontSize: 11,
-              letterSpacing: '0.06em',
-              padding: '6px 0',
-              borderRadius: 8,
-              border: `1px solid ${i === gateIdx ? g.color : bdr}`,
-              background: i === gateIdx ? `${g.color}18` : bg,
-              color: i === gateIdx ? g.color : tMut,
-              cursor: 'pointer',
-              transition: 'all 0.18s',
-            }}
-          >
-            {g.symbol} {g.type}
-          </button>
-        ))}
+        {GATES.map((g, i) => {
+          const isHovered = hoveredBtn === g.type;
+          return (
+            <button
+              key={g.type}
+              onClick={() => setGateIdx(i)}
+              onMouseEnter={() => setHoveredBtn(g.type)}
+              onMouseLeave={() => setHoveredBtn(null)}
+              style={{
+                flex: 1,
+                fontFamily: mono,
+                fontSize: 11,
+                letterSpacing: '0.06em',
+                padding: '6px 0',
+                borderRadius: 999,
+                border: `1px solid ${i === gateIdx ? g.color : (isHovered ? bdrSub : bdr)}`,
+                background: i === gateIdx ? `${g.color}18` : (isHovered ? bgEl : 'var(--az-bg)'),
+                color: i === gateIdx ? g.color : tMut,
+                cursor: 'pointer',
+                transition: 'all 0.18s',
+              }}
+            >
+              {g.symbol} {g.type}
+            </button>
+          )
+        })}
       </div>
 
       {/* description */}
@@ -221,21 +230,21 @@ function GatePanel({ dark }) {
           <span style={{ fontFamily: mono, fontSize: '0.65rem', color: tMut }}>
             {gate.type === 'NOT' ? 'Input' : 'Input A'}
           </span>
-          <ToggleBtn val={a} onToggle={() => setA(v => !v)} />
+          <ToggleBtn id="toggle-a" val={a} onToggle={() => setA(v => !v)} />
         </div>
         {!gate.single && (
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             <span style={{ fontFamily: mono, fontSize: '0.65rem', color: tMut }}>Input B</span>
-            <ToggleBtn val={b} onToggle={() => setB(v => !v)} />
+            <ToggleBtn id="toggle-b" val={b} onToggle={() => setB(v => !v)} />
           </div>
         )}
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginLeft: 'auto' }}>
           <span style={{ fontFamily: mono, fontSize: '0.65rem', color: tMut }}>Output</span>
           <div style={{
             width: 52, height: 36,
-            borderRadius: 8,
+            borderRadius: 999,
             border: `1px solid ${out ? accent : bdr}`,
-            background: out ? `${accent}22` : bg,
+            background: out ? `${accent}22` : 'var(--az-bg)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontFamily: mono, fontSize: 13, fontWeight: 600,
             color: out ? accent : tMut,
@@ -302,9 +311,9 @@ function GatePanel({ dark }) {
 // Hardcoded 3-variable formula from Post 12 as worked example
 // φ = (x₁ ∨ ¬x₂) ∧ (¬x₁ ∨ x₃) ∧ (x₂ ∨ ¬x₃)
 const CLAUSES = [
-  { vars: [0, 1], negated: [false, true],  label: '(x₁ ∨ ¬x₂)' },
-  { vars: [0, 2], negated: [true,  false], label: '(¬x₁ ∨ x₃)' },
-  { vars: [1, 2], negated: [false, true],  label: '(x₂ ∨ ¬x₃)' },
+  { vars: [0, 1], negated: [false, true], label: '(x₁ ∨ ¬x₂)' },
+  { vars: [0, 2], negated: [true, false], label: '(¬x₁ ∨ x₃)' },
+  { vars: [1, 2], negated: [false, true], label: '(x₂ ∨ ¬x₃)' },
 ];
 
 function evalClause(clause, vals) {
@@ -316,17 +325,18 @@ function evalClause(clause, vals) {
 
 function SATPanel({ dark }) {
   const [vals, setVals] = useState([true, true, true]);
+  const [hoveredBtn, setHoveredBtn] = useState(null);
 
-  const mono   = 'JetBrains Mono, monospace';
+  const mono = 'JetBrains Mono, monospace';
   const accent = dark ? '#a67cff' : '#5e35b1';
-  const green  = '#4caf50';
-  const red    = '#c85555';
-  const bdr    = 'var(--az-border)';
+  const green = '#4caf50';
+  const red = '#c85555';
+  const bdr = 'var(--az-border)';
   const bdrSub = 'var(--az-border-subtle)';
-  const bg     = 'var(--az-surface)';
-  const bgEl   = 'var(--az-elevated)';
-  const tPri   = 'var(--az-text)';
-  const tMut   = 'var(--az-text)';
+  const bg = 'var(--az-surface)';
+  const bgEl = 'var(--az-elevated)';
+  const tPri = 'var(--az-text)';
+  const tMut = 'var(--az-text)';
 
   const clauseResults = CLAUSES.map(c => evalClause(c, vals));
   const allSat = clauseResults.every(Boolean);
@@ -354,26 +364,31 @@ function SATPanel({ dark }) {
 
       {/* variable toggles */}
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-        {['x₁', 'x₂', 'x₃'].map((label, i) => (
-          <button
-            key={i}
-            onClick={() => toggle(i)}
-            style={{
-              fontFamily: mono,
-              fontSize: 13,
-              fontWeight: 600,
-              padding: '8px 18px',
-              borderRadius: 10,
-              border: `1px solid ${vals[i] ? accent : bdr}`,
-              background: vals[i] ? `${accent}22` : bg,
-              color: vals[i] ? accent : tMut,
-              cursor: 'pointer',
-              transition: 'all 0.18s',
-            }}
-          >
-            {label} = {vals[i] ? 'T' : 'F'}
-          </button>
-        ))}
+        {['x₁', 'x₂', 'x₃'].map((label, i) => {
+          const isHovered = hoveredBtn === label;
+          return (
+            <button
+              key={i}
+              onClick={() => toggle(i)}
+              onMouseEnter={() => setHoveredBtn(label)}
+              onMouseLeave={() => setHoveredBtn(null)}
+              style={{
+                fontFamily: mono,
+                fontSize: 13,
+                fontWeight: 600,
+                padding: '8px 18px',
+                borderRadius: 999,
+                border: `1px solid ${vals[i] ? accent : (isHovered ? bdrSub : bdr)}`,
+                background: vals[i] ? `${accent}22` : (isHovered ? bgEl : 'var(--az-bg)'),
+                color: vals[i] ? accent : tMut,
+                cursor: 'pointer',
+                transition: 'all 0.18s',
+              }}
+            >
+              {label} = {vals[i] ? 'T' : 'F'}
+            </button>
+          )
+        })}
       </div>
 
       {/* clause results */}
@@ -436,7 +451,7 @@ function SATPanel({ dark }) {
         )}
       </div>
 
-      <div style={{ fontFamily: mono, fontSize: '0.6rem', color: tMut, textAlign: 'center', opacity: 0.55, letterSpacing: '0.04em' }}>
+      <div style={{ fontFamily: mono, fontSize: '0.6rem', color: tMut, textAlign: 'center', letterSpacing: '0.04em' }}>
         Toggle variable values to explore — try to find all satisfying assignments.
       </div>
     </div>
@@ -450,12 +465,13 @@ function Inner() {
   const dark = colorMode === 'dark';
 
   const [tab, setTab] = useState(0);
+  const [hoveredTab, setHoveredTab] = useState(null);
 
-  const mono   = 'var(--ifm-font-family-monospace)';
+  const mono = 'var(--ifm-font-family-monospace)';
   const accent = 'var(--az-accent)';
-  const bdr    = 'var(--az-border)';
-  const bg     = 'var(--az-surface)';
-  const tMut   = 'var(--az-text)';
+  const bdr = 'var(--az-border)';
+  const bg = 'var(--az-surface)';
+  const tMut = 'var(--az-text)';
 
   const TABS = ['⊙ Logic Gates', '⊛ SAT Formula'];
 
@@ -482,27 +498,32 @@ function Inner() {
 
       {/* tab switcher */}
       <div style={{ display: 'flex', gap: 6, marginBottom: '1.1rem' }}>
-        {TABS.map((label, i) => (
-          <button
-            key={i}
-            onClick={() => setTab(i)}
-            style={{
-              flex: 1,
-              fontFamily: mono,
-              fontSize: '0.7rem',
-              letterSpacing: '0.04em',
-              padding: '8px 0',
-              borderRadius: 10,
-              border: `1px solid ${i === tab ? accent : bdr}`,
-              background: i === tab ? `${accent}18` : 'transparent',
-              color: i === tab ? accent : tMut,
-              cursor: 'pointer',
-              transition: 'all 0.18s',
-            }}
-          >
-            {label}
-          </button>
-        ))}
+        {TABS.map((label, i) => {
+          const isHovered = hoveredTab === i;
+          return (
+            <button
+              key={i}
+              onClick={() => setTab(i)}
+              onMouseEnter={() => setHoveredTab(i)}
+              onMouseLeave={() => setHoveredTab(null)}
+              style={{
+                flex: 1,
+                fontFamily: mono,
+                fontSize: '0.7rem',
+                letterSpacing: '0.04em',
+                padding: '8px 0',
+                borderRadius: 999,
+                border: `1px solid ${i === tab ? accent : (isHovered ? 'var(--az-border-subtle)' : bdr)}`,
+                background: i === tab ? `${accent}18` : (isHovered ? 'var(--az-elevated)' : 'var(--az-bg)'),
+                color: i === tab ? accent : tMut,
+                cursor: 'pointer',
+                transition: 'all 0.18s',
+              }}
+            >
+              {label}
+            </button>
+          )
+        })}
       </div>
 
       {/* content */}

@@ -1,6 +1,6 @@
 ---
 slug: why-i-made-azeon
-title: Why I Made Azeon, The Honest Answer
+title: "Why I Made Azeon: The Honest Answer"
 authors: aziz
 tags: [azeon, learning-in-public, founder-story]
 date: 2026-03-11
