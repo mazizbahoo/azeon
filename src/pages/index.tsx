@@ -220,7 +220,7 @@ function PhaseCard({ phase }: { phase: Phase }) {
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onClick={e => { if (!isLive) e.preventDefault(); }}
+      onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { if (!isLive) e.preventDefault(); }}
     >
       <div className="az-phase-card__top">
         <span className="az-phase-card__num" style={{ color: hovered && isLive ? phase.color : undefined }}>
@@ -256,7 +256,10 @@ function FeaturedProject() {
             complexity theory.
           </p>
           <div className="az-featured__meta">
-            <span className="az-featured__pill az-featured__pill--live">● Live</span>
+            <span className="az-featured__pill az-featured__pill--live">
+              <span className="az-featured__pill-dot" />
+              Live
+            </span>
             <span className="az-featured__pill">{TOTAL_PUBLISHED} of {TOTAL_PLANNED} posts published</span>
             <span className="az-featured__pill">7 phases</span>
             <span className="az-featured__pill">$1,000,000 prize</span>

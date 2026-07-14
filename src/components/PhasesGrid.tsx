@@ -1,7 +1,17 @@
 import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
 
-const PHASES = [
+interface Phase {
+  num: string;
+  title: string;
+  slug: string;
+  color: string;
+  desc: string;
+  publishedPosts: number;
+  totalPosts: number;
+}
+
+const PHASES: Phase[] = [
   {
     num: '01',
     title: 'Foundations',
@@ -67,7 +77,7 @@ const PHASES = [
   },
 ];
 
-function PhaseCard({ phase }) {
+function PhaseCard({ phase }: { phase: Phase }) {
   const [hovered, setHovered] = useState(false);
   const isLive = phase.publishedPosts > 0;
 
@@ -83,7 +93,7 @@ function PhaseCard({ phase }) {
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onClick={e => { if (!isLive) e.preventDefault(); }}
+      onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { if (!isLive) e.preventDefault(); }}
     >
       <div className="az-phase-card__top">
         <span
