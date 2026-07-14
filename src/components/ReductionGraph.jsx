@@ -92,6 +92,8 @@ function drawGraph(canvas, nodes, selected, isLeft, dark) {
 
     ctx.beginPath();
     ctx.arc(x, y, 18, 0, Math.PI * 2);
+    ctx.fillStyle = NODE_BG;
+    ctx.fill();
     ctx.fillStyle = fill;
     ctx.fill();
     ctx.strokeStyle = stroke;
@@ -230,7 +232,7 @@ function Inner() {
           { ref: c1Ref, label: 'Click cities — Independent Set',        onClick: handleClick, cursor: 'pointer' },
           { ref: c2Ref, label: 'Camera placements — Vertex Cover',       onClick: null,        cursor: 'default'  },
         ].map(({ ref, label, onClick, cursor }) => (
-          <div key={label} style={{ border: `0.5px solid ${bdr}`, borderRadius: 24, overflow: 'hidden' }}>
+          <div key={label} style={{ border: `0.5px solid ${bdr}`, borderRadius: 12, overflow: 'hidden' }}>
             <div style={{
               padding: '6px 12px', fontSize: '0.58rem', letterSpacing: '0.09em',
               color: tMut, borderBottom: `0.5px solid ${bdrSub}`, background: raised,
@@ -254,7 +256,7 @@ function Inner() {
           { val: nk, label: `cities with cameras — every road watched (n − k = ${nk})`, sublabel: 'Vertex Cover size' },
         ].map(({ val, label, sublabel }) => (
           <div key={sublabel} style={{
-            background: acDim, borderRadius: 16,
+            background: acDim, borderRadius: 8,
             border: `0.5px solid ${acBdr}`, padding: '10px 14px',
           }}>
             <div style={{ fontSize: '1.5rem', fontWeight: 500, color: PURPLE, lineHeight: 1.2, marginBottom: 2 }}>
