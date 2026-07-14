@@ -1321,7 +1321,6 @@ pre {
   background: var(--az-id-card-bg);
   border: 1px solid var(--az-id-card-border);
   box-shadow: var(--az-card-shadow);
-  cursor: pointer;
 }
 
 [data-theme='light'] .az-id-card {
