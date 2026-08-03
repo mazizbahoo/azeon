@@ -259,7 +259,7 @@ samp {
 }
 
 .theme-doc-sidebar-container .menu {
-  padding: 10px !important;
+  padding: 10px 1px 10px 10px !important;
 }
 
 .menu__link,
