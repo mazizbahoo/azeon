@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
     <channel>
         <title>Azeon Blog</title>
-        <link>https://mrazizz.github.io/azeon/blog</link>
+        <link>https://mazizbahoo.github.io/azeon/blog</link>
         <description>Azeon Blog</description>
         <lastBuildDate>Wed, 11 Mar 2026 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
@@ -10,37 +10,37 @@
         <language>en</language>
         <item>
             <title><![CDATA[Why I Made Azeon: The Honest Answer]]></title>
-            <link>https://mrazizz.github.io/azeon/blog/why-i-made-azeon</link>
-            <guid>https://mrazizz.github.io/azeon/blog/why-i-made-azeon</guid>
+            <link>https://mazizbahoo.github.io/azeon/blog/why-i-made-azeon</link>
+            <guid>https://mazizbahoo.github.io/azeon/blog/why-i-made-azeon</guid>
             <pubDate>Wed, 11 Mar 2026 00:00:00 GMT</pubDate>
             <description><![CDATA[I didn't go looking for P vs NP. It found me in a classroom.]]></description>
             <content:encoded><![CDATA[<p>I didn't go looking for P vs NP. It found me in a classroom.</p>
 <!-- -->
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="it-started-with-a-class-discussion">It Started With a Class Discussion<a href="https://mrazizz.github.io/azeon/blog/why-i-made-azeon#it-started-with-a-class-discussion" class="hash-link" aria-label="Direct link to It Started With a Class Discussion" title="Direct link to It Started With a Class Discussion" translate="no">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="it-started-with-a-class-discussion">It Started With a Class Discussion<a href="https://mazizbahoo.github.io/azeon/blog/why-i-made-azeon#it-started-with-a-class-discussion" class="hash-link" aria-label="Direct link to It Started With a Class Discussion" title="Direct link to It Started With a Class Discussion" translate="no">​</a></h2>
 <p>We were covering complexity classes in my CS class at FC College. Somewhere in the middle of that discussion, the topic shifted: what problems are actually unsolvable? What problems do we not have answers to yet?</p>
 <p>Someone brought up P vs NP.</p>
 <p>I don't remember exactly how the conversation went, but I remember the feeling after it. Something had lodged itself in my head and wouldn't come out. Not the technical details (I barely had those yet) but the <em>idea</em>. That there's this question, sitting there since 1971, with a million dollars attached to it, and nobody has cracked it.</p>
 <p>I went home and started reading about it.</p>
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="the-problem-with-trying-to-learn-it">The Problem With Trying to Learn It<a href="https://mrazizz.github.io/azeon/blog/why-i-made-azeon#the-problem-with-trying-to-learn-it" class="hash-link" aria-label="Direct link to The Problem With Trying to Learn It" title="Direct link to The Problem With Trying to Learn It" translate="no">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="the-problem-with-trying-to-learn-it">The Problem With Trying to Learn It<a href="https://mazizbahoo.github.io/azeon/blog/why-i-made-azeon#the-problem-with-trying-to-learn-it" class="hash-link" aria-label="Direct link to The Problem With Trying to Learn It" title="Direct link to The Problem With Trying to Learn It" translate="no">​</a></h2>
 <p>The deeper I went, the more I ran into the same wall.</p>
 <p>Academic papers were written for people who already knew the field. Pop-science articles explained it so loosely they were almost misleading. Videos scratched the surface and stopped. Textbooks assumed mathematical maturity I don't have yet.</p>
 <p>Nobody had put it all together in one place, starting from the very beginning, from what an algorithm even is, building up properly, written for someone who is genuinely starting from zero.</p>
 <p>So I was stitching together an understanding from six different tabs, none of them quite right, none of them designed to fit with each other. More time hunting for the right resource than actually learning.</p>
 <p>That bothered me more than not understanding the problem itself.</p>
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="what-i-actually-believe">What I Actually Believe<a href="https://mrazizz.github.io/azeon/blog/why-i-made-azeon#what-i-actually-believe" class="hash-link" aria-label="Direct link to What I Actually Believe" title="Direct link to What I Actually Believe" translate="no">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="what-i-actually-believe">What I Actually Believe<a href="https://mazizbahoo.github.io/azeon/blog/why-i-made-azeon#what-i-actually-believe" class="hash-link" aria-label="Direct link to What I Actually Believe" title="Direct link to What I Actually Believe" translate="no">​</a></h2>
 <p>Here's something I've thought about a lot, and it shapes how I think about unsolved problems.</p>
 <p>I don't believe there exists a problem without a solution. I think the solution comes first (it exists, it's out there) and the problem is just our way of not having found it yet. A problem is defined by the gap between where we are and where the answer lives. The answer was always there. We just haven't caught up to it.</p>
 <p>P vs NP is the same. The answer exists. Whether P equals NP or it doesn't, that truth is already fixed, already determined, sitting somewhere beyond what we currently understand. We just haven't built the mathematics to reach it yet.</p>
 <p>That's not a reason to feel defeated. That's a reason to keep going.</p>
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="so-i-built-azeon">So I Built Azeon<a href="https://mrazizz.github.io/azeon/blog/why-i-made-azeon#so-i-built-azeon" class="hash-link" aria-label="Direct link to So I Built Azeon" title="Direct link to So I Built Azeon" translate="no">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="so-i-built-azeon">So I Built Azeon<a href="https://mazizbahoo.github.io/azeon/blog/why-i-made-azeon#so-i-built-azeon" class="hash-link" aria-label="Direct link to So I Built Azeon" title="Direct link to So I Built Azeon" translate="no">​</a></h2>
 <p>If no one had compiled this properly, I would do it myself. Document everything as I learn it. Start from zero and build up correctly. Write it the way I wished someone had written it when I was sitting in that classroom with more questions than answers.</p>
 <p>And if I was going to do that properly, I wanted a real platform for it. Not just a folder of notes. Something structured, something public, something that could hold more than one project as I kept learning hard things.</p>
 <p>That's Azeon.</p>
 <p>The P vs NP project is first: 80 posts across 7 phases, from the definition of an algorithm to the frontiers of complexity theory research. More projects will follow as I find the next thing I can't stop thinking about.</p>
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="who-its-for">Who It's For<a href="https://mrazizz.github.io/azeon/blog/why-i-made-azeon#who-its-for" class="hash-link" aria-label="Direct link to Who It's For" title="Direct link to Who It's For" translate="no">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="who-its-for">Who It's For<a href="https://mazizbahoo.github.io/azeon/blog/why-i-made-azeon#who-its-for" class="hash-link" aria-label="Direct link to Who It's For" title="Direct link to Who It's For" translate="no">​</a></h2>
 <p>Anyone who is curious but not yet expert. Anyone who has heard about something hard and wanted to understand it for real rather than just know what it is. Anyone who has gone through the same six-tab frustration I went through and come out the other side knowing less than when they started.</p>
 <p>You shouldn't have to suffer through that. That's what Azeon is for.</p>
-<p><a class="" href="https://mrazizz.github.io/azeon/p-vs-np/foundations/introduction-to-the-millennium-prize">Start reading here →</a></p>
+<p><a class="" href="https://mazizbahoo.github.io/azeon/p-vs-np/foundations/introduction-to-the-millennium-prize">Start reading here →</a></p>
 <hr>
 <p><em>Azeon is a public knowledge platform. New posts and projects are added as they're written.</em></p>]]></content:encoded>
             <category>azeon</category>
