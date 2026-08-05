@@ -54,7 +54,7 @@ If I'm wrong, the archive will show exactly where and why. If something interest
 
 Two New posts are published **every week**. The full archive lives on the Azeon website — every proof attempt, contradiction, and insight, in the order it happened.
 
-**[Read the research →](https://mrazizz.github.io/azeon/p-vs-np/foundations)**
+**[Read the research →](https://mazizbahoo.github.io/azeon/p-vs-np/foundations)**
 
 ---
 
@@ -75,7 +75,7 @@ azeon/
 ## Running Locally
 
 ```bash
-git clone https://github.com/mrazizz/azeon.git
+git clone https://github.com/mazizbahoo/azeon.git
 cd azeon
 npm install
 npm run start
@@ -91,7 +91,7 @@ This project is updated regularly. The best ways to follow along:
 
 - ⭐ **Star this repo** — you'll get notified of new posts
 - 𝕏 **X (Twitter)**: [@azeon_io](https://x.com/azeon_io) — research updates & behind-the-scenes
-- 🌐 **Website**: [Azeon](https://mrazizz.github.io/azeon) — full documentation
+- 🌐 **Website**: [Azeon](https://mazizbahoo.github.io/azeon) — full documentation
 
 ---
 
@@ -116,6 +116,6 @@ That said, if you spot a logical error or have a reference worth reading, open a
 
 <br/>
 
-[![Star this repo](https://img.shields.io/github/stars/mrazizz/azeon?style=social)](https://github.com/mrazizz/azeon)
+[![Star this repo](https://img.shields.io/github/stars/mazizbahoo/azeon?style=social)](https://github.com/mazizbahoo/azeon)
 
 </div>

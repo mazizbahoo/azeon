@@ -380,7 +380,7 @@ function AboutSection() {
         <div className="az-about__grid">
           <div className="az-id-card">
             <img
-              src="https://github.com/mrazizz.png"
+              src="https://github.com/mazizbahoo.png"
               alt="Aziz"
               className="az-id-card__avatar"
             />

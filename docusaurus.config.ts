@@ -13,10 +13,10 @@ const config: Config = {
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
-  url: 'https://mrazizz.github.io',
+  url: 'https://mazizbahoo.github.io',
   baseUrl: '/azeon/',
-  organizationName: 'mrazizz', // Usually your GitHub org/user name.
-  projectName: 'azeon', // Usually your repo name.
+  organizationName: 'mazizbahoo',
+  projectName: 'azeon',
   onBrokenLinks: 'throw',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
@@ -86,7 +86,7 @@ const config: Config = {
         },
         { to: '/blog', label: 'Founder Blog', position: 'left' },
         {
-          href: 'https://github.com/mrazizz/azeon',
+          href: 'https://github.com/mazizbahoo/azeon',
           label: 'GitHub',
           position: 'right',
         },
@@ -112,7 +112,7 @@ const config: Config = {
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/mrazizz',
+              href: 'https://github.com/mazizbahoo',
             },
             {
               label: 'Founder Blog',
