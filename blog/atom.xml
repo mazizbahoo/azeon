@@ -6,7 +6,7 @@
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://mrazizz.github.io/azeon/blog"/>
     <subtitle>Azeon Blog</subtitle>
-    <icon>https://mrazizz.github.io/azeon/img/favicon.ico</icon>
+    <icon>https://mrazizz.github.io/azeon/img/favicon.svg</icon>
     <entry>
         <title type="html"><![CDATA[Why I Made Azeon: The Honest Answer]]></title>
         <id>https://mrazizz.github.io/azeon/blog/why-i-made-azeon</id>
