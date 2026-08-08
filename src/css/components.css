@@ -1,0 +1,853 @@
+/* ════════════════════════════════════════════════════════════
+   Interactive figures — shared "instrument panel" system.
+
+   Every visual in src/components renders inside the same shell:
+   a labelled panel, a stage, and a readout. Components own their
+   logic; this file owns every colour, radius, and spacing value.
+
+   Sizes are in px on purpose: the docs set a 19px root, and these
+   panels are instrument UI, not prose — they hold their own scale.
+   ════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Semantic verdicts — readable on light surfaces */
+  --az-ok: #2e7d32;
+  --az-ok-soft: rgba(46, 125, 50, 0.09);
+  --az-ok-line: rgba(46, 125, 50, 0.32);
+  --az-no: #b3283f;
+  --az-no-soft: rgba(179, 40, 63, 0.08);
+  --az-no-line: rgba(179, 40, 63, 0.30);
+
+  /* Figure series palette — ordered, distinguishable, accent-adjacent */
+  --az-c1: #2e7d32;
+  --az-c2: #0d7a8c;
+  --az-c3: #6a3fc0;
+  --az-c4: #a8730a;
+  --az-c5: #c25a1c;
+  --az-c6: #b3283f;
+  --az-c7: #a02a86;
+
+  --az-viz-grid: rgba(13, 10, 26, 0.08);
+  --az-viz-stage: rgba(255, 255, 255, 0.55);
+}
+
+[data-theme='dark'] {
+  --az-ok: #5cc46a;
+  --az-ok-soft: rgba(92, 196, 106, 0.10);
+  --az-ok-line: rgba(92, 196, 106, 0.30);
+  --az-no: #ef5a72;
+  --az-no-soft: rgba(239, 90, 114, 0.10);
+  --az-no-line: rgba(239, 90, 114, 0.28);
+
+  --az-c1: #5cc46a;
+  --az-c2: #3ec8dd;
+  --az-c3: #a67cff;
+  --az-c4: #e0a83a;
+  --az-c5: #f08a4b;
+  --az-c6: #ef5a72;
+  --az-c7: #e07bd0;
+
+  --az-viz-grid: rgba(244, 244, 255, 0.07);
+  --az-viz-stage: rgba(255, 255, 255, 0.015);
+}
+
+/* ── Panel shell ──────────────────────────────────────────── */
+
+.az-viz {
+  --viz-accent: var(--az-accent);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 13px;
+  line-height: 1.55;
+  background: var(--az-surface);
+  border: 1px solid var(--az-border);
+  border-radius: 16px;
+  box-shadow: var(--az-card-shadow);
+  margin: 2rem 0;
+  overflow: hidden;
+}
+
+.az-viz__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--az-border);
+}
+
+.az-viz__label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--viz-accent);
+  white-space: nowrap;
+}
+
+.az-viz__tools {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.az-viz__body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.az-viz__stage {
+  background: var(--az-viz-stage);
+  border: 1px solid var(--az-border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.az-viz__stage-label {
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--az-muted);
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--az-border-subtle);
+  background: var(--az-elevated);
+}
+
+.az-viz__foot {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  line-height: 1.6;
+  color: var(--az-muted);
+  text-align: center;
+  padding: 0 16px 14px;
+  margin: 0;
+}
+
+.az-viz__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  margin: 2rem 0;
+  border: 1px solid var(--az-border);
+  border-radius: 16px;
+  background: var(--az-surface);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--az-muted);
+}
+
+/* ── Controls ─────────────────────────────────────────────── */
+
+.az-viz-btn {
+  --btn-accent: var(--viz-accent);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--az-border);
+  background: var(--az-bg);
+  color: var(--az-text);
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.az-viz-btn:hover:not(:disabled) {
+  background: var(--az-elevated);
+  border-color: var(--az-border-subtle);
+}
+
+.az-viz-btn:focus-visible {
+  outline: 2px solid var(--viz-accent);
+  outline-offset: 2px;
+}
+
+.az-viz-btn:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.az-viz-btn--on {
+  border-color: var(--btn-accent);
+  background: color-mix(in srgb, var(--btn-accent) 14%, transparent);
+  color: var(--btn-accent);
+}
+
+.az-viz-btn--on:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--btn-accent) 20%, transparent);
+  border-color: var(--btn-accent);
+}
+
+.az-viz-btn--solid {
+  border-color: var(--viz-accent);
+  background: var(--viz-accent);
+  color: #fff;
+}
+
+.az-viz-btn--solid:hover:not(:disabled) {
+  background: var(--viz-accent);
+  border-color: var(--viz-accent);
+  filter: brightness(1.12);
+}
+
+.az-viz-btn--grow {
+  flex: 1;
+  min-width: 64px;
+}
+
+.az-viz-btn--wide {
+  min-width: 46px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.az-viz-segment {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+/* ── Readouts ─────────────────────────────────────────────── */
+
+.az-viz-note {
+  --note-accent: var(--viz-accent);
+  background: var(--az-elevated);
+  border-left: 2px solid var(--note-accent);
+  border-radius: 0 10px 10px 0;
+  padding: 10px 13px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--az-body);
+}
+
+.az-viz-note--ok {
+  --note-accent: var(--az-ok);
+  background: var(--az-ok-soft);
+}
+
+.az-viz-note--no {
+  --note-accent: var(--az-no);
+  background: var(--az-no-soft);
+}
+
+.az-viz-note em {
+  font-style: normal;
+  color: var(--note-accent);
+  font-weight: 600;
+}
+
+.az-viz-hint {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  line-height: 1.6;
+  color: var(--az-muted);
+  text-align: center;
+}
+
+.az-viz-legend {
+  display: flex;
+  gap: 6px 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--az-muted);
+}
+
+.az-viz-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.az-viz-legend__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid var(--dot, var(--az-accent));
+  flex-shrink: 0;
+}
+
+.az-viz-legend__rule {
+  width: 18px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: var(--dot, var(--az-accent));
+  flex-shrink: 0;
+}
+
+.az-viz-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.az-viz-stat {
+  background: var(--az-accent-dim);
+  border: 1px solid var(--az-accent-border);
+  border-radius: 10px;
+  padding: 10px 13px;
+}
+
+.az-viz-stat__value {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--az-accent);
+}
+
+.az-viz-stat__label {
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--az-muted);
+  margin-top: 4px;
+}
+
+.az-viz-verdict {
+  border: 1px solid var(--az-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  text-align: center;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.az-viz-verdict--ok {
+  border-color: var(--az-ok-line);
+  background: var(--az-ok-soft);
+}
+
+.az-viz-verdict--no {
+  border-color: var(--az-no-line);
+  background: var(--az-no-soft);
+}
+
+.az-viz-verdict__label {
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--az-muted);
+}
+
+.az-viz-verdict__value {
+  font-family: var(--ifm-heading-font-family);
+  font-size: 20px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.az-viz-verdict--ok .az-viz-verdict__value {
+  color: var(--az-ok);
+}
+
+.az-viz-verdict--no .az-viz-verdict__value {
+  color: var(--az-no);
+}
+
+.az-viz-verdict__sub {
+  font-size: 10.5px;
+  color: var(--az-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ── Row list (clause results, rules) ─────────────────────── */
+
+.az-viz-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 13px;
+  border: 1px solid var(--az-border);
+  border-radius: 10px;
+  background: var(--az-elevated);
+  font-size: 12.5px;
+  color: var(--az-text);
+  transition: border-color 0.22s ease, background 0.22s ease;
+}
+
+.az-viz-row--ok {
+  border-color: var(--az-ok-line);
+  background: var(--az-ok-soft);
+}
+
+.az-viz-row--no {
+  border-color: var(--az-no-line);
+  background: var(--az-no-soft);
+}
+
+.az-viz-row__status {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.az-viz-row--ok .az-viz-row__status {
+  color: var(--az-ok);
+}
+
+.az-viz-row--no .az-viz-row__status {
+  color: var(--az-no);
+}
+
+/* ── Tokens: literals, clauses, chips ─────────────────────── */
+
+.az-viz-token {
+  --tok: var(--az-accent);
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--tok) 38%, transparent);
+  background: color-mix(in srgb, var(--tok) 10%, transparent);
+  color: var(--tok);
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.az-viz-clause {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+  color: var(--az-muted);
+  font-size: 12px;
+}
+
+.az-viz-chip {
+  --tok: var(--az-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--tok) 34%, transparent);
+  background: color-mix(in srgb, var(--tok) 9%, transparent);
+  color: var(--tok);
+  font-size: 11.5px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* ── Truth table ──────────────────────────────────────────── */
+
+.az-viz-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 12px;
+}
+
+.az-viz-table th {
+  padding: 6px 12px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--az-muted);
+  border-bottom: 1px solid var(--az-border);
+}
+
+.az-viz-table td {
+  padding: 6px 12px;
+  text-align: center;
+  color: var(--az-muted);
+  border-bottom: 1px solid var(--az-border-subtle);
+}
+
+.az-viz-table tr:last-child td {
+  border-bottom: none;
+}
+
+.az-viz-table tr[data-active='true'] {
+  background: color-mix(in srgb, var(--viz-accent) 12%, transparent);
+}
+
+.az-viz-table tr[data-active='true'] td {
+  color: var(--viz-accent);
+  font-weight: 600;
+}
+
+/* ── Turing tape ──────────────────────────────────────────── */
+
+.az-tape {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.az-tape__ellipsis {
+  font-size: 13px;
+  color: var(--az-muted-dim);
+  padding-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.az-tape__slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.az-tape__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 40px;
+  justify-content: flex-end;
+  margin-bottom: 3px;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: var(--az-accent);
+}
+
+.az-tape__head[data-on='true'] {
+  opacity: 1;
+}
+
+.az-tape__head-tag {
+  background: var(--az-accent);
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+
+.az-tape__cell {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--az-text);
+  background: var(--az-bg);
+  border: 1px solid var(--az-border-subtle);
+  transition: color 0.22s ease, background 0.22s ease, border-color 0.22s ease;
+}
+
+.az-tape__cell[data-on='true'] {
+  color: var(--az-accent);
+  background: var(--az-accent-dim);
+  border-color: var(--az-accent);
+  z-index: 1;
+}
+
+.az-tape__mode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.az-tape__mode-value {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 5px 22px;
+  border-radius: 999px;
+  border: 1px solid var(--az-border);
+  background: var(--az-elevated);
+  color: var(--az-text);
+  transition: all 0.25s ease;
+}
+
+.az-tape__mode-value[data-mode='Accept'] {
+  border-color: var(--az-ok-line);
+  background: var(--az-ok-soft);
+  color: var(--az-ok);
+}
+
+.az-tape__mode-value[data-mode='Reject'] {
+  border-color: var(--az-no-line);
+  background: var(--az-no-soft);
+  color: var(--az-no);
+}
+
+.az-viz-controls {
+  display: flex;
+  gap: 7px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── Graph pair (reduction) ───────────────────────────────── */
+
+.az-viz-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.az-viz-pair canvas {
+  display: block;
+  width: 100%;
+  background: transparent;
+}
+
+@media (max-width: 640px) {
+
+  .az-viz-pair,
+  .az-viz-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .az-viz__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ── Conversion figure (SAT → 3-SAT) ──────────────────────── */
+
+.az-viz-field {
+  background: var(--az-viz-stage);
+  border: 1px solid var(--az-border-subtle);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.az-viz-field__label {
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--az-muted);
+}
+
+.az-viz-field__divider {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--viz-accent);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.az-viz-field__divider::before,
+.az-viz-field__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--az-border);
+}
+
+.az-viz-field__line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.az-viz-field__aside {
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  color: var(--az-muted);
+}
+
+.az-viz-rule {
+  background: var(--az-accent-dim);
+  border: 1px solid var(--az-accent-border);
+  border-radius: 12px;
+  padding: 11px 14px;
+}
+
+.az-viz-rule__label {
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--az-accent);
+  margin-bottom: 5px;
+}
+
+.az-viz-rule__text {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--az-body);
+}
+
+/* ── Gate explorer ────────────────────────────────────────── */
+
+.az-gate {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.az-gate__diagram {
+  background: var(--az-viz-stage);
+  border: 1px solid var(--az-border-subtle);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.az-gate__io {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.az-gate__io-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.az-gate__io-group--out {
+  margin-left: auto;
+}
+
+.az-gate__io-label {
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--az-muted);
+}
+
+.az-gate__out {
+  min-width: 46px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid var(--az-border);
+  background: var(--az-bg);
+  color: var(--az-muted);
+  transition: all 0.18s ease;
+}
+
+.az-gate__out[data-on='true'] {
+  border-color: var(--viz-accent);
+  background: color-mix(in srgb, var(--viz-accent) 14%, transparent);
+  color: var(--viz-accent);
+}
+
+/* ── Formula bar ──────────────────────────────────────────── */
+
+.az-viz-formula {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--az-border);
+  font-size: 12px;
+  color: var(--az-muted);
+}
+
+.az-viz-formula--plain {
+  justify-content: center;
+  border: 1px solid var(--az-border-subtle);
+  border-radius: 10px;
+  background: var(--az-viz-stage);
+  color: var(--az-text);
+  letter-spacing: 0.02em;
+}
+
+/* ── Escape the prose scale ───────────────────────────────
+   These panels sit inside .markdown, whose `p` / `table` rules
+   are specific enough to win over a plain class. Re-assert. */
+
+.az-viz p,
+.az-viz li,
+.az-viz td,
+.az-viz th {
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
+}
+
+.az-viz p.az-viz__foot {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--az-muted);
+}
+
+.az-viz p.az-viz-rule__text {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--az-body);
+}
+
+.az-viz p.az-viz-hint {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--az-muted);
+}
+
+.az-viz table.az-viz-table {
+  display: table;
+  margin: 0;
+  background: transparent;
+}
+
+.az-viz table.az-viz-table tr {
+  background: transparent;
+  border: none;
+}
+
+.az-viz table.az-viz-table th {
+  font-size: 9.5px;
+  color: var(--az-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--az-border);
+}
+
+.az-viz table.az-viz-table td {
+  font-size: 12px;
+  border: none;
+  border-bottom: 1px solid var(--az-border-subtle);
+}
+
+.az-viz table.az-viz-table tr:last-child td {
+  border-bottom: none;
+}
+
+.az-viz table.az-viz-table tr[data-active='true'] {
+  background: color-mix(in srgb, var(--viz-accent) 12%, transparent);
+}
+
+.az-viz table.az-viz-table tr[data-active='true'] td {
+  color: var(--viz-accent);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .az-viz *,
+  .az-viz *::before,
+  .az-viz *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
