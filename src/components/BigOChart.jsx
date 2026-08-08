@@ -1,20 +1,14 @@
 import React from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
-import { useColorMode } from '@docusaurus/theme-common';
 
-/* ── helpers ─────────────────────────────────────────────── */
-
-function fact(n) {
-  if (n <= 1) return 1;
-  let r = 1;
-  for (let i = 2; i <= n; i++) r *= i;
-  return r;
-}
+/* ── data ────────────────────────────────────────────────── */
 
 const CAP = 60;
 
-function clamp(v) {
-  return v > CAP ? CAP : parseFloat(v.toFixed(2));
+function fact(n) {
+  let r = 1;
+  for (let i = 2; i <= n; i++) r *= i;
+  return r;
 }
 
 function trueVal(key, n) {
@@ -30,247 +24,185 @@ function trueVal(key, n) {
   }
 }
 
-const CURVE_KEYS = ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)', 'O(n²)', 'O(2ⁿ)', 'O(n!)'];
-
 const CURVES = [
-  { key: 'O(1)', color: '#4caf50', dash: '', label: 'O(1) — Constant' },
-  { key: 'O(log n)', color: '#00e5ff', dash: '', label: 'O(log n) — Logarithmic' },
-  { key: 'O(n)', color: '#a67cff', dash: '', label: 'O(n) — Linear' },
-  { key: 'O(n log n)', color: '#f5c542', dash: '', label: 'O(n log n) — Linearithmic' },
-  { key: 'O(n²)', color: '#ff8c00', dash: '', label: 'O(n²) — Quadratic' },
-  { key: 'O(2ⁿ)', color: '#e0224e', dash: '6 3', label: 'O(2ⁿ) — Exponential' },
-  { key: 'O(n!)', color: '#ff69b4', dash: '3 3', label: 'O(n!) — Factorial' },
+  { key: 'O(1)', color: 'var(--az-c1)', dash: '', name: 'Constant' },
+  { key: 'O(log n)', color: 'var(--az-c2)', dash: '', name: 'Logarithmic' },
+  { key: 'O(n)', color: 'var(--az-c3)', dash: '', name: 'Linear' },
+  { key: 'O(n log n)', color: 'var(--az-c4)', dash: '', name: 'Linearithmic' },
+  { key: 'O(n²)', color: 'var(--az-c5)', dash: '', name: 'Quadratic' },
+  { key: 'O(2ⁿ)', color: 'var(--az-c6)', dash: '6 3', name: 'Exponential' },
+  { key: 'O(n!)', color: 'var(--az-c7)', dash: '3 3', name: 'Factorial' },
 ];
 
-function buildData() {
-  const rows = [];
-  for (let n = 1; n <= 10; n++) {
-    const row = { n };
-    CURVE_KEYS.forEach(key => {
-      row[key] = clamp(trueVal(key, n));
-      row[`${key}_true`] = trueVal(key, n);
-      row[`${key}_capped`] = trueVal(key, n) > CAP;
-    });
-    rows.push(row);
-  }
-  return rows;
-}
+const DATA = Array.from({ length: 10 }, (_, i) => {
+  const n = i + 1;
+  const row = { n };
+  CURVES.forEach(({ key }) => {
+    const v = trueVal(key, n);
+    row[key] = v > CAP ? CAP : parseFloat(v.toFixed(2));
+    row[`${key}_true`] = v;
+    row[`${key}_capped`] = v > CAP;
+  });
+  return row;
+});
 
-const DATA = buildData();
+/* ── chart ───────────────────────────────────────────────── */
 
-/* ── inner chart ─────────────────────────────────────────── */
-
-function Inner() {
-  const { colorMode } = useColorMode();
-  const dark = colorMode === 'dark';
-
-  const {
-    LineChart, Line, XAxis, YAxis, CartesianGrid,
-    Tooltip, ReferenceLine, ResponsiveContainer,
-  } = require('recharts');
-
-  // Dark mode: pure black base (#000000), surface #0f0f0f, elevated #1a1a1a
-  // Light mode: pure white base (#ffffff), elevated #f7f7fa
-  // Text: dark = #e7e9ea, light = #0d0a1a
-  const bgColor = 'var(--az-surface)';
-  const borderCol = 'var(--az-border)';
-  const tooltipBg = dark ? '#1a1a1a' : '#f7f7fa';
-  const tooltipBdr = dark ? 'rgba(166,124,255,0.28)' : 'rgba(94,53,177,0.20)';
-  const labelColor = 'var(--az-text)';
-  const gridColor = dark ? 'rgba(231,233,234,0.05)' : 'rgba(13,10,26,0.07)';
-  const axisColor = 'var(--az-text)';
-  const accentCol = 'var(--az-accent)';
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null;
-    const seen = new Set();
-    const items = payload.filter(p => {
-      if (p.dataKey.includes('_true') || p.dataKey.includes('_capped')) return false;
-      if (seen.has(p.dataKey)) return false;
-      seen.add(p.dataKey);
-      return true;
-    });
-    return (
-      <div style={{
-        background: tooltipBg,
-        border: `1px solid ${tooltipBdr}`,
-        borderRadius: 10,
-        padding: '10px 14px',
-        fontFamily: "'JetBrains Mono', monospace",
-        fontSize: '0.72rem',
-        color: labelColor,
-        boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-        minWidth: 200,
-      }}>
-        <div style={{ marginBottom: 7, opacity: 0.45, fontSize: '0.62rem', letterSpacing: '0.12em' }}>
-          n = {label}
-        </div>
-        {items.map(({ dataKey, color }) => {
-          const row = DATA.find(d => d.n === label);
-          const tv = row ? row[`${dataKey}_true`] : '—';
-          const isCap = row ? row[`${dataKey}_capped`] : false;
-          const display = isCap
-            ? `${Number(tv).toLocaleString()} ↑`
-            : parseFloat(Number(tv).toFixed(2));
-          return (
-            <div key={dataKey} style={{ display: 'flex', justifyContent: 'space-between', gap: 24, marginBottom: 4 }}>
-              <span style={{ color }}>{dataKey}</span>
-              <span style={{ fontWeight: isCap ? 700 : 400, color: isCap ? color : undefined, opacity: isCap ? 1 : 0.8 }}>
-                {display}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const CustomLegend = () => (
-    <div style={{
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: '7px 18px',
-      justifyContent: 'center',
-      marginTop: 14,
-      fontFamily: "'JetBrains Mono', monospace",
-      fontSize: '0.63rem',
-      letterSpacing: '0.03em',
-    }}>
-      {CURVES.map(({ key, color, label }) => (
-        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <div style={{ width: 20, height: 2.5, background: color, borderRadius: 2 }} />
-          <span style={{ color: axisColor }}>{label}</span>
-        </div>
-      ))}
-    </div>
-  );
+function Tooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  const row = DATA.find(d => d.n === label);
+  const seen = new Set();
+  const items = payload.filter(p => {
+    if (p.dataKey.includes('_')) return false;
+    if (seen.has(p.dataKey)) return false;
+    seen.add(p.dataKey);
+    return true;
+  });
 
   return (
-    <div style={{
-      background: bgColor,
-      border: `1px solid ${borderCol}`,
-      borderRadius: 24,
-      padding: '28px 16px 20px',
-      margin: '2rem 0',
-      boxShadow: 'var(--az-card-shadow)',
-    }}>
-      <div style={{
-        fontFamily: "'JetBrains Mono', monospace",
-        fontSize: '0.6rem',
-        letterSpacing: '0.16em',
-        textTransform: 'uppercase',
-        color: accentCol,
-        textAlign: 'center',
-        marginBottom: 20,
-      }}>
-        // Big-O Growth Curves — n = 1 to 10
+    <div
+      style={{
+        background: 'var(--az-elevated)',
+        border: '1px solid var(--az-border)',
+        borderRadius: 12,
+        padding: '10px 13px',
+        fontFamily: 'var(--ifm-font-family-monospace)',
+        fontSize: 12,
+        boxShadow: 'var(--az-card-shadow)',
+        minWidth: 190,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 9.5,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: 'var(--az-muted)',
+          marginBottom: 7,
+        }}
+      >
+        n = {label}
       </div>
-
-      <ResponsiveContainer width="100%" height={340}>
-        <LineChart data={DATA} margin={{ top: 8, right: 28, left: 4, bottom: 24 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-
-          <XAxis
-            dataKey="n"
-            type="number"
-            domain={[1, 10]}
-            ticks={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
-            label={{
-              value: 'Input size (n)',
-              position: 'insideBottom',
-              offset: -14,
-              fill: axisColor,
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 11,
-            }}
-            tick={{ fill: axisColor, fontFamily: "'JetBrains Mono', monospace", fontSize: 11 }}
-            tickLine={false}
-            axisLine={{ stroke: gridColor }}
-          />
-
-          <YAxis
-            domain={[0, CAP]}
-            ticks={[0, 10, 20, 30, 40, 50, 60]}
-            label={{
-              value: 'Steps',
-              angle: -90,
-              position: 'insideLeft',
-              offset: 14,
-              fill: axisColor,
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 11,
-            }}
-            tick={{ fill: axisColor, fontFamily: "'JetBrains Mono', monospace", fontSize: 10 }}
-            tickLine={false}
-            axisLine={{ stroke: gridColor }}
-            tickFormatter={v => v >= CAP ? `${CAP}+` : v}
-          />
-
-          <Tooltip content={<CustomTooltip />} />
-
-          <ReferenceLine
-            y={CAP}
-            stroke={accentCol}
-            strokeDasharray="8 4"
-            strokeWidth={1}
-            label={{
-              value: '← curves hitting this ceiling continue growing far beyond this chart',
-              position: 'insideTopRight',
-              fill: accentCol,
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 9,
-            }}
-          />
-
-          {CURVES.map(({ key, color, dash }) => (
-            <Line
-              key={key}
-              type="monotone"
-              dataKey={key}
-              stroke={color}
-              strokeWidth={2.2}
-              strokeDasharray={dash}
-              dot={false}
-              activeDot={{ r: 5, strokeWidth: 0, fill: color }}
-              isAnimationActive={false}
-            />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
-
-      <CustomLegend />
-
-      <div style={{
-        marginTop: 12,
-        fontFamily: "'JetBrains Mono', monospace",
-        fontSize: '0.59rem',
-        color: axisColor,
-        textAlign: 'center',
-        letterSpacing: '0.04em',
-      }}>
-        Y-axis capped at {CAP} steps so slower curves stay visible. Hover any point to see the true value.
-      </div>
+      {items.map(({ dataKey, color }) => {
+        const tv = row ? row[`${dataKey}_true`] : 0;
+        const capped = row ? row[`${dataKey}_capped`] : false;
+        return (
+          <div
+            key={dataKey}
+            style={{ display: 'flex', justifyContent: 'space-between', gap: 20, lineHeight: 1.8 }}
+          >
+            <span style={{ color }}>{dataKey}</span>
+            <span style={{ color: capped ? color : 'var(--az-text)', fontWeight: capped ? 600 : 400 }}>
+              {capped ? `${Number(tv).toLocaleString()} ↑` : Number(tv)}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-/* ── export ──────────────────────────────────────────────── */
+function Inner() {
+  const {
+    LineChart, Line, XAxis, YAxis, CartesianGrid,
+    Tooltip: RTooltip, ReferenceLine, ResponsiveContainer,
+  } = require('recharts');
+
+  const axisTick = {
+    fill: 'var(--az-muted)',
+    fontFamily: 'var(--ifm-font-family-monospace)',
+    fontSize: 11,
+  };
+  const axisLabel = { ...axisTick, fontSize: 10, letterSpacing: '0.1em' };
+  const grid = 'var(--az-viz-grid)';
+
+  return (
+    <div className="az-viz">
+      <div className="az-viz__head">
+        <span className="az-viz__label">Big-O growth curves</span>
+        <span className="az-viz-hint">n = 1 … 10</span>
+      </div>
+
+      <div className="az-viz__body">
+        <ResponsiveContainer width="100%" height={340}>
+          <LineChart data={DATA} margin={{ top: 8, right: 20, left: 0, bottom: 22 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={grid} />
+
+            <XAxis
+              dataKey="n"
+              type="number"
+              domain={[1, 10]}
+              ticks={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+              label={{ value: 'INPUT SIZE (n)', position: 'insideBottom', offset: -14, ...axisLabel }}
+              tick={axisTick}
+              tickLine={false}
+              axisLine={{ stroke: grid }}
+            />
+
+            <YAxis
+              domain={[0, CAP]}
+              ticks={[0, 10, 20, 30, 40, 50, 60]}
+              label={{ value: 'STEPS', angle: -90, position: 'insideLeft', offset: 16, ...axisLabel }}
+              tick={axisTick}
+              tickLine={false}
+              axisLine={{ stroke: grid }}
+              tickFormatter={v => (v >= CAP ? `${CAP}+` : v)}
+              width={56}
+            />
+
+            <RTooltip content={<Tooltip />} cursor={{ stroke: grid }} />
+
+            <ReferenceLine
+              y={CAP}
+              stroke="var(--az-accent)"
+              strokeDasharray="6 4"
+              strokeWidth={1}
+              label={{
+                value: 'CEILING — CURVES CONTINUE OFF-CHART',
+                position: 'insideTopRight',
+                fill: 'var(--az-accent)',
+                fontFamily: 'var(--ifm-font-family-monospace)',
+                fontSize: 9,
+                letterSpacing: '0.1em',
+              }}
+            />
+
+            {CURVES.map(({ key, color, dash }) => (
+              <Line
+                key={key}
+                type="monotone"
+                dataKey={key}
+                stroke={color}
+                strokeWidth={2}
+                strokeDasharray={dash}
+                dot={false}
+                activeDot={{ r: 4, strokeWidth: 0, fill: color }}
+                isAnimationActive={false}
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+
+        <div className="az-viz-legend">
+          {CURVES.map(({ key, color, name }) => (
+            <span className="az-viz-legend__item" key={key} style={{ '--dot': color }}>
+              <span className="az-viz-legend__rule" />
+              {key} — {name}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <p className="az-viz__foot">
+        The y-axis stops at {CAP} steps so the slower curves stay readable. Hover any point for the true value.
+      </p>
+    </div>
+  );
+}
 
 export default function BigOChart() {
   return (
-    <BrowserOnly fallback={
-      <div style={{
-        height: 340,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: 0.4,
-        fontFamily: 'monospace',
-        fontSize: '0.8rem',
-      }}>
-        Loading chart...
-      </div>
-    }>
+    <BrowserOnly fallback={<div className="az-viz__loading">Loading chart</div>}>
       {() => <Inner />}
     </BrowserOnly>
   );
