@@ -1,0 +1,328 @@
+---
+sidebar_position: 6
+title: "The Vertex Cover Problem"
+description: "Back in Post 11 I used cameras on roads to explain what a reduction is. I never proved that problem was NP-Complete. Today I finally do, and it takes almost no new work."
+tags: [np-completeness, vertex-cover, clique, independent-set, reductions, np-complete, complexity, graph-theory]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import ReductionGraph from '@site/src/components/ReductionGraph';
+
+# The Vertex Cover Problem
+
+Back in Post 11, I gave you a map of cities joined by roads and asked you to place security cameras. A camera on a city watches every road touching that city. The goal was to watch every road on the map using as few cameras as possible.
+
+I called that a vertex cover, showed you how it connects to independent sets, and then moved on. I never proved it was NP-Complete. I just used it to demonstrate what a reduction looks like.
+
+Today I'm coming back to finish that job. And I want to be honest about how this one felt when I worked through it, because it was different from the last few posts. Cook-Levin was brutal. SAT to 3-SAT took real effort. This one took me about twenty minutes, and not because I got smarter. It took twenty minutes because Post 11 and Post 15 had already built every piece I needed. I just had to snap them together.
+
+That was genuinely satisfying. It's the first time in this series where earlier work paid me back directly, and it made all that groundwork feel worth it.
+
+Let me show you what I mean.
+
+---
+
+## What Vertex Cover Asks, Stated Properly
+
+Same cameras, same roads, now written the way we write everything else in this phase.
+
+> **Vertex Cover:** given a graph $G$ and a number $k$, is there a set of $k$ vertices or fewer such that every edge in $G$ touches at least one of them?
+
+Cities are vertices. Roads are edges. Cameras are the set we're choosing.
+
+**Vertex Cover is in $\mathcal{NP}$.** Say you hand me a list of cities and claim the cameras there watch everything. I don't have to find that list myself, I just have to check it. I walk through the roads one at a time and ask: does this road touch at least one city on your list? If every road passes, your list is valid. If even one road fails, it isn't.
+
+That's one pass over the edges. If there are $m$ edges, it's $O(m)$ work. Polynomial, so we're in $\mathcal{NP}$.
+
+The hard part is showing Vertex Cover is NP-Hard, which means proving that some known NP-Complete problem reduces to it. That's what the rest of this post does, and I'm going to reach for Clique from Post 15.
+
+---
+
+## The Relationship We Already Have
+
+Post 11 showed that independent sets and vertex covers are two sides of the same coin. I want to rebuild that here slowly, using a real map, because the size relationship that comes out of it is the piece that confused me most and I don't want to hand it to you as a formula.
+
+Take four cities, $A$, $B$, $C$, $D$, joined in a straight line:
+
+$$(A,B), \quad (B,C), \quad (C,D)$$
+
+So $A$ connects to $B$, $B$ connects to $C$, $C$ connects to $D$. That's the whole map. Four cities, three roads.
+
+### Pick a group with no roads inside it
+
+Look at $\{A, C\}$. Is there a road directly between $A$ and $C$? Check the list. We have $A$-$B$, $B$-$C$, $C$-$D$. No $A$-$C$ road anywhere.
+
+A group of cities with no roads between any of its members is an **independent set**. So $\{A, C\}$ is an independent set of size 2.
+
+### Now look at everything you didn't pick
+
+The cities left over are $\{B, D\}$. Let me check whether cameras on just those two watch every road:
+
+- Road $A$-$B$: does it touch $B$ or $D$? It touches $B$. Covered.
+- Road $B$-$C$: touches $B$. Covered.
+- Road $C$-$D$: touches $D$. Covered.
+
+All three roads watched, using only the cities I didn't pick. That's a vertex cover.
+
+And this isn't luck. It works every time, and the reason is short.
+
+### Why the leftovers always work
+
+Ask what it would take for a road to be missed. A road gets missed only if neither of its two ends has a camera. Its ends aren't leftovers, so both ends must be inside the group I picked.
+
+But the group I picked has no roads inside it. That was the whole condition. So a road with both ends inside it cannot exist.
+
+No such road exists, therefore no road gets missed. The leftovers cover everything, always.
+
+This runs backwards too. If the leftovers watch every road, then no road has both ends inside my picked group, so my picked group has no roads inside it.
+
+Both directions hold, and there's a symbol for that:
+
+:::info New Symbol: $\iff$
+Read it as "if and only if." It means both directions are true at the same time. "X $\iff$ Y" says that if X holds then Y holds, and if Y holds then X holds. They can't come apart. One is never true while the other is false.
+:::
+
+So the relationship is:
+
+$$S \text{ is an independent set in } G \iff V(G) \setminus S \text{ is a vertex cover of } G$$
+
+:::info New Symbol: $V(G) \setminus S$
+$V(G)$ means "the vertices of $G$," which is just the full list of cities on the map. The $V$ stands for vertices.
+
+The backslash $\setminus$ means "take away." So $V(G) \setminus S$ reads as: all the cities on the map, except the ones in $S$.
+
+On our four city map, $V(G) = \{A, B, C, D\}$. If $S = \{A, C\}$, then $V(G) \setminus S = \{B, D\}$. It's the leftovers, written formally.
+:::
+
+### Where $n - k$ comes from
+
+This is the part I want to slow down on, because when I first read this proof I accepted the $n - k$ without really seeing it, and then it kept confusing me later.
+
+Here's the thing: there is nothing clever happening. It's counting.
+
+Every city on the map is in exactly one of two states. Either I picked it for my independent set, or I didn't. There's no third option, and no city is in both groups.
+
+So if the map has $n$ cities and I picked $k$ of them, how many did I not pick? Everything else. Which is $n - k$.
+
+That's all. The independent set has size $k$, the leftovers have size $n - k$, and the two sizes have to add up to $n$ because together the two groups are the entire map.
+
+On our four city line: $n = 4$, I picked $\{A, C\}$ so $k = 2$, and the leftovers $\{B, D\}$ have size $4 - 2 = 2$. Both happen to be 2 here, which is a bit of an unhelpful coincidence, so let me do one more.
+
+Take the group $\{A\}$ on its own. One city, obviously no roads inside it, so it's an independent set of size $k = 1$. The leftovers are $\{B, C, D\}$, size $4 - 1 = 3$. Check them: road $A$-$B$ touches $B$, road $B$-$C$ touches both, road $C$-$D$ touches both. Every road watched, by exactly $n - k$ cities.
+
+:::tip Read $n - k$ as a Sentence
+Whenever $n - k$ shows up in this post, don't read it as arithmetic. Read it as "everybody I didn't pick." That's what it means every single time it appears, and thinking of it that way stops it from feeling like a formula you have to remember.
+:::
+
+:::note One Map, Two Groups
+Notice what did not happen in this section. The map never changed. No road moved. No road appeared or disappeared. All that changed was which cities I was pointing at.
+
+I'm flagging this now because the next section does change the map, and telling those two operations apart is the only genuinely tricky thing in this post.
+:::
+
+---
+
+## Bringing In Clique
+
+Post 15 proved that Clique is NP-Complete. A **clique** is a group of cities where every single pair has a road between them. Everyone connected to everyone.
+
+Put the two definitions next to each other:
+
+- **Clique:** every pair inside the group **is** connected.
+- **Independent set:** every pair inside the group is **not** connected.
+
+Those are exact opposites. And when two things are exact opposites, there's usually a way to turn one into the other. Here, the way is to flip the entire map.
+
+:::info New Symbol: $\overline{G}$
+Say this as "G bar." It's called the **complement graph** of $G$.
+
+$\overline{G}$ keeps every city exactly as it was, but flips every road:
+
+- Where $G$ **has** a road, $\overline{G}$ has **none**.
+- Where $G$ has **no** road, $\overline{G}$ **has** one.
+
+Same cities, same names, opposite roads. Nothing else about the map changes.
+:::
+
+Now watch what flipping does to a clique. Take a group where every pair is connected in $G$. Flip the map, and every one of those connections is gone. That same group now has zero roads inside it, in $\overline{G}$.
+
+Zero roads inside it is the definition of an independent set. So:
+
+$$G \text{ has a clique of size } k \iff \overline{G} \text{ has an independent set of size } k$$
+
+Same cities in the group, same size $k$, opposite map.
+
+**And flipping is cheap.** You go through every possible pair of cities and flip whether a road is there.
+
+:::info New Symbol: $\binom{n}{2}$
+Say it as "n choose 2." It counts how many ways you can pick 2 things out of $n$ things. Here it counts how many pairs of cities exist, which is the maximum number of roads a map could possibly have.
+
+For 5 cities, $\binom{5}{2} = 10$ possible pairs.
+:::
+
+Since $\binom{n}{2}$ works out to roughly $n^2 / 2$, flipping the map is $O(n^2)$ work. Polynomial, so it's a legal move inside a reduction.
+
+---
+
+## Snapping the Two Pieces Together
+
+Two facts, side by side.
+
+**Fact 1, from Post 11 and rebuilt above:** an independent set of size $k$ in a graph corresponds to a vertex cover of size $n - k$ in that same graph.
+
+**Fact 2, from just now:** a clique of size $k$ in $G$ corresponds to an independent set of size $k$ in $\overline{G}$.
+
+Chain them together:
+
+$$G \text{ has a clique of size } k$$
+$$\iff \overline{G} \text{ has an independent set of size } k$$
+$$\iff \overline{G} \text{ has a vertex cover of size } n - k$$
+
+Step one flips the map. Step two, working inside that flipped map, switches from a group to the cities that group left behind.
+
+:::info The Reduction: Clique $\leq_p$ Vertex Cover
+Someone gives me a Clique question: does $G$ have a clique of size $k$?
+
+I do two things:
+
+1. Build $\overline{G}$, the flipped map.
+2. Work out the number $n - k$.
+
+Then I ask a Vertex Cover question instead: does $\overline{G}$ have a vertex cover of size $n - k$?
+
+Whatever answer comes back is also the answer to the original Clique question. Yes means yes, no means no, in both directions.
+:::
+
+Building $\overline{G}$ costs $O(n^2)$. Computing $n - k$ is one subtraction. Both polynomial, so this is a valid reduction.
+
+**That completes the proof.** Vertex Cover is in $\mathcal{NP}$, we checked that at the top. Clique is NP-Complete, from Post 15. Clique reduces to Vertex Cover in polynomial time, just shown. So Vertex Cover is NP-Complete.
+
+This is what I meant about it being satisfying. I didn't build a gadget, I didn't construct a clause structure, I didn't do anything like the work Cook-Levin demanded. I reached for two things already sitting on the table and connected them.
+
+---
+
+## Running It on a Real Graph
+
+I don't fully trust a proof until I've pushed actual numbers through it, so let's do that.
+
+**Our graph $G$:** five cities $A, B, C, D, E$, with roads:
+
+$$(A,B), \quad (A,C), \quad (B,C), \quad (C,D), \quad (D,E)$$
+
+So $n = 5$.
+
+<Tabs>
+  <TabItem value="clique" label="Step 1: find a clique in G" default>
+
+Test the group $\{A, B, C\}$. To be a clique, every pair inside it needs a road.
+
+- $A$ and $B$: road $(A,B)$ is in the list. Yes.
+- $A$ and $C$: road $(A,C)$ is in the list. Yes.
+- $B$ and $C$: road $(B,C)$ is in the list. Yes.
+
+Three pairs, three roads, all present. $\{A, B, C\}$ is a clique of size $k = 3$.
+
+  </TabItem>
+  <TabItem value="complement" label="Step 2: flip the map">
+
+Five cities means $\binom{5}{2} = 10$ possible roads. $G$ uses 5 of them, so $\overline{G}$ gets the other 5, which are the pairs that were missing from $G$.
+
+Missing from $G$: $(A,D)$, $(A,E)$, $(B,D)$, $(B,E)$, $(C,E)$.
+
+**Roads in $\overline{G}$:**
+
+$$(A,D), \quad (A,E), \quad (B,D), \quad (B,E), \quad (C,E)$$
+
+Look at what's gone: $(A,B)$, $(A,C)$ and $(B,C)$ have all disappeared. Those were exactly the clique's roads. Flipping erased them, which is the entire point of flipping.
+
+  </TabItem>
+  <TabItem value="independentset" label="Step 3: same group, now independent">
+
+Take the same three cities $\{A, B, C\}$ and check them against $\overline{G}$. For an independent set, none of their pairs should be roads.
+
+- $A$ and $B$: not in $\overline{G}$'s road list. Good.
+- $A$ and $C$: not in the list. Good.
+- $B$ and $C$: not in the list. Good.
+
+Zero roads inside the group, so $\{A, B, C\}$ is an independent set of size 3 in $\overline{G}$.
+
+I never touched the group. I only changed what was underneath it.
+
+  </TabItem>
+  <TabItem value="vertexcover" label="Step 4: take the leftovers">
+
+Which cities did I not pick? $\{D, E\}$.
+
+The formula predicts a size of $n - k = 5 - 3 = 2$, and $\{D, E\}$ has 2 cities. It matches, and it matches for the boring reason from earlier: I picked 3 out of 5, so 2 were left.
+
+Now confirm those two actually cover $\overline{G}$. Every road in $\overline{G}$ has to touch $D$ or $E$:
+
+- $(A,D)$: touches $D$. Covered.
+- $(A,E)$: touches $E$. Covered.
+- $(B,D)$: touches $D$. Covered.
+- $(B,E)$: touches $E$. Covered.
+- $(C,E)$: touches $E$. Covered.
+
+Every road watched by two cameras. Valid vertex cover of size 2, exactly as promised.
+
+  </TabItem>
+</Tabs>
+
+Started with a clique in $G$, finished with a vertex cover in $\overline{G}$, and the size came out to $n - k$ on the nose. Nothing got lost passing through both flips.
+
+---
+
+## Seeing the Leftovers Live
+
+The graph explorer from Post 11 already shows the second half of this chain, so I'm reusing it rather than building something new.
+
+<ReductionGraph />
+
+Select a few cities with no roads between them, and watch the camera set fill in as exactly the cities you didn't select. That's Fact 1, happening in front of you.
+
+The map flipping part isn't in here. That step happens on paper, before you ever look at this diagram. Once the map is flipped, everything this explorer demonstrates applies directly to the flipped version.
+
+---
+
+## The One Thing That Confused Me
+
+I used the word "complement" for two different operations in this post, and that word doing double duty is genuinely the trap here.
+
+:::caution Two Different Complements
+**Complement of a graph**, written $\overline{G}$: flips the **roads**. Cities stay put, roads invert. This is what turns a Clique question into an Independent Set question, and it happens once, right at the start.
+
+**Complement of a vertex set**, written $V(G) \setminus S$: flips **which cities you picked**. The map is untouched, not one road moves. This is what turns an Independent Set question into a Vertex Cover question, and it happens afterwards, inside the already flipped map.
+
+Same word, completely different jobs.
+:::
+
+And no, doing both doesn't undo anything. They act on different things. One acts on the roads, one acts on your selection. Flipping the roads and then flipping your selection leaves you somewhere new, not back where you started.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+Vertex Cover is NP-Complete.
+
+**In $\mathcal{NP}$:** hand me a proposed set of cities and I check every road once to confirm it touches at least one of them. $O(m)$ for $m$ edges, so polynomial.
+
+**NP-Hard:** Clique reduces to it. Given $(G, k)$, build the flipped map $\overline{G}$ and ask for a vertex cover of size $n - k$. The two questions always have the same answer. Building $\overline{G}$ is $O(n^2)$ and $n - k$ is one subtraction, so the conversion is polynomial.
+
+The whole thing was short because Post 11 handed me the independent set and leftovers relationship, and Post 15 handed me Clique. I assembled, I didn't build.
+:::
+
+---
+
+## Up Next
+
+You might have spotted something. I've now leaned on Independent Set twice, once in Post 11 and once here, using it as a stepping stone both times, without ever proving that Independent Set itself is NP-Complete.
+
+Post 17 fixes that gap. And after how this one went, you can probably guess it's going to be even shorter, because by then every piece we need will already be sitting on the table.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
