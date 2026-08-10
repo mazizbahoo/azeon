@@ -1,0 +1,229 @@
+---
+sidebar_position: 7
+title: "The Independent Set Problem"
+description: "I have used Independent Set as a stepping stone twice without ever proving it is hard. Today I pay that debt, once the lazy way and once the honest way, straight from 3-SAT."
+tags: [np-completeness, independent-set, vertex-cover, clique, 3-sat, reductions, graph-theory]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import IndependentSetSAT from '@site/src/components/IndependentSetSAT';
+
+# The Independent Set Problem
+
+At the end of Post 16 I admitted something. I had leaned on Independent Set twice, once in Post 11 and once in Post 16, and both times I treated it like a stepping stone without ever checking whether the stone itself was solid.
+
+I promised this post would be short. It is going to be short, but I want to do it twice.
+
+The first proof takes about five lines, because everything we need is already on the table. The second proof goes straight from 3-SAT without borrowing anything from Clique or Vertex Cover. I am doing the second one because when I finished the first, I felt a bit like I had cheated. I had proved the result, but I had not learned anything new. The direct reduction is where the actual learning is.
+
+---
+
+## The Problem, Stated Properly
+
+Same cities, same roads as always.
+
+> **Independent Set:** given a graph $G$ and a number $k$, is there a set of at least $k$ vertices such that no two of them are joined by an edge?
+
+In the language of Post 11: can you pick $k$ cities so that no road runs directly between any two of your picks?
+
+I like to think of it as a party problem. You are inviting people to a dinner, and some pairs of guests absolutely cannot stand each other. Every pair who cannot stand each other is an edge. An independent set is a guest list with no feuds at the table. The question is whether you can invite at least $k$ people without seating any two enemies together.
+
+**Independent Set is in $\mathcal{NP}$.** If you hand me a guest list, I check every pair on the list and confirm none of them is an edge. With $k$ guests that is about $k^2 / 2$ pair checks. Polynomial. Done.
+
+---
+
+## Maximal Is Not Maximum
+
+Before the proofs, there is one trap I fell straight into, and I think almost everyone does.
+
+My first instinct was: this is easy. Go through the cities one by one. If the city has no road to anything already picked, pick it. Otherwise skip it. Keep going until you run out of cities.
+
+That procedure is fast, and it always produces an independent set. The problem is that it produces an independent set you **cannot add to**, which is not the same as the **largest possible** one.
+
+Here is the smallest example that broke my instinct. Take a star: one city in the middle, $C$, with roads to five outer cities $A_1$ through $A_5$, and no other roads.
+
+- If my greedy procedure happens to look at $C$ first, it picks $C$. Now every other city has a road to $C$, so nothing else can join. I end up with a set of size 1.
+- If it looks at the outer cities first, it picks all five. None of them are connected to each other. Size 5.
+
+Both results are "stuck". You cannot add a single city to either one. But one is five times bigger than the other.
+
+:::info Two Words That Sound the Same
+**Maximal** independent set: one you cannot add any more vertices to. Finding one is easy, the greedy procedure above does it in polynomial time.
+
+**Maximum** independent set: the largest one that exists anywhere in the graph. Finding this one is the hard problem.
+
+Every maximum set is maximal. Most maximal sets are nowhere near maximum.
+:::
+
+This distinction comes back again and again later in the series, especially in Phase 6 when we talk about greedy algorithms. Greedy gets you stuck somewhere. Whether "somewhere" is good enough is a completely different question.
+
+---
+
+## Proof One: The Lazy Way
+
+We already have two facts.
+
+**From Post 16:** a graph $G$ has a clique of size $k$ if and only if the flipped graph $\overline{G}$ has an independent set of size $k$. Flipping every road turns "everyone connected" into "no one connected".
+
+**From Post 15:** Clique is NP-Complete.
+
+So given a Clique question, "does $G$ have a clique of size $k$?", I build $\overline{G}$ in $O(n^2)$ time and ask "does $\overline{G}$ have an independent set of size $k$?" Same answer, every time.
+
+$$\text{Clique} \leq_P \text{Independent Set}$$
+
+Clique is NP-Complete, Independent Set is in $\mathcal{NP}$, and Clique reduces to it. So Independent Set is NP-Complete.
+
+That is the whole proof. I told you it would be short.
+
+And you could do it from Vertex Cover instead: $G$ has a vertex cover of size $n - k$ if and only if it has an independent set of size $k$, so Vertex Cover reduces to Independent Set by one subtraction. Either route works.
+
+---
+
+## Proof Two: Straight From 3-SAT
+
+Here is what bothered me about proof one. It works, but it only works because Clique was proved hard first. If you erased Post 15, proof one would collapse.
+
+So I asked myself a question I now ask after every reduction: could I have built this one directly, from the formula, without the middleman?
+
+The answer is yes, and the construction is really clean. It is also very similar to the Clique construction, but inverted, and seeing the two side by side taught me more than either one did alone.
+
+### The two rules a satisfying assignment follows
+
+Remember from Post 15 what a satisfying assignment really is. For a 3-SAT formula with $k$ clauses:
+
+1. **Pick one true literal from every clause.** That is what makes each clause true.
+2. **Never pick a literal and its opposite.** You cannot have $x_1$ true and $\neg x_1$ true at the same time.
+
+In the Clique reduction, edges meant "these two picks are compatible", and we wanted every pair of picks to be connected.
+
+For Independent Set, I flip the meaning. **An edge now means "these two picks are not allowed together".** And we want a set where no pair of picks is connected.
+
+### The construction
+
+For each clause, draw three nodes, one per literal, and connect all three to each other. That makes a little triangle per clause.
+
+Why a triangle? Because an independent set can never contain two nodes that share an edge, and in a triangle every pair shares an edge. So an independent set can take **at most one** node from each triangle. That is rule 1, half enforced.
+
+Then, between triangles, draw an edge between every literal and its opposite. Every $x_1$ gets an edge to every $\neg x_1$, every $x_2$ to every $\neg x_2$, and so on. Those are the **conflict edges**. An independent set can never contain both ends of one, so it can never pick a literal and its opposite. That is rule 2.
+
+Finally, set the target size to $k$, the number of clauses.
+
+:::tip Why the target is $k$
+At most one node per triangle, and there are $k$ triangles. So an independent set of size exactly $k$ must take **exactly** one node from **every** triangle. That is the other half of rule 1. The size target is doing real work here: it forces every clause to be covered.
+:::
+
+### Trying it on Post 15's formula
+
+I am deliberately using the same formula as Post 15, so you can compare the two graphs:
+
+$$\phi = (x_1 \vee \neg x_2 \vee x_3) \wedge (\neg x_1 \vee x_2 \vee \neg x_3) \wedge (x_1 \vee x_2 \vee x_3)$$
+
+Three clauses, so three triangles and a target of $k = 3$. The conflict edges are every pair of opposite literals in different triangles:
+
+| Conflict edge | Between |
+|---|---|
+| $x_1$ ↔ $\neg x_1$ | clause 1 and clause 2 |
+| $\neg x_1$ ↔ $x_1$ | clause 2 and clause 3 |
+| $\neg x_2$ ↔ $x_2$ | clause 1 and clause 2 |
+| $\neg x_2$ ↔ $x_2$ | clause 1 and clause 3 |
+| $x_3$ ↔ $\neg x_3$ | clause 1 and clause 2 |
+| $\neg x_3$ ↔ $x_3$ | clause 2 and clause 3 |
+
+Six conflict edges, plus three edges inside each of the three triangles. Fifteen edges in total.
+
+Below, the solid lines are the triangles and the dashed lines are the conflict edges. Try to pick one literal from each triangle without picking both ends of any line. If two picks share a line, it turns red and tells you which rule you broke.
+
+<IndependentSetSAT />
+
+**Example** fills in $\{x_1, x_2, x_1\}$, one from each clause. No two of them share a triangle, and no two are opposites, so there is no edge among them. The assignment it reads off is $x_1 = \text{true}$, $x_2 = \text{true}$, with $x_3$ free to be anything. That is the same assignment Post 15 found as a clique. Same answer, opposite graph.
+
+### Why it works in both directions
+
+<Tabs>
+  <TabItem value="forward" label="Satisfiable → independent set" default>
+
+Suppose the formula has a satisfying assignment. In each clause at least one literal is true; pick one such literal from each clause. That gives $k$ nodes, one per triangle.
+
+Are any two of them joined by an edge?
+
+- Not by a triangle edge, because they all come from different triangles.
+- Not by a conflict edge, because a conflict edge joins $x_i$ to $\neg x_i$, and an assignment cannot make both of those true. We only picked true literals.
+
+No edges among them. Independent set of size $k$.
+
+  </TabItem>
+  <TabItem value="backward" label="Independent set → satisfiable">
+
+Suppose the graph has an independent set of size $k$. Each triangle can contribute at most one node, and there are exactly $k$ triangles, so the set has exactly one node from every triangle.
+
+No two of the chosen nodes are opposite literals, because opposites are joined by conflict edges. So I can set every chosen literal to true without contradicting myself. Any variable that was not chosen at all, I set however I like.
+
+Every clause has its chosen literal set to true, so every clause is true. The formula is satisfied.
+
+  </TabItem>
+</Tabs>
+
+### Why it is fast
+
+For $k$ clauses, the graph has $3k$ nodes. Triangle edges: $3k$ of them. Conflict edges: at most one per pair of nodes, so at most $(3k)^2 / 2$. Building all of that is a polynomial amount of bookkeeping.
+
+$$\text{3-SAT} \leq_P \text{Independent Set}$$
+
+---
+
+## Clique and Independent Set, Side by Side
+
+This is the comparison that made the whole thing click for me.
+
+| | Clique (Post 15) | Independent Set (today) |
+|---|---|---|
+| Nodes | one per literal | one per literal |
+| Same-clause pairs | **no** edge | **edge** (the triangle) |
+| Opposite literals | **no** edge | **edge** (conflict) |
+| Every other pair | **edge** | **no** edge |
+| We want $k$ nodes that are | all connected | all disconnected |
+
+Look at the "edge" and "no edge" entries. Every single one is flipped. The independent set graph is exactly the complement of the clique graph.
+
+So proof two is not a different idea at all. It is proof one with the flip done in advance. I spent an evening thinking I had found a separate construction, and it turned out to be the same construction seen from the other side of the mirror. I was a little annoyed and a little delighted at the same time.
+
+---
+
+## Where It Shows Up
+
+Independent Set is not just a graph puzzle. Any time you have a set of things where certain pairs cannot coexist, and you want as many as possible, you are looking at an independent set problem.
+
+- **Scheduling with clashes:** tasks that need the same machine at the same time cannot both run. Pick the most tasks with no clashes.
+- **Radio frequencies:** towers that are too close interfere if they share a channel. The set of towers that can share one channel is an independent set in the interference graph.
+- **Exams:** two exams with a shared student cannot go in the same time slot. Every time slot is an independent set. That idea is going to come back very soon, in the next post.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+Independent Set is NP-Complete.
+
+**In $\mathcal{NP}$:** check every pair in the proposed set for an edge, polynomial.
+
+**NP-Hard, the short way:** Clique reduces to it by flipping the graph.
+
+**NP-Hard, the direct way:** 3-SAT reduces to it. One triangle per clause forces one pick per clause, conflict edges forbid picking a literal and its opposite, and a target of $k$ forces every clause to be covered. This graph is exactly the complement of the Clique graph from Post 15.
+
+Finding a **maximal** independent set is easy. Finding a **maximum** one is the hard problem.
+:::
+
+---
+
+## Up Next
+
+The exam scheduling idea at the end of this post is a hint. If every time slot is an independent set, then scheduling all your exams means splitting the whole graph into a few independent sets. That splitting has a much more famous name.
+
+Post 18 is Graph Coloring, the problem that started with someone trying to color a map of England's counties in 1852. It is where I first saw a problem jump from easy to NP-Complete by changing a single number from 2 to 3.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
