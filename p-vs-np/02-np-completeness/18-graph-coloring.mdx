@@ -1,0 +1,196 @@
+---
+sidebar_position: 8
+title: "Graph Coloring"
+description: "A map, a box of crayons, and the strangest jump in this whole series: with two colours the problem is easy, with three it is NP-Complete. Here is why one extra colour changes everything."
+tags: [np-completeness, graph-coloring, 3-coloring, four-color-theorem, scheduling, reductions, 3-sat]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import GraphColoring from '@site/src/components/GraphColoring';
+
+# Graph Coloring
+
+My little cousin had a colouring book open on the floor last winter, one of those pages with a map split into odd shaped regions. She had a rule she was very strict about: two regions that touch can't be the same colour. She had four crayons. She ran out of options on one corner of the page, got frustrated, and scribbled over it.
+
+I didn't tell her she was stuck on a problem from 1852. I did go home and read about it.
+
+---
+
+## Where the Problem Comes From
+
+In 1852, a young mathematician named Francis Guthrie was colouring a map of the counties of England. He noticed he never needed more than four colours to make sure no two neighbouring counties matched. He wondered whether that was always true, for every map anyone could ever draw.
+
+That question became the **Four Colour Problem**, and it stayed open for 124 years. In 1976, Kenneth Appel and Wolfgang Haken finally proved it: every map drawn on a flat surface can be coloured with at most four colours. Their proof was famous for another reason too. It was one of the first major proofs that leaned on a computer to check a huge number of cases, which made a lot of mathematicians uncomfortable at the time.
+
+So four colours is always enough for a flat map. That sounds like it should make colouring easy. It does not, and that gap is what this post is about.
+
+---
+
+## Turning a Map Into a Graph
+
+Every map can be turned into the kind of graph we have been using all along.
+
+- Each region becomes a **node**.
+- If two regions share a border, draw an **edge** between their nodes.
+
+Now the crayon rule becomes a graph rule: **two nodes joined by an edge must get different colours.**
+
+> **Graph $k$-Coloring:** given a graph $G$ and a number $k$, can you give every node one of $k$ colours so that no edge joins two nodes of the same colour?
+
+Once it is a graph, it doesn't have to come from a map at all. Any graph works. And general graphs are not limited by the Four Colour Theorem. A graph where five nodes are all joined to each other obviously needs five colours, since every node touches every other.
+
+:::info New Word: Chromatic Number
+The smallest number of colours that works for a graph is called its **chromatic number**. A triangle has chromatic number 3. A graph with no edges at all has chromatic number 1. The Four Colour Theorem says that every graph that comes from a flat map has chromatic number at most 4.
+:::
+
+**Coloring is in $\mathcal{NP}$.** Hand me a colouring and I walk through the edges one by one, checking that the two ends have different colours. One pass, polynomial. That is the certificate check.
+
+---
+
+## Try It First
+
+Before any theory, play with it. Click a node to cycle through the colours. If two touching nodes end up the same colour, the edge between them turns red.
+
+<GraphColoring />
+
+Three things worth trying:
+
+1. On **Map**, set the palette to **2 colours**. You will get stuck. Look at $A$, $B$ and $D$: all three touch each other, so they need three different colours.
+2. On **Odd cycle**, five nodes in a ring, try 2 colours. Same result, but there is no triangle this time, and it is worth noticing why it still fails.
+3. On **Wheel**, try 3 colours. The middle node touches everything, so it takes one colour on its own, and the outer ring of five has to manage with the other two. That is the odd cycle again, so it fails. The wheel needs four.
+
+---
+
+## Two Colours Is Easy
+
+Here is the surprise. With $k = 2$, there is a fast algorithm, and it is the kind of thing you would invent yourself if you sat with it for ten minutes.
+
+Pick any node and colour it purple. Every neighbour of that node is now **forced** to be orange. Every neighbour of those is forced back to purple. You never have a choice. You just spread outwards, alternating, until every node has a colour.
+
+If at any moment you are forced to give a node a colour that clashes with a neighbour, the graph cannot be 2-coloured, and you can stop. Otherwise you are done.
+
+This touches each node and each edge once. That is $O(n + m)$, linear time. **2-Coloring is in $\mathcal{P}$.**
+
+And the odd cycle from the figure is exactly where this procedure breaks. Go round a ring of five alternating purple, orange, purple, orange, purple, and the fifth node is purple and touches the first, which is also purple. A ring with an odd number of nodes can never alternate cleanly. It turns out this is the only thing that can go wrong: a graph can be 2-coloured exactly when it has no cycle of odd length.
+
+:::tip The key word is "forced"
+2-colouring is easy because every decision forces the next one. There is never a branch, never a guess, never a moment where you have to try one option and backtrack. The whole algorithm is one long chain of consequences.
+:::
+
+---
+
+## Three Colours Is NP-Complete
+
+Add one crayon and everything changes.
+
+With three colours, once I colour a node purple, its neighbours are not forced into anything. Each of them could be orange or blue. That's a choice. The next node over is another choice. The choices branch, and a wrong choice early on might only show up as a clash much later, after you've made twenty more decisions on top of it.
+
+That branching is exactly what we have seen in every NP-Complete problem so far. And this time it really is NP-Complete.
+
+**3-Coloring is NP-Complete.** It was part of Richard Karp's famous 1972 paper, where he showed 21 different problems were all NP-Complete. (He stated it for the chromatic number in general. The specific three colour version is proved by the reduction below.)
+
+### The reduction from 3-SAT
+
+I am not going to draw every node of this construction, because it gets busy quickly. But the ideas are short, and I want you to see the ideas.
+
+<Tabs>
+  <TabItem value="palette" label="1. The palette" default>
+
+Start with a triangle of three special nodes, and name them **T**, **F** and **B** (True, False, Base).
+
+A triangle needs three different colours, so these three nodes get all three colours, one each. Whatever colour lands on T, we now *call* that colour "true". Whatever lands on F, we call "false". The third colour, on B, is a leftover colour that we'll use as a blocker.
+
+The triangle turns colours into meanings.
+
+  </TabItem>
+  <TabItem value="variables" label="2. One pair per variable">
+
+For each variable $x_i$, make two nodes: one for $x_i$ and one for $\neg x_i$.
+
+- Join $x_i$ to $\neg x_i$. So they get different colours.
+- Join both of them to **B**. So neither of them can use the base colour.
+
+That leaves each of them only "true" or "false", and they must be different. So exactly one of $x_i$ and $\neg x_i$ is coloured true. That is precisely a truth assignment.
+
+  </TabItem>
+  <TabItem value="clauses" label="3. One gadget per clause">
+
+For each clause, like $(a \vee b \vee c)$, attach a small gadget of six extra nodes to the three literal nodes. The gadget is built from two copies of a simple "OR" piece: a triangle with two of its corners hanging off two inputs.
+
+The gadget is designed so that its final node **can** be coloured true if at least one of $a$, $b$, $c$ is coloured true, and **cannot** be coloured true if all three are false. Then that final node is joined to both F and B, which leaves it no option except true.
+
+So the clause gadget can only be coloured if at least one of its literals is true. That is the clause.
+
+  </TabItem>
+</Tabs>
+
+If the formula has a satisfying assignment, colour the variable nodes by it, and every clause gadget can be completed. If the whole graph can be 3-coloured, read off which literal nodes got the "true" colour, and that assignment satisfies every clause.
+
+The graph has three palette nodes, two nodes per variable and six per clause. That is linear in the size of the formula, so building it is polynomial.
+
+$$\text{3-SAT} \leq_P \text{3-Coloring}$$
+
+### And flat maps don't save you
+
+You might hope that 3-colouring becomes easy for maps, since maps are so well behaved that four colours always work. It doesn't. In 1976, Michael Garey, David Johnson and Larry Stockmeyer showed that 3-colouring stays NP-Complete even when the graph comes from a flat map.
+
+So we get a strange set of facts about maps:
+
+| Question about a flat map | How hard? |
+|---|---|
+| Can it be coloured with 2 colours? | Easy, linear time |
+| Can it be coloured with 3 colours? | NP-Complete |
+| Can it be coloured with 4 colours? | Always yes, the answer is free |
+
+Easy, hard, trivial. The hard one is in the middle. I find that table very funny and slightly unsettling.
+
+---
+
+## Why Anyone Cares: Scheduling
+
+Last post I left a hint about exams. Here it is properly.
+
+Suppose a college has to schedule its final exams. Make a node for every course. Join two courses with an edge if **at least one student is taking both**, because those two exams cannot happen at the same time.
+
+Now colour the graph. Each colour is a time slot. The rule "touching nodes get different colours" becomes "two exams that share a student go in different slots". The chromatic number is the fewest time slots you can possibly fit the exam season into.
+
+Every colour class, the set of nodes with one particular colour, has no edges inside it. That's an independent set, from Post 17. A colouring is just the whole graph split into independent sets.
+
+The same idea shows up in places I didn't expect:
+
+- **Compilers:** when a program runs, the computer has a small number of very fast storage slots called registers. Two variables that are needed at the same moment can't share one. Assigning variables to registers is a colouring problem, and compilers have used colouring for this since the early 1980s.
+- **Radio and mobile networks:** towers close enough to interfere must use different frequencies. Frequencies are colours.
+- **Sudoku:** every cell is a node, cells in the same row, column or box are joined, and the nine digits are nine colours. A finished Sudoku is a valid 9-colouring. That one is going to come back in Post 23.
+
+In all of these, people don't wait for an exact answer. They use fast methods that find a good colouring, usually not the best one. Phase 6 is about how those methods work.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+**Graph $k$-Coloring** asks whether a graph's nodes can be given $k$ colours with no edge joining two nodes of the same colour.
+
+It is in $\mathcal{NP}$: checking a colouring is one pass over the edges.
+
+**2-Coloring is in $\mathcal{P}$**, because every choice forces the next one. A graph is 2-colourable exactly when it has no odd cycle.
+
+**3-Coloring is NP-Complete**, by a reduction from 3-SAT using a palette triangle, one pair of nodes per variable and a small gadget per clause. It stays NP-Complete even for flat maps, where four colours always suffice.
+
+A colouring is a split of the graph into independent sets, which is why scheduling, register allocation and frequency assignment are all colouring problems underneath.
+:::
+
+---
+
+## Up Next
+
+So far every problem in this phase has been about choosing a set: a clique, a cover, an independent set, a colour class. Post 19 is about choosing an **order**.
+
+It's the Hamiltonian Cycle problem: can you visit every city exactly once and come home? It started as a puzzle sold as a board game in Victorian England, and it has a near twin, about roads instead of cities, that is solvable in a few seconds. Figuring out why one is easy and the other is hard took me longer than I'd like to admit.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
