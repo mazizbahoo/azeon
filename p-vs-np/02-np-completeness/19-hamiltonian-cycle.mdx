@@ -1,0 +1,159 @@
+---
+sidebar_position: 9
+title: "Hamiltonian Cycle"
+description: "Visit every city exactly once and come home. It started as a Victorian puzzle game, and it has a twin about roads instead of cities that is easy. Why one is easy and the other is NP-Complete is the real lesson."
+tags: [np-completeness, hamiltonian-cycle, euler, graph-theory, reductions, 3-sat]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import HamiltonianCycle from '@site/src/components/HamiltonianCycle';
+
+# Hamiltonian Cycle
+
+Every problem in this phase so far has asked you to choose a **set**. A clique, a vertex cover, an independent set, a group of nodes that share a colour. You pick some things, and the order you pick them in doesn't matter.
+
+This post is the first one about choosing an **order**.
+
+And I have to admit the first time I read about this problem, I thought I already knew how to solve it. I had seen a puzzle in school where you have to draw a shape without lifting your pen and without going over any line twice. There's a neat rule for it. I assumed this was the same thing.
+
+It is not the same thing. It looks almost identical, and one of them is easy and the other is NP-Complete. Understanding the difference between them is, I think, one of the best ways to build intuition for what makes a problem hard.
+
+---
+
+## The Easy Twin: Euler and the Bridges
+
+In 1736, the city of Königsberg (now Kaliningrad, in Russia) had seven bridges joining four pieces of land. The locals had a puzzle: can you go for a walk that crosses every bridge exactly once?
+
+Leonhard Euler showed that you can't, and more importantly, he showed **why**, in a way that works for every possible map.
+
+Think about any piece of land in the middle of your walk. Every time you arrive there on one bridge, you leave on another bridge. Arrivals and departures come in pairs. So if you want to use every bridge exactly once and end where you started, every piece of land must touch an **even** number of bridges.
+
+That condition turns out to be enough as well. A connected map has a walk that uses every road exactly once and comes home **if and only if** every place touches an even number of roads.
+
+In Königsberg, all four pieces of land touched an odd number of bridges. No walk was possible.
+
+:::tip Why Euler's problem is easy
+Euler's rule is a local check. You look at each place on its own and count its roads. You never have to think about the route as a whole. That count takes polynomial time, linear in fact, and once the condition passes there is also a fast way to actually build the route.
+
+**Euler Cycle is in $\mathcal{P}$.**
+:::
+
+---
+
+## The Hard Twin: Hamilton's Game
+
+Over a century later, in 1857, the Irish mathematician William Rowan Hamilton invented a puzzle he called the **Icosian Game**. It was a board in the shape of a dodecahedron flattened onto a table: twenty holes for twenty cities, joined by thirty lines. The challenge was to travel along the lines and visit every **city** exactly once, returning to where you started. It was sold as a game in London a couple of years later. It was not a commercial success.
+
+Notice the one word that changed. Euler wanted every **road** exactly once. Hamilton wanted every **city** exactly once.
+
+> **Hamiltonian Cycle:** given a graph $G$, is there a cycle that visits every node exactly once and returns to its start?
+
+You can play Hamilton's game right here. The **Dodecahedron** is his board. Click any city to start, then click a neighbouring city to move there. The dashed circles show where you are allowed to go next. If you get stuck, click your last city to undo.
+
+<HamiltonianCycle />
+
+Then switch to **Petersen**. This graph, ten nodes and fifteen edges, is famous among mathematicians for being a counterexample to lots of nice-sounding guesses. One of its properties is that it has **no** Hamiltonian cycle at all. You can walk through all ten nodes in a line, but you can never close the loop. Try it. It is a strange feeling to keep almost succeeding.
+
+---
+
+## Why Hamilton's Problem Is Hard
+
+So why doesn't an Euler-style counting rule work for cities?
+
+I spent a whole evening on this question. What I eventually understood is that for roads, every place has a **local** budget: arrivals must match departures, and you can check that one place at a time. For cities, every city is visited once, so every city uses exactly two of its roads, one in and one out. That sounds local too. But which two roads? The choice at one city affects which roads are still useful at its neighbours, which affects their neighbours, and so on, all the way around the graph. There is no way to check the whole thing by looking at one city at a time.
+
+There are some helpful rules. For example, in 1952 Gabriel Dirac proved that if every node is connected to at least half of all the other nodes, a Hamiltonian cycle definitely exists. But that is only a "sometimes yes" rule. Lots of graphs with a Hamiltonian cycle fail it. Nobody has ever found a simple rule that is both necessary and sufficient, the way Euler's even-roads rule is.
+
+And by now you can probably guess why nobody has found one.
+
+**Hamiltonian Cycle is in $\mathcal{NP}$.** The certificate is the route itself, a list of all $n$ cities in order. Checking it means confirming every city appears once and every consecutive pair, including last back to first, is joined by an edge. Polynomial.
+
+**Hamiltonian Cycle is NP-Complete.** It was on Richard Karp's 1972 list, in both a directed version (one-way streets) and an undirected version (two-way roads).
+
+---
+
+## The Reduction, in Ideas
+
+The usual textbook proof reduces 3-SAT to the **directed** version first, where every road is one-way, then converts that to the undirected version. I'll walk through the ideas rather than every arrow, because the full drawing is enormous. The ideas are what matter.
+
+<Tabs>
+  <TabItem value="vars" label="1. Variables as rows" default>
+
+For each variable $x_i$, build a long horizontal row of nodes with arrows going **both** ways between neighbours. The cycle has to cross every row, and the only sensible ways to cross a row are left to right, or right to left.
+
+- Crossing left to right means $x_i = \text{true}$.
+- Crossing right to left means $x_i = \text{false}$.
+
+Stack the rows on top of each other and connect them so the cycle goes through row 1, then row 2, then row 3, and back to the top. Each full trip around is one complete truth assignment. With $n$ variables, there are $2^n$ ways to go round, one per assignment.
+
+  </TabItem>
+  <TabItem value="clauses" label="2. Clauses as detours">
+
+For each clause, add one extra node off to the side. It still has to be visited, because a Hamiltonian cycle visits **every** node.
+
+Now hook that clause node into the rows of the variables it mentions, using short detours. The detours are set up so that:
+
+- If the clause contains $x_i$, there is a detour from $x_i$'s row out to the clause node and back, which can only be taken while crossing the row **left to right** (true).
+- If the clause contains $\neg x_i$, the detour only works while crossing **right to left** (false).
+
+So a clause node can be picked up only by a row whose direction makes one of its literals true.
+
+  </TabItem>
+  <TabItem value="why" label="3. Why it works">
+
+If the formula is satisfiable, cross every row in the direction given by the assignment. Every clause has at least one true literal, so for each clause there is at least one row going the right way to take its detour. Take one detour per clause. Every node gets visited once.
+
+If a Hamiltonian cycle exists, read off the direction of each row as the assignment. Every clause node was visited, and it could only have been visited through a row going the right direction, so every clause has a true literal.
+
+The construction uses a few nodes per clause in each row, so its size is polynomial in the formula.
+
+  </TabItem>
+</Tabs>
+
+Then, to turn one-way streets into two-way roads, there's a short trick. Replace every node with a chain of three: an "in" node, a "middle" node, and an "out" node. Every one-way arrow becomes a two-way road from an "out" node to an "in" node. The middle node can only be reached from its own "in" and "out", which forces any cycle to pass through each chain in the right order. Direction is now built into the shape.
+
+$$\text{3-SAT} \leq_P \text{Directed Hamiltonian Cycle} \leq_P \text{Hamiltonian Cycle}$$
+
+---
+
+## The Easy-Hard Pairs
+
+Euler versus Hamilton is my favourite example of something I now look for everywhere: two problems that sound almost the same, with one in $\mathcal{P}$ and the other NP-Complete.
+
+| Easy | Hard |
+|---|---|
+| Use every **road** exactly once (Euler) | Visit every **city** exactly once (Hamilton) |
+| Colour with **2** colours (Post 18) | Colour with **3** colours (Post 18) |
+| 2-SAT, clauses with two literals (Post 14) | 3-SAT, clauses with three literals (Post 14) |
+| Shortest path between two cities | Longest simple path between two cities |
+
+Each pair differs by a tiny change, and the easy side always has some kind of local rule or forced chain of consequences. The hard side always has choices that interact across the whole problem.
+
+I think this is the best intuition I have for NP-Completeness so far. It is not about a problem being big or complicated looking. It is about whether decisions in one place can quietly ruin you somewhere far away.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+**Euler Cycle** (every road once) is in $\mathcal{P}$: a connected graph has one exactly when every node has an even number of edges.
+
+**Hamiltonian Cycle** (every city once) is NP-Complete. It is in $\mathcal{NP}$, since the route itself is a certificate that takes polynomial time to check. It is NP-Hard by a reduction from 3-SAT: each variable becomes a row crossed left or right, and each clause becomes a node that can only be picked up by a row crossed in a satisfying direction.
+
+The Petersen graph has no Hamiltonian cycle, and no simple local rule is known that tells you when one exists.
+:::
+
+---
+
+## Up Next
+
+Hamiltonian Cycle only asks **whether** a route exists. Real life asks a nastier question. Every road has a length, and you want the **shortest** possible route that visits every city.
+
+Post 20 is the Traveling Salesman Problem, probably the most famous NP-Hard problem in the world. And it is going to come out of this post almost for free, just by writing a number on every road.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
