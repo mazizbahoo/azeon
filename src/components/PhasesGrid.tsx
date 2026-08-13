@@ -27,7 +27,7 @@ const PHASES: Phase[] = [
     slug: '/p-vs-np/np-completeness',
     color: 'var(--az-phase-02)',
     desc: 'Reductions, Cook-Levin theorem, SAT, TSP, Graph Coloring, Sudoku, and the NP-Complete zoo.',
-    publishedPosts: 9,
+    publishedPosts: 10,
     totalPosts: 14,
   },
   {

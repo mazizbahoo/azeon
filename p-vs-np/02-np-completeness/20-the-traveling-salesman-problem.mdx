@@ -1,0 +1,182 @@
+---
+sidebar_position: 10
+title: "The Traveling Salesman Problem"
+description: "Write a number on every road from the last post and ask for the shortest round trip. That one change gives you the most famous hard problem in computer science, and a reduction you can do in your head."
+tags: [np-completeness, tsp, traveling-salesman, hamiltonian-cycle, optimization, reductions]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import TSPRoutes from '@site/src/components/TSPRoutes';
+
+# The Traveling Salesman Problem
+
+If you have heard of only one NP-Hard problem in your life, it was probably this one.
+
+A salesman has a list of cities to visit. He wants to leave home, visit every city exactly once, and come back home, travelling the shortest total distance possible. Which order should he visit them in?
+
+That's the whole problem. You could explain it to a ten year old. And yet nobody knows a fast way to solve it, and if you found one, you would also have found a fast way to solve every single problem we have seen in this phase.
+
+When I started reading about it, I kept seeing it described as the problem that "launched a thousand algorithms". After this week I understand why. Almost every trick in Phase 6 was tested on it first.
+
+---
+
+## From Hamilton to the Salesman
+
+Post 19 asked: is there a cycle that visits every city exactly once?
+
+TSP takes that same cycle and adds one thing. Every road now has a **length**, or a cost, or a travel time. Instead of asking whether a round trip exists, we ask for the **cheapest** one.
+
+To fit it into our yes/no framework, we phrase it as a decision problem, just like we did with Clique and Vertex Cover:
+
+> **TSP (decision version):** given a list of cities, the distance between every pair, and a budget $B$, is there a round trip that visits every city exactly once with total length at most $B$?
+
+The everyday version, "find me the shortest tour", is called the **optimization version**. If you could answer the yes/no question quickly, you could find the shortest length quickly too, by trying different budgets and narrowing in, a bit like guessing a number when someone tells you "higher" or "lower". So the two versions stand or fall together.
+
+**TSP is in $\mathcal{NP}$.** The certificate is the tour. Add up its $n$ legs, check it visits every city once, and compare the total to $B$. Polynomial.
+
+---
+
+## Play With It
+
+Below are some cities. Click them in the order you want to visit them, and the tour closes itself once you have them all. Then press **Show shortest** to see the best possible tour.
+
+<TSPRoutes />
+
+At 5 or 6 cities, I usually find the best tour by eye. At 8 or 9 I almost always miss by a few percent. I never manage to tell **which** connection I got wrong by looking, which is exactly the feeling of an NP-Hard problem: checking that a tour is short is easy, but knowing that it is the shortest is not.
+
+The status line shows how many genuinely different round trips there are. For $n$ cities it is:
+
+$$\frac{(n-1)!}{2}$$
+
+:::info New Symbol: $n!$
+Say it as "$n$ factorial". It means multiply every whole number from 1 up to $n$. So $5! = 5 \times 4 \times 3 \times 2 \times 1 = 120$.
+
+Why $(n-1)!$ here? Fix your home city. There are $n-1$ choices for the first stop, then $n-2$ for the next, and so on, which multiplies out to $(n-1)!$. Then we divide by 2 because driving a loop clockwise or anticlockwise is the same tour.
+:::
+
+That number gets out of hand very, very fast:
+
+| Cities | Different round trips |
+|---|---|
+| 5 | 12 |
+| 10 | 181,440 |
+| 15 | about 43.6 billion |
+| 20 | about $6 \times 10^{16}$ |
+| 30 | about $4 \times 10^{30}$ |
+
+Factorial grows even faster than $2^n$, the exponential from Post 6. At 30 cities, checking a billion tours a second would still take far longer than the age of the universe.
+
+---
+
+## The Reduction: Two Numbers Is All It Takes
+
+Here is the part I promised would be almost free.
+
+We want to show that Hamiltonian Cycle reduces to TSP. So someone hands me a graph $G$ with $n$ cities and asks: does $G$ have a Hamiltonian cycle?
+
+I build a TSP instance on the same $n$ cities, where **every** pair of cities gets a distance:
+
+- If the two cities are joined by a road in $G$, the distance is **1**.
+- If they are not joined in $G$, the distance is **2**.
+
+Then I set the budget to $B = n$.
+
+That's the whole conversion.
+
+<Tabs>
+  <TabItem value="yes" label="If G has a Hamiltonian cycle" default>
+
+Use that cycle as the salesman's tour. It has exactly $n$ legs, and every leg is a real road in $G$, so every leg costs 1.
+
+Total: $n \times 1 = n$. That is within the budget. TSP says yes.
+
+  </TabItem>
+  <TabItem value="no" label="If TSP says yes">
+
+A tour always has exactly $n$ legs, and every leg costs at least 1. So the only way to keep the total at $n$ or below is for **every** leg to cost exactly 1.
+
+A leg costs 1 only when it is a real road in $G$. So the whole tour uses only real roads, visits every city once, and comes home. That is a Hamiltonian cycle in $G$.
+
+  </TabItem>
+</Tabs>
+
+Building the distance table means filling in about $n^2 / 2$ entries with a 1 or a 2. Polynomial.
+
+$$\text{Hamiltonian Cycle} \leq_P \text{TSP}$$
+
+Hamiltonian Cycle is NP-Complete, TSP is in $\mathcal{NP}$, so **TSP is NP-Complete.**
+
+:::tip What the 2 is doing
+The value 2 doesn't matter much. Any number bigger than 1 would work. The 2 just stands for "this isn't a real road, and using it puts you over budget". The budget of $n$ leaves zero room for even one fake road.
+:::
+
+When I first saw this I genuinely laughed. Twenty minutes earlier I had been worrying that TSP would need some enormous gadget like Cook-Levin did. It needed two numbers.
+
+---
+
+## Smarter Than Brute Force, Still Exponential
+
+Trying all $(n-1)!/2$ tours is the dumbest possible method. There are better exact methods, and it's worth knowing that "NP-Hard" doesn't mean "brute force is the best we can do".
+
+In 1962, Michael Held and Richard Karp (yes, the same Karp from the 21 problems) published a method based on **dynamic programming**, an idea we will study properly in Post 70. Their key observation was that the best way to finish a tour depends only on **which** cities you have left and **where** you are now, not on the order you visited the earlier ones. So you can solve each "cities left plus current city" situation once and reuse the answer.
+
+That brings the work down to roughly $n^2 \cdot 2^n$ steps. For 30 cities, that's about $10^{12}$ instead of about $10^{30}$. A huge improvement. But it's still exponential, and still hopeless for a thousand cities. More than sixty years later, nobody has found an exact method whose worst case is fundamentally better than $2^n$.
+
+---
+
+## And Yet People Solve Huge Ones
+
+Here is the part that confused me when I first read it, and I think it confuses a lot of people.
+
+Researchers have found **proven optimal** tours for enormous instances.
+
+- In 1954, George Dantzig, Ray Fulkerson and Selmer Johnson solved a tour through 49 American cities, which at the time was a huge achievement.
+- In 2006, a team led by David Applegate, Robert Bixby, Vašek Chvátal and William Cook solved an instance with **85,900 points**, which came from a real chip manufacturing problem. Their solver is called Concorde.
+
+How can that be, if TSP is NP-Hard?
+
+The answer is that NP-Hardness is a statement about the **worst case**. It says that for every algorithm we know, there are some instances that make it take exponential time. It doesn't say every instance is hard. Real maps have structure: cities cluster, distances obey geometry, the best tour rarely does anything bizarre. Clever solvers exploit that structure and prune away almost all of the search space, then prove that what is left can't beat their answer.
+
+So "NP-Hard" means "no guarantee", not "never". We'll come back to this idea in Phase 6, when we look at how SAT solvers handle formulas with millions of variables.
+
+---
+
+## Why Everyone Cares
+
+TSP is a cartoon of a salesman, but the same structure appears all over the place:
+
+- **Delivery routes:** every parcel van solves a TSP-shaped problem every morning, usually with extra rules about time windows and van capacity.
+- **Drilling and manufacturing:** a machine that drills thousands of holes in a circuit board wants to move its drill head as little as possible. That 85,900-point instance came from exactly this kind of problem.
+- **Telescopes:** pointing a telescope at a list of stars in the order that minimises how far it has to swing.
+- **Genome sequencing:** some ways of putting DNA fragments back in order can be phrased as finding a shortest tour.
+
+Post 54 is about the delivery side of this in much more detail.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+**TSP** asks for a round trip through every city, exactly once each, with total length at most a budget $B$.
+
+It is in $\mathcal{NP}$: add up the tour and compare to $B$.
+
+It is NP-Hard: Hamiltonian Cycle reduces to it by setting real roads to distance 1, missing roads to distance 2, and the budget to $n$.
+
+There are $(n-1)!/2$ different tours. Dynamic programming (Held and Karp, 1962) cuts the work to about $n^2 2^n$, which is still exponential. Even so, real instances with tens of thousands of cities have been solved exactly, because NP-Hardness is about worst cases, not every case.
+:::
+
+---
+
+## Up Next
+
+TSP is about choosing an order. The next problem is about choosing what to bring.
+
+Post 21 is the Knapsack Problem. You have a bag that can carry only so much weight, and a pile of things with different weights and values. What do you pack? It sounds like a packing puzzle for a holiday, and it is secretly sitting under a lot of the decisions businesses make about budgets.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
