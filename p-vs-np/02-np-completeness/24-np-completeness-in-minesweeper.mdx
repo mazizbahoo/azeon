@@ -1,0 +1,155 @@
+---
+sidebar_position: 14
+title: "NP-Completeness in Minesweeper"
+description: "Phase 2 ends with a game. Checking whether the numbers on a Minesweeper board even make sense is NP-Complete, you can build logic gates out of mines, and knowing whether a square is safe turns out to be hard in a different way."
+tags: [np-completeness, minesweeper, circuit-sat, puzzles, reductions, conp]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import MinesweeperLogic from '@site/src/components/MinesweeperLogic';
+
+# NP-Completeness in Minesweeper
+
+The computer in my school's lab had Minesweeper on it. During free periods, a few of us used to compete on it, and I remember a very specific feeling from that game. You clear a big area, numbers everywhere, and then you reach a spot where you stare at the board for a full minute and slowly realise the numbers just don't tell you enough. You have to click and hope.
+
+I always assumed that was my fault. That a better player would have seen the logic I was missing.
+
+Sometimes, it was my fault. But sometimes the information genuinely isn't on the board. And deciding which of those two situations you're in, it turns out, is a hard computational problem. That's what this last post of Phase 2 is about.
+
+---
+
+## How the Game Works
+
+If you've never played: the board is a grid of hidden squares. Some of them hide mines. You click a square to reveal it. If it's a mine, you lose. If it isn't, it shows a number: how many of its (up to) eight neighbouring squares contain mines. A 0 means no neighbours are mines, a 3 means exactly three are.
+
+You win by revealing every square that isn't a mine. The numbers are your only information.
+
+---
+
+## The Problem That's Actually Hard
+
+The question that was proved NP-Complete is not "can you win?". It's a more basic question, about whether the board makes sense at all.
+
+> **Minesweeper Consistency:** given a board where some squares show numbers and the rest are hidden, is there **any** way to place mines in the hidden squares so that every number is correct?
+
+In a game played honestly, the answer is always yes, because a real mine layout produced those numbers. But as a general problem, you could be handed a made-up board, and then you have to figure out whether any layout fits.
+
+Try it on this small board. Click hidden squares to flag them as mines. Each number lights up when exactly the right number of its neighbours are flagged, and turns red if you've flagged too many.
+
+<MinesweeperLogic />
+
+Here's how I worked through it. You might like to do it yourself first.
+
+- The bottom-left three numbers are all **0**. A 0 means none of its neighbours are mines. The third 0 touches the first hidden square on the bottom row, so that square is **safe**.
+- The **1** on the far left has only two hidden neighbours, the top-left two squares. So exactly one of them is a mine.
+- The **2** next to it has three hidden neighbours, the top-left three. Two of those are mines.
+- The **1** after that has hidden neighbours in the top row (second, third and fourth squares) plus the bottom square we know is safe. Exactly one mine among them.
+
+If the second top square were a mine, the first **1** would force the first square to be safe, then the **2** would force the third square to be a mine, and the next **1** would see two mines. Contradiction. So the second square is safe, and everything else on the left falls into place.
+
+Now press **Analyse**. The figure tries every possible arrangement of mines in the hidden squares and keeps only those that fit every number. There are 4. In all four, some squares are mines (**M**) and some are safe (**S**). But on the right, a few squares are **?**. They're mines in some valid layouts and not in others. The numbers simply don't decide them.
+
+That's exactly the "click and hope" feeling from the school lab.
+
+---
+
+## Why It's in NP
+
+The certificate is a mine layout. For each number on the board, count the mines among its neighbours and compare. That's at most 8 checks per number. Polynomial.
+
+---
+
+## Why It's NP-Hard: Logic Gates Made of Mines
+
+In 2000, a mathematician named Richard Kaye published a short paper with a great title: *Minesweeper is NP-complete*. His proof is my favourite kind, because instead of a clever formula, it builds **physical-looking circuits** out of Minesweeper squares.
+
+Remember from Post 13 that SAT is really about circuits: AND, OR and NOT gates, with the question of whether some setting of the inputs makes the output true. Kaye showed that you can build each part of a circuit on a Minesweeper board.
+
+<Tabs>
+  <TabItem value="wire" label="Wires" default>
+
+A **wire** is a long thin strip of hidden squares, with revealed numbers along both sides. The numbers are chosen so that the hidden squares along the strip can be filled in exactly **two** ways: mines on the "odd" squares, or mines on the "even" squares.
+
+Call one pattern **true** and the other **false**. Because the numbers lock neighbouring squares together, choosing the pattern at one end of the wire forces the same pattern all the way along it. A signal travels down the strip.
+
+  </TabItem>
+  <TabItem value="not" label="NOT gates">
+
+A **NOT gate** is a small section in the middle of a wire where the numbers are arranged so that the pattern shifts by one square. If the mines were on the odd squares before the gate, they have to be on the even squares after it. True goes in, false comes out.
+
+  </TabItem>
+  <TabItem value="and" label="AND gates and crossings">
+
+Kaye designed larger patches of numbers for **AND** gates, where two wires come in and one goes out, and the only consistent layouts are the ones where the output is true exactly when both inputs are true. He also designed patches for splitting a wire into two, bending a wire round a corner, and letting two wires cross without interfering.
+
+With AND and NOT you can build any circuit, since OR can be made from them.
+
+  </TabItem>
+</Tabs>
+
+So, given any circuit, you can lay it out on a big Minesweeper board. Finally, at the circuit's output, you place numbers that only make sense if the output wire carries **true**.
+
+The board is consistent **if and only if** some setting of the inputs makes the circuit output true. The board is about as large as the circuit drawing, so building it takes polynomial time.
+
+$$\text{Circuit SAT} \leq_P \text{Minesweeper Consistency}$$
+
+**Minesweeper Consistency is NP-Complete.**
+
+There is an obvious joke here, and plenty of people have made it. Since the problem is NP-Complete, if you found a fast, always-correct algorithm for it, you would have proved $\mathcal{P} = \mathcal{NP}$, and the Clay Institute would owe you a million dollars. Playing Minesweeper well is, in a very literal sense, a Millennium Prize problem.
+
+---
+
+## The Question a Player Actually Asks
+
+Here's something I only found out while reading for this post, and it changed how I think about the whole thing.
+
+When you're actually playing, you don't ask "is this board consistent?". You already know it is. You ask: **"is this particular square definitely safe?"**
+
+That's a different question. "Definitely safe" means: **in every** consistent layout, this square has no mine. Look at how that's phrased. It's a claim about **all** layouts, not about one.
+
+- To convince you a board is **consistent**, I just show you **one** layout. Easy to check.
+- To convince you a square is **safe**, showing you one layout where it's safe proves nothing. There might be another layout where it's a mine. I'd somehow have to convince you that **no** layout puts a mine there.
+
+In 2011, Allan Scott, Ulrike Stege and Iris van Rooij published a paper with an even better title: *Minesweeper May Not Be NP-Complete but Is Hard Nonetheless*. They showed that the "is this square safe?" question belongs to a different class, called **coNP**, and is one of the hardest problems there.
+
+"Hard to prove a yes" and "hard to prove a no" are not the same thing, and they have different names. That difference is the first thing we're going to look at in Phase 3.
+
+---
+
+## Phase 2 Is Complete
+
+Here's the map we built across these fourteen posts.
+
+- **Post 11:** reductions, the tool for comparing problems.
+- **Post 12:** Cook-Levin. Every problem in $\mathcal{NP}$ reduces to SAT.
+- **Posts 13 and 14:** SAT, then 3-SAT, the version with three literals per clause.
+- **Posts 15 to 17:** Clique, Vertex Cover, Independent Set, three faces of one idea.
+- **Post 18:** Graph Coloring, easy with 2 colours, NP-Complete with 3.
+- **Posts 19 and 20:** Hamiltonian Cycle, then the Traveling Salesman.
+- **Posts 21 and 22:** Knapsack and Subset Sum, hardness hidden in the digits of big numbers.
+- **Posts 23 and 24:** Sudoku and Minesweeper, hardness hiding in games.
+
+Every one of these is NP-Complete, and they are all connected by chains of reductions running back to SAT. If anyone ever finds a polynomial-time algorithm for any single one of them, every one of them falls, along with everything else in $\mathcal{NP}$.
+
+Thousands of problems have now been shown to be NP-Complete, in scheduling, biology, chip design, games, and more. Nobody has found a fast algorithm for a single one.
+
+:::note What We Have Established
+**Minesweeper Consistency**, deciding whether any mine layout fits the numbers on a board, is NP-Complete (Kaye, 2000). It's in $\mathcal{NP}$ because a layout is easy to check, and NP-Hard because you can build wires, NOT gates and AND gates out of Minesweeper squares and so encode any circuit.
+
+Deciding whether a square is **definitely safe** is a claim about every layout, not one, which puts it in a different class, coNP (Scott, Stege and van Rooij, 2011).
+:::
+
+---
+
+## Up Next
+
+Phase 3 is called the **Complexity Zoo**. $\mathcal{P}$ and $\mathcal{NP}$ are not the only classes. There are dozens, and a few of them matter a lot for understanding P vs NP.
+
+Post 25 starts with the class Minesweeper just pointed us to: **coNP**, the problems where a **no** answer is the one with a short proof. It seems like a small twist on $\mathcal{NP}$. It turns out to be one of the deepest open questions in its own right.
+
+See you in Phase 3. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
