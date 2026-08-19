@@ -1,0 +1,182 @@
+---
+sidebar_position: 2
+title: "Tautologies and coNP-Completeness"
+description: "A tautology is a formula that's true no matter what. Deciding whether a formula is one is the hardest problem in coNP, and it's tied to an old question: does every true statement have a short proof?"
+tags: [complexity-zoo, conp, tautology, conp-complete, proof-complexity, boolean-logic]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import TautologyTable from '@site/src/components/TautologyTable';
+
+# Tautologies and coNP-Completeness
+
+In my first-year logic lectures, we spent a whole week drawing truth tables. Rows and rows of T and F, for formulas with names like "De Morgan's law" and "the law of the excluded middle". At the time I thought it was the most boring thing I'd ever been asked to do.
+
+Then I started this phase and found out that those boring tables were sitting on top of one of the deepest open questions in the subject. I owe that lecturer an apology for all the sighing.
+
+---
+
+## What a Tautology Is
+
+A **tautology** is a formula that comes out **true** under every possible assignment of its variables. It doesn't matter what you plug in. It's always true.
+
+The simplest one is:
+
+$$x \vee \neg x$$
+
+"$x$ is true, or $x$ is false." If $x$ is true, the left side is true. If $x$ is false, the right side is true. There's no way to make it false. In everyday language, "it's raining or it isn't" is a tautology. It's always true, and it tells you nothing about the weather.
+
+Before going further I need two new symbols. You'll see them in the figure.
+
+:::info New Symbols: $\to$ and $\leftrightarrow$
+**$x \to y$** means "if $x$ then $y$". It is only false in one situation: when $x$ is true and $y$ is false. If $x$ is false, the statement is counted as true no matter what $y$ is. (This felt like cheating to me at first. Think of a promise: "if it rains, I'll bring an umbrella". If it doesn't rain, I haven't broken my promise, whatever I do.)
+
+**$x \leftrightarrow y$** means "$x$ and $y$ have the same truth value": both true, or both false.
+:::
+
+> **TAUTOLOGY:** given a Boolean formula, is it true under every possible assignment?
+
+---
+
+## Check Some Yourself
+
+Here are six formulas. For each one, the figure shows the full truth table: every possible assignment, one per row, and what the formula comes out as.
+
+<TautologyTable />
+
+A few that surprised me:
+
+- **Formula 2** is De Morgan's law. "Not (x and y)" means the same as "not x, or not y". It's true on every row.
+- **Formula 3** says "if $x$ implies $y$, then $y$ implies $x$". It sounds reasonable, and people make this mistake all the time in arguments. "If it's a cat, it has four legs" does not mean "if it has four legs, it's a cat". The truth table finds the row that breaks it immediately.
+- **Formula 5** is a tautology even though it looks like it says something. Look closely: it contains "$\neg y$" in one half and "$y$" in the other, so one of the two halves always wins.
+
+Now notice the asymmetry in the status line:
+
+- When a formula is **not** a tautology, one false row is enough to prove it. You can check that one row in a moment.
+- When a formula **is** a tautology, you had to look at **every** row. With $n$ variables, that's $2^n$ rows.
+
+That's exactly the shape of $co\mathcal{NP}$ from Post 25. Short proofs for **no**. No known short proofs for **yes**.
+
+---
+
+## TAUTOLOGY Is SAT, Looked at Upside Down
+
+Here's the connection that made this click for me.
+
+A formula $\phi$ is a tautology if it's true on every row. Now look at its negation, $\neg \phi$. On every row where $\phi$ is true, $\neg \phi$ is false. So:
+
+$$\phi \text{ is a tautology} \iff \neg \phi \text{ is unsatisfiable}$$
+
+"Always true" and "never true" are mirror images. If you could decide one quickly, you could decide the other by sticking a NOT in front.
+
+So TAUTOLOGY and UNSAT from Post 25 are essentially the same problem. And UNSAT is the complement of SAT. So TAUTOLOGY is in $co\mathcal{NP}$.
+
+---
+
+## The Hardest Problems in coNP
+
+In Phase 2, we called a problem **NP-Complete** if it's in $\mathcal{NP}$ and every problem in $\mathcal{NP}$ reduces to it. The same idea works for $co\mathcal{NP}$:
+
+:::info coNP-Complete
+A problem is **coNP-Complete** if it's in $co\mathcal{NP}$, and every problem in $co\mathcal{NP}$ reduces to it in polynomial time.
+:::
+
+**TAUTOLOGY is coNP-Complete.** And the proof is short, because Cook-Levin from Post 12 already did all the work. Watch.
+
+<Tabs>
+  <TabItem value="step1" label="1. Start with any coNP problem" default>
+
+Take any problem $L$ in $co\mathcal{NP}$. By definition, its complement $\overline{L}$ is in $\mathcal{NP}$.
+
+(The bar over $L$ means "complement" here, the same idea as the complement graph $\overline{G}$ from Post 16: flip everything. For a problem, that means flipping every yes and no.)
+
+  </TabItem>
+  <TabItem value="step2" label="2. Use Cook-Levin">
+
+Cook-Levin says every problem in $\mathcal{NP}$ reduces to SAT. So there's a fast conversion $f$ that turns any input $x$ into a formula $f(x)$, with:
+
+$$x \in \overline{L} \iff f(x) \text{ is satisfiable}$$
+
+Flipping both sides:
+
+$$x \in L \iff f(x) \text{ is unsatisfiable}$$
+
+  </TabItem>
+  <TabItem value="step3" label="3. Add a NOT">
+
+A formula is unsatisfiable exactly when its negation is a tautology. So:
+
+$$x \in L \iff \neg f(x) \text{ is a tautology}$$
+
+The conversion is: compute $f(x)$, put a NOT in front. Still polynomial. So $L$ reduces to TAUTOLOGY.
+
+  </TabItem>
+</Tabs>
+
+Since $L$ was any problem in $co\mathcal{NP}$, every one of them reduces to TAUTOLOGY. It's coNP-Complete.
+
+And the flip side, which ties back to Post 25: if TAUTOLOGY turned out to be in $\mathcal{NP}$, meaning every tautology had a short certificate, then every $co\mathcal{NP}$ problem would be in $\mathcal{NP}$, and the two classes would be equal.
+
+---
+
+## A Funny Twist: Which Shape Is Easy?
+
+Remember CNF from Post 13: an AND of ORs, like $(x \vee y) \wedge (\neg x \vee z)$. SAT for CNF formulas is NP-Complete.
+
+There's an opposite shape called **DNF**: an OR of ANDs, like $(x \wedge y) \vee (\neg x \wedge z)$. And the difficulty flips with the shape:
+
+| | CNF (AND of ORs) | DNF (OR of ANDs) |
+|---|---|---|
+| Is it **satisfiable**? | NP-Complete | Easy: just check if any one AND-group doesn't contain both a variable and its negation |
+| Is it a **tautology**? | Easy: every OR-group must contain some variable and its negation | coNP-Complete |
+
+Easy and hard swap places when you swap the shape and the question. Each easy case has a quick, local check. Each hard case requires reasoning about all the groups at once. Formula 6 in the figure above is a DNF, and it's exactly the hard kind of tautology question.
+
+---
+
+## Does Every True Statement Have a Short Proof?
+
+This is the part I found most interesting, and it goes beyond truth tables.
+
+In maths, you don't prove things by checking every case. You write a **proof**: a sequence of steps, each following from earlier ones by fixed rules. For tautologies, logicians have designed many **proof systems**, sets of rules for deriving tautologies step by step.
+
+Truth tables are one, terrible, proof system: the proof is the whole table, $2^n$ rows long. The question is whether some cleverer system could always give **short** proofs.
+
+In 1979, Stephen Cook (the Cook of Cook-Levin) and Robert Reckhow made this precise and proved:
+
+> $\mathcal{NP} = co\mathcal{NP}$ **if and only if** there is a proof system in which every tautology has a proof of polynomial length.
+
+So the question "is $\mathcal{NP}$ equal to $co\mathcal{NP}$?" is the same as "does every logical truth have a short proof, in some system?". That reframing started a whole research area called **proof complexity**. Researchers take specific proof systems, one at a time, and try to prove that some tautologies need very long proofs in them.
+
+The most famous early success involves the **pigeonhole principle**: if you put $n + 1$ pigeons into $n$ holes, some hole has two pigeons. Obviously true. You can write it as a tautology. In 1985, Armin Haken proved that in a widely used proof system called **resolution**, any proof of the pigeonhole tautology needs exponentially many steps.
+
+That's a real lower bound, but only for one proof system. To show $\mathcal{NP} \neq co\mathcal{NP}$, you'd need to do it for **every** possible proof system. That's the same kind of "rule out everything" problem that makes P vs NP so hard, and Phase 4 is all about why.
+
+Resolution is not just a theoretical toy, by the way. It's closely related to how modern SAT solvers work. When a solver reports that a formula is unsatisfiable, its run can be turned into a resolution proof. So Haken's result also says something practical: there are small-looking formulas that some of the most common solver techniques will take exponential time to refute.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+A **tautology** is a formula true under every assignment. $\phi$ is a tautology exactly when $\neg \phi$ is unsatisfiable.
+
+**TAUTOLOGY is coNP-Complete**: Cook-Levin turns any $co\mathcal{NP}$ problem into "is this formula unsatisfiable?", and a NOT turns that into "is this a tautology?".
+
+$\mathcal{NP} = co\mathcal{NP}$ exactly when some proof system gives every tautology a polynomial-length proof (Cook and Reckhow, 1979). Specific systems like resolution are known to need exponential-length proofs for some tautologies, such as the pigeonhole principle (Haken, 1985).
+:::
+
+---
+
+## Up Next
+
+I've been using the words "NP-Hard" and "NP-Complete" as if they were almost the same thing. They aren't, and the difference matters.
+
+Post 27 pulls them apart. NP-Hard problems don't even have to be in $\mathcal{NP}$. Some of them can't be solved by any computer at all, ever. And yet they're still "NP-Hard", because the label only says how hard a problem is from below, not how hard it is from above.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
