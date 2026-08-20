@@ -1,0 +1,175 @@
+---
+sidebar_position: 3
+title: "NP-Hard vs. NP-Complete"
+description: "Two labels I'd been using almost interchangeably. NP-Complete means 'hardest inside NP'. NP-Hard only means 'at least that hard', and some NP-Hard problems can't be solved by any computer, ever."
+tags: [complexity-zoo, np-hard, np-complete, halting-problem, optimization, misconceptions]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# NP-Hard vs. NP-Complete
+
+A friend of mine who studies business sent me a message a few weeks ago: "my professor said scheduling our warehouse is NP-Complete, so it's impossible, right?"
+
+I started typing a reply and realised I'd have to correct two separate things. "NP-Complete" doesn't mean impossible. And for what her professor was describing, the right word was probably "NP-Hard", not "NP-Complete". I'd been using those two words almost interchangeably myself until fairly recently.
+
+So this post is the long version of the reply I sent her.
+
+---
+
+## The Two Definitions, Side by Side
+
+Both definitions come from reductions, the tool from Post 11.
+
+:::info NP-Hard
+A problem $H$ is **NP-Hard** if **every** problem in $\mathcal{NP}$ reduces to it in polynomial time.
+
+In words: $H$ is at least as hard as every problem in $\mathcal{NP}$. If you had a fast algorithm for $H$, you'd have a fast algorithm for everything in $\mathcal{NP}$.
+:::
+
+:::info NP-Complete
+A problem $C$ is **NP-Complete** if:
+1. $C$ is NP-Hard, **and**
+2. $C$ is itself in $\mathcal{NP}$.
+:::
+
+That's the whole difference. NP-Complete has one extra condition: the problem must live **inside** $\mathcal{NP}$, meaning a yes-answer has a short certificate that can be checked quickly.
+
+NP-Hard has no such condition. An NP-Hard problem might be in $\mathcal{NP}$. It might be far, far above it.
+
+$$\text{NP-Complete} = \mathcal{NP} \cap \text{NP-Hard}$$
+
+The NP-Complete problems are exactly the NP-Hard problems that happen to sit inside $\mathcal{NP}$.
+
+:::tip A picture I use
+Think of "NP-Hard" as a **floor**, not a room. It says "this problem is at least this hard". It says nothing about the ceiling. NP-Complete says "this problem is at least this hard, **and** no harder than $\mathcal{NP}$". Floor and ceiling both pinned down.
+:::
+
+---
+
+## Every Problem in Phase 2 Was NP-Complete
+
+Go back over Phase 2 and you'll notice every proof had the same two halves:
+
+- "**It is in $\mathcal{NP}$:** here's the certificate, here's how to check it quickly."
+- "**It is NP-Hard:** here's a reduction from a known NP-Complete problem."
+
+The first half was always the boring one. It was a sentence or two. But it was the half that upgraded "NP-Hard" to "NP-Complete". Without it, we'd only know the floor.
+
+---
+
+## NP-Hard Problems That Aren't in NP
+
+Here's where it gets interesting. What does an NP-Hard problem **outside** $\mathcal{NP}$ look like?
+
+<Tabs>
+  <TabItem value="opt" label="Optimisation problems" default>
+
+The cheapest example is one we've already seen, wearing different clothes.
+
+**"Find the shortest tour"** for the Traveling Salesman is not a yes/no question. Its answer is a tour, not "yes" or "no". So it can't be in $\mathcal{NP}$, which is a class of yes/no problems by definition. But it's at least as hard as the yes/no version: if you could find the shortest tour, you could answer "is there a tour under budget $B$?" by comparing.
+
+So the optimisation version is **NP-Hard**, but not NP-Complete, simply because it's the wrong **type** of problem to be in $\mathcal{NP}$.
+
+This is the most common reason you'll see "NP-Hard" in the wild. When people talk about scheduling, routing or packing in practice, they usually mean the "find the best" version, which is NP-Hard. My friend's professor was talking about finding the best warehouse schedule. NP-Hard was the right word.
+
+  </TabItem>
+  <TabItem value="verify" label="Hard to even check">
+
+Here's a subtler one. Take TSP and ask:
+
+> "Is the **shortest** tour of these cities exactly 100 km long?"
+
+That's a yes/no question. But what's the certificate for "yes"? Showing me a tour of length 100 proves the shortest is **at most** 100. To prove it's **exactly** the shortest, you'd have to convince me no tour is shorter, which is a "for every tour" claim, the $co\mathcal{NP}$ shape from Post 25.
+
+This question is NP-Hard, but it's believed **not** to be in $\mathcal{NP}$, because it needs both a "there exists" part and a "for all" part at once.
+
+  </TabItem>
+  <TabItem value="halting" label="The Halting Problem">
+
+And now the extreme case.
+
+In 1936, Alan Turing (Post 3) proved that there's no algorithm that can look at any program and its input and always correctly decide whether the program will eventually stop or run forever. This is the **Halting Problem**. It's not slow. It's **undecidable**: no algorithm solves it, given any amount of time.
+
+And the Halting Problem is NP-Hard.
+
+Here's the reduction from SAT. Given a formula $\phi$, write a small program that tries every possible assignment one by one. If it finds one that satisfies $\phi$, it stops. If it runs out of assignments, it deliberately goes into an infinite loop.
+
+That program halts **if and only if** $\phi$ is satisfiable. Writing the program takes polynomial time, since it's the same short search loop with $\phi$ pasted in. So SAT reduces to the Halting Problem.
+
+So the Halting Problem is at least as hard as everything in $\mathcal{NP}$. It's also infinitely harder than that, because nothing can solve it at all.
+
+  </TabItem>
+</Tabs>
+
+That third example is what made the distinction really stick for me. "NP-Hard" includes problems that **no computer can ever solve**. Clearly "NP-Hard" can't mean "about as hard as SAT". It only means "**at least** as hard as SAT".
+
+---
+
+## The Layout
+
+Here's how the pieces fit, written out:
+
+| Region | What's there | Examples |
+|---|---|---|
+| In $\mathcal{P}$ | Solvable quickly | Sorting, shortest path, 2-colouring, primality |
+| In $\mathcal{NP}$, not known to be in $\mathcal{P}$, not NP-Complete | The in-between | Factoring, graph isomorphism |
+| NP-Complete | Hardest inside $\mathcal{NP}$ | SAT, 3-colouring, TSP decision, Sudoku |
+| NP-Hard, outside $\mathcal{NP}$ (or believed to be) | At least as hard, possibly much harder | TSP optimisation, "exact shortest tour", generalized chess, the Halting Problem |
+
+The middle row deserves a note. In 1975, Richard Ladner proved that **if** $\mathcal{P} \neq \mathcal{NP}$, then there must exist problems in $\mathcal{NP}$ that are neither in $\mathcal{P}$ nor NP-Complete. These are called **NP-intermediate**. Factoring and graph isomorphism are the most famous candidates, but nobody has proved either one is actually intermediate, because that would prove $\mathcal{P} \neq \mathcal{NP}$.
+
+---
+
+## Four Things People Get Wrong
+
+Here's what I wish I'd known earlier, and what I told my friend.
+
+**1. "NP" does not mean "not polynomial".** It means **nondeterministic polynomial**, from the machine in Post 4. Everything in $\mathcal{P}$ is also in $\mathcal{NP}$. Sorting is in $\mathcal{NP}$. "In $\mathcal{NP}$" doesn't mean hard at all.
+
+**2. "NP-Complete" does not mean "impossible".** It means "no fast algorithm is known that works on every input, and finding one would solve P vs NP". Small instances are easy. Many large real-world instances are solvable with good software. Post 20 mentioned a TSP with 85,900 cities solved exactly.
+
+**3. "NP-Hard" does not mean "harder than NP-Complete".** Some NP-Hard problems are harder, like the Halting Problem. But every NP-Complete problem is also NP-Hard. It's a floor, not a separate tier.
+
+**4. "My problem is NP-Hard" is a statement about the general problem, not your instance.** A warehouse with twelve orders is tiny. The label is about how difficulty grows in the worst case, not about whether your Tuesday afternoon schedule can be optimised.
+
+---
+
+## Why the Distinction Matters for P vs NP
+
+If someone found a polynomial-time algorithm for an **NP-Complete** problem, $\mathcal{P} = \mathcal{NP}$. Instantly. That's because NP-Complete problems are the hardest things in $\mathcal{NP}$, so every other $\mathcal{NP}$ problem reduces to them.
+
+If someone found a polynomial-time algorithm for any NP-Hard problem, the same thing would follow, since every $\mathcal{NP}$ problem reduces to it too.
+
+But the reverse doesn't work. Proving that some NP-Hard problem has **no** fast algorithm tells you nothing about P vs NP, unless that problem is also inside $\mathcal{NP}$. The Halting Problem has no algorithm at all, and Turing proved that in 1936. That fact says nothing about whether SAT is easy, because the Halting Problem is hard for reasons that sit far above $\mathcal{NP}$. This is exactly why the NP-Complete problems are the interesting ones: if **any** problem in $\mathcal{NP}$ is hard, they are, so they are the natural place to look for a proof.
+
+And conversely, if $\mathcal{P} \neq \mathcal{NP}$, then **no** NP-Hard problem can be solved in polynomial time. The label "NP-Hard" is a promise: "this is at least as hard as the thing everyone believes is hard".
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+**NP-Hard**: every problem in $\mathcal{NP}$ reduces to it. A floor on difficulty, with no ceiling.
+
+**NP-Complete**: NP-Hard **and** in $\mathcal{NP}$. The hardest problems inside $\mathcal{NP}$.
+
+NP-Hard problems outside $\mathcal{NP}$ include optimisation versions (wrong type of answer), problems that need both "exists" and "for all" checks, and even undecidable problems like the Halting Problem, which SAT reduces to.
+
+If $\mathcal{P} \neq \mathcal{NP}$, there are also NP-intermediate problems, in $\mathcal{NP}$ but neither easy nor NP-Complete (Ladner, 1975). Factoring and graph isomorphism are the best-known candidates.
+:::
+
+---
+
+## Up Next
+
+The Halting Problem showed that "harder than $\mathcal{NP}$" can mean "impossible". But there's a lot of room between $\mathcal{NP}$ and impossible.
+
+Post 28 introduces the first big class above $\mathcal{NP}$: **PSPACE**, the problems you can solve with a limited amount of **memory**, no matter how long it takes. It turns out that memory and time are very different resources, and that a lot of two-player games live exactly here.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
