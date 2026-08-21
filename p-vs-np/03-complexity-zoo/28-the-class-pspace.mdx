@@ -1,0 +1,183 @@
+---
+sidebar_position: 4
+title: "The Class PSPACE"
+description: "Time can't be reused. Memory can. That one difference creates a class of problems that might take forever to solve but never need much room, and it's where two-player games live."
+tags: [complexity-zoo, pspace, space-complexity, tqbf, games, savitch]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import QuantifierTree from '@site/src/components/QuantifierTree';
+import ComplexityZoo from '@site/src/components/ComplexityZoo';
+
+# The Class PSPACE
+
+Every class so far has been about **time**. $\mathcal{P}$: problems you can solve in polynomially many steps. $\mathcal{NP}$: problems you can check in polynomially many steps.
+
+But a computer has two resources, not one. It has time, and it has **memory**. When I was writing code for an assignment last semester, my program didn't run slowly, it crashed because it ran out of memory. That was the first time I really noticed that the two are separate limits.
+
+This post is about the class you get when you limit memory instead of time.
+
+---
+
+## Memory Can Be Reused. Time Can't.
+
+Here's the single idea that makes space complexity different from time complexity.
+
+Once a second has passed, it's gone. You can't spend it again. But a piece of memory can be written, used, erased and written again, as many times as you like. A whiteboard is not used up by being written on.
+
+So a computer with a small amount of memory can still run for an enormous amount of time, reusing the same few cells over and over.
+
+:::info Space, Formally
+The **space** used by an algorithm is the number of memory cells it uses at the same time, at most. On a Turing machine from Post 3, that's the number of tape cells the head ever visits.
+
+The input itself doesn't count, only the extra working space.
+:::
+
+:::info The Class PSPACE
+$\mathcal{PSPACE}$ is the class of yes/no problems that can be solved using a **polynomial amount of memory**, with no limit on how much time it takes.
+:::
+
+---
+
+## NP Fits Inside PSPACE
+
+Here's the first thing I worked out on my own about this class, and I was quite pleased with myself.
+
+Take any problem in $\mathcal{NP}$, say SAT with $n$ variables. To solve it with very little memory:
+
+1. Write the first assignment on the whiteboard: all false.
+2. Check whether it satisfies the formula. That takes polynomial space.
+3. If it does, answer yes. If not, **erase** it and write the next assignment.
+4. Repeat until you've tried all $2^n$ of them.
+
+This takes exponential **time**: $2^n$ assignments. But at any moment, the whiteboard only holds **one** assignment and the scratch work for checking it. That's polynomial **space**.
+
+The same trick works for any problem in $\mathcal{NP}$: go through every possible certificate, one at a time, reusing the same space. So:
+
+$$\mathcal{NP} \subseteq \mathcal{PSPACE}$$
+
+And the same trick shows $co\mathcal{NP} \subseteq \mathcal{PSPACE}$ too: try every certificate, and answer the opposite.
+
+---
+
+## The Problem That Captures PSPACE
+
+Every class we've met has a "hardest" problem. For $\mathcal{NP}$ it's SAT. For $co\mathcal{NP}$ it's TAUTOLOGY. For $\mathcal{PSPACE}$, it's a combination of the two.
+
+Look at SAT and TAUTOLOGY again, written with the symbols for "there exists" and "for all":
+
+:::info New Symbols: $\exists$ and $\forall$
+**$\exists x$** means "there exists a value of $x$ such that..." It's a backwards E, for **E**xists.
+
+**$\forall x$** means "for all values of $x$..." It's an upside-down A, for **A**ll.
+:::
+
+- SAT asks: $\exists x_1 \exists x_2 \ldots \exists x_n : \phi$. Is there **some** assignment that works?
+- TAUTOLOGY asks: $\forall x_1 \forall x_2 \ldots \forall x_n : \phi$. Does **every** assignment work?
+
+What if you're allowed to **mix** them?
+
+$$\exists x \; \forall y \; \exists z : \phi(x, y, z)$$
+
+"There is some $x$ such that, for every $y$, there is some $z$ that makes $\phi$ true."
+
+This is called a **quantified Boolean formula**, and the problem of deciding whether one is true is called **TQBF** (True Quantified Boolean Formulas). In 1973, Larry Stockmeyer and Albert Meyer proved that **TQBF is PSPACE-Complete**: it's in $\mathcal{PSPACE}$, and every $\mathcal{PSPACE}$ problem reduces to it.
+
+---
+
+## A Formula Is a Game
+
+The thing that made TQBF click for me was reading it as a game between two players.
+
+- The **$\exists$ player** wants the formula to be true. They choose the values of the $\exists$ variables.
+- The **$\forall$ player** wants it to be false. They choose the values of the $\forall$ variables.
+- They take turns, in the order the quantifiers appear.
+
+$\exists x \, \forall y \, \exists z : \phi$ asks: "Does the $\exists$ player have a **winning strategy**?" Can they pick an $x$ such that, whatever $y$ the opponent picks, they can still answer with a $z$ that makes $\phi$ true?
+
+And here's how to evaluate it with very little memory. Walk the whole game tree, depth first, holding only the **current path** in memory. At an $\exists$ node, the value is true if **either** child is true. At a $\forall$ node, it's true only if **both** children are.
+
+<QuantifierTree />
+
+Step through it and watch the counter. The tree has 8 leaves, and with $n$ variables it would have $2^n$. But you only ever hold **one path** from the root to a leaf in memory, never more than $n + 1$ nodes. Once a subtree is finished, its value goes up to the parent and the subtree is forgotten.
+
+That's exactly the whiteboard idea. Exponential time, polynomial space.
+
+In this example, the $\exists$ player wins by choosing $x$ true. If they choose $x$ false, the $\forall$ player picks $y$ false and the first clause $(x \vee y)$ can never be satisfied.
+
+---
+
+## Games Live in PSPACE
+
+Once you see TQBF as a game, a lot of things fall into place. Many two-player games, where the number of moves is limited to polynomially many, are PSPACE-Complete when generalised to bigger boards. Asking "does the first player have a winning strategy?" is asking a quantified formula: "is there a move for me, such that for every reply, there is a move for me, such that..."
+
+Some examples that have been proved PSPACE-Complete:
+
+- **Hex**, the board game where players try to connect opposite sides of a diamond-shaped board, generalised to $n \times n$ boards (Stefan Reisch, 1981).
+- **Generalised Geography**, the word game where each place name has to start with the last letter of the previous one, played on a graph.
+
+And some single-player puzzles too, where the difficulty comes from solutions that can be extremely long:
+
+- **Sokoban**, the warehouse puzzle where you push boxes onto targets (Joseph Culberson, 1997).
+- **Rush Hour**, the sliding car puzzle, generalised to bigger boards (Gary Flake and Eric Baum, 2002).
+
+Why aren't those puzzles simply in $\mathcal{NP}$? A solution would be a certificate, but the shortest solution might need **exponentially** many moves. A certificate that long isn't short, so it doesn't count. They're not known to be in $\mathcal{NP}$, and if any PSPACE-Complete problem were, then $\mathcal{NP}$ would equal $\mathcal{PSPACE}$, which almost nobody believes.
+
+---
+
+## Nondeterminism Barely Helps With Space
+
+Here's a fact that genuinely shocked me.
+
+We spent all of Phase 1 and Phase 2 on whether nondeterminism, the "perfect guessing" machine from Post 4, helps with **time**. That's P vs NP, and it's unsolved.
+
+For **space**, the same question was answered in 1970. Walter Savitch proved that anything a nondeterministic machine can do in polynomial space, a deterministic machine can do in polynomial space too. The space needed at most **squares**, and the square of a polynomial is still a polynomial.
+
+$$\mathcal{NPSPACE} = \mathcal{PSPACE}$$
+
+So for memory, "guessing perfectly" gives you essentially nothing. For time, nobody knows. I find it both reassuring and frustrating that the space version of our question has a clean answer and the time version doesn't.
+
+---
+
+## Where PSPACE Sits
+
+Here's the zoo map again, now with $\mathcal{PSPACE}$ selected. Everything we've met so far is inside it.
+
+<ComplexityZoo focus="PSPACE" />
+
+So we have a chain:
+
+$$\mathcal{P} \subseteq \mathcal{NP} \subseteq \mathcal{PSPACE}$$
+
+Is $\mathcal{P} = \mathcal{PSPACE}$? **Nobody knows.** That's another open problem, and it would be a strange world if it were true. It would mean every PSPACE problem, including finding perfect strategies in generalised games, could be solved in polynomial time. And since $\mathcal{NP}$ sits in between, $\mathcal{P} = \mathcal{PSPACE}$ would immediately give $\mathcal{P} = \mathcal{NP}$ as well.
+
+Almost everyone believes $\mathcal{P} \neq \mathcal{PSPACE}$. But just like P vs NP, nobody can prove it.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+$\mathcal{PSPACE}$ is the class of problems solvable with a polynomial amount of memory and unlimited time. Memory can be reused, so exponential-time search can fit in polynomial space.
+
+$\mathcal{NP} \subseteq \mathcal{PSPACE}$ and $co\mathcal{NP} \subseteq \mathcal{PSPACE}$, by trying every certificate one at a time.
+
+**TQBF**, deciding quantified Boolean formulas with mixed $\exists$ and $\forall$, is PSPACE-Complete (Stockmeyer and Meyer, 1973). A quantified formula is a two-player game, which is why generalised games like Hex, and puzzles like Sokoban and Rush Hour, are PSPACE-Complete.
+
+Savitch (1970): $\mathcal{NPSPACE} = \mathcal{PSPACE}$. For space, nondeterminism barely helps. Whether $\mathcal{P} = \mathcal{PSPACE}$ is open.
+:::
+
+---
+
+## Up Next
+
+PSPACE is a class where we **can't prove** things are hard. Post 29 is about the first class above it where we **can**.
+
+$\mathcal{EXP}$ is the class of problems solvable in exponential time. And unlike almost everything in this phase, there's a theorem that says, with complete certainty, that some problems in $\mathcal{EXP}$ are **not** in $\mathcal{P}$. It's one of the only hard separations we have.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
