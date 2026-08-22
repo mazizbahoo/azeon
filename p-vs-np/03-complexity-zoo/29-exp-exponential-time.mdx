@@ -1,0 +1,174 @@
+---
+sidebar_position: 5
+title: "EXP: Exponential Time"
+description: "Finally, a separation we can actually prove. The Time Hierarchy Theorem says that more time really does let you solve more problems, and it pins down a class of problems that are guaranteed not to be in P."
+tags: [complexity-zoo, exp, exptime, time-hierarchy, diagonalization, exp-complete]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import ComplexityZoo from '@site/src/components/ComplexityZoo';
+import RuntimeCalculator from '@site/src/components/RuntimeCalculator';
+
+# EXP: Exponential Time
+
+I've written the word "unknown" a lot in this phase. Is $\mathcal{NP} = co\mathcal{NP}$? Unknown. Is $\mathcal{P} = \mathcal{PSPACE}$? Unknown. Is factoring in $\mathcal{P}$? Unknown.
+
+After a while it starts to feel like complexity theory is just a list of things nobody can prove. So I want to spend this post on something we **can** prove. It's one of the few places where the field has a solid, permanent answer, and the technique behind it is going to matter a lot in Phase 4.
+
+---
+
+## The Class
+
+:::info The Class EXP
+$\mathcal{EXP}$ (sometimes written EXPTIME) is the class of yes/no problems that can be solved in time $2^{p(n)}$, where $p(n)$ is some polynomial in the input size $n$.
+
+So $2^n$, $2^{n^2}$, $2^{5n^3}$: all of these count as exponential time.
+:::
+
+Just to feel how big that is, here's the calculator from Post 6 again. Slide the input size and watch the $2^n$ row run away from everything else.
+
+<RuntimeCalculator />
+
+Everything we've met so far fits inside $\mathcal{EXP}$:
+
+- $\mathcal{P}$ obviously does. A polynomial is much smaller than an exponential.
+- $\mathcal{NP}$ does: try all $2^{p(n)}$ possible certificates and check each one.
+- $\mathcal{PSPACE}$ does too, and the reason is worth a section of its own.
+
+---
+
+## Why PSPACE Fits Inside EXP
+
+This is a counting argument, and I like it because it's simple once you see it.
+
+Think about everything a computer's state includes at one moment: what's written in memory, which instruction it's on, and so on. Call that whole snapshot a **configuration**.
+
+If the computer is only allowed $p(n)$ bits of memory, how many different configurations can it be in? Each bit is 0 or 1, so roughly $2^{p(n)}$ possibilities (times a small factor for the current instruction). That's a lot, but it's a fixed, finite number.
+
+Now, a deterministic computer that's going to give an answer can't repeat a configuration. If it ever returned to exactly the same snapshot, it would do exactly the same things again and be stuck in a loop forever. So it must finish within $2^{p(n)}$-ish steps.
+
+Polynomial space means at most exponentially many configurations, which means at most exponential time.
+
+$$\mathcal{P} \subseteq \mathcal{NP} \subseteq \mathcal{PSPACE} \subseteq \mathcal{EXP}$$
+
+<ComplexityZoo focus="EXP" />
+
+---
+
+## The Theorem: More Time Means More Problems
+
+In 1965, Juris Hartmanis and Richard Stearns proved something that sounds obvious and is actually very hard to make precise:
+
+> **Time Hierarchy Theorem:** with significantly more time, a computer can solve problems that it genuinely could not solve with less.
+
+It's not just "we haven't found a faster algorithm yet". It's a proof that for some problems, **no** faster algorithm exists. Hartmanis and Stearns later received the Turing Award, computing's highest prize, largely for this work, which helped create complexity theory as a field.
+
+The consequence that matters for us:
+
+$$\mathcal{P} \subsetneq \mathcal{EXP}$$
+
+There are problems solvable in exponential time that are **provably** not solvable in polynomial time. Not "probably". Not "nobody has found an algorithm". **Provably.**
+
+:::info New Symbol: $\subsetneq$
+"Is a subset of, and not equal to." $\mathcal{P} \subsetneq \mathcal{EXP}$ says everything in $\mathcal{P}$ is in $\mathcal{EXP}$, and there's at least one thing in $\mathcal{EXP}$ that isn't in $\mathcal{P}$.
+:::
+
+---
+
+## How the Proof Works
+
+The proof uses a technique called **diagonalization**, which I'll explain properly in Post 46. Here's the idea in plain words, because it's genuinely clever.
+
+<Tabs>
+  <TabItem value="list" label="1. List every fast program" default>
+
+Every program can be written as text, and every piece of text can be put in a list, in order of length. So we can imagine a list of **every** program that runs in polynomial time: program 1, program 2, program 3, and so on.
+
+  </TabItem>
+  <TabItem value="contrary" label="2. Build a contrary program">
+
+Now build a new program, $D$. When $D$ is given input number $i$, it:
+
+1. Looks up program $i$ in the list.
+2. Runs program $i$ on input $i$, for a limited (but large) number of steps.
+3. Does the **opposite**: if program $i$ said yes, $D$ says no. If it said no, $D$ says yes.
+
+  </TabItem>
+  <TabItem value="why" label="3. Why D is outside P">
+
+Could $D$ itself be somewhere in the list of polynomial-time programs? Say it's program number $k$.
+
+Then what does $D$ do on input $k$? By its own rule, it does the **opposite** of what program $k$ does on input $k$. But program $k$ **is** $D$. So $D$ does the opposite of itself. That's impossible.
+
+So $D$ isn't in the list. $D$ solves a problem that no polynomial-time program solves.
+
+  </TabItem>
+  <TabItem value="time" label="4. But D is in EXP">
+
+How long does $D$ take? It has to simulate other programs for their full polynomial running time, and it has to beat **every** polynomial, so its own running time has to grow faster than every polynomial. The details are fiddly, but the result is that $D$ runs comfortably within exponential time.
+
+So $D$'s problem is in $\mathcal{EXP}$ but not in $\mathcal{P}$.
+
+  </TabItem>
+</Tabs>
+
+I want to point out something about this proof, because it becomes very important later. $D$ is a very **artificial** problem. Nobody actually wants to solve "do the opposite of program $i$ on input $i$". The proof shows a hard problem **exists** by building a weird one on purpose. Phase 4 is partly about why this same trick doesn't work for P vs NP.
+
+---
+
+## The Squeeze
+
+Look at the chain again:
+
+$$\mathcal{P} \subseteq \mathcal{NP} \subseteq \mathcal{PSPACE} \subseteq \mathcal{EXP}$$
+
+We know $\mathcal{P} \neq \mathcal{EXP}$. The two ends of the chain are definitely different. So **at least one** of the three $\subseteq$ signs in between must be a strict "smaller than".
+
+Maybe $\mathcal{P} \neq \mathcal{NP}$. Maybe $\mathcal{NP} \neq \mathcal{PSPACE}$. Maybe $\mathcal{PSPACE} \neq \mathcal{EXP}$. Maybe all three. We know at least one is true.
+
+And we can't prove **any particular one** of them.
+
+When I first understood this I found it almost funny. It's like knowing for certain that one of three doors is locked, being completely unable to tell which, and having the world's best locksmiths stuck on the same problem for fifty years. Most researchers think all three doors are locked.
+
+---
+
+## Problems That Are Provably Hard
+
+The artificial problem $D$ is not the only thing outside $\mathcal{P}$. Once you have one problem that's provably hard, reductions can spread the hardness to natural problems, exactly like NP-Completeness spread through Phase 2.
+
+A problem is **EXP-Complete** if it's in $\mathcal{EXP}$ and every $\mathcal{EXP}$ problem reduces to it. And because $\mathcal{P} \neq \mathcal{EXP}$:
+
+:::tip The guarantee
+**Every EXP-Complete problem is provably not in $\mathcal{P}$.** Unlike NP-Complete problems, where we only believe there's no fast algorithm, here we know.
+:::
+
+A clean example: **"Given a program, an input, and a number $k$ written in binary, does the program stop within $k$ steps?"** You can answer it by just running the program for $k$ steps. But $k$ written in binary has only about $\log_2 k$ digits, so running for $k$ steps is exponential in the input size. This bounded halting problem turns out to be EXP-Complete.
+
+And the most famous examples are games. That's next post.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+$\mathcal{EXP}$ is the class of problems solvable in time $2^{p(n)}$. It contains $\mathcal{P}$, $\mathcal{NP}$ and $\mathcal{PSPACE}$. PSPACE fits inside because polynomial memory allows only exponentially many configurations.
+
+The **Time Hierarchy Theorem** (Hartmanis and Stearns, 1965) proves that more time solves strictly more problems, so $\mathcal{P} \subsetneq \mathcal{EXP}$. The proof is a diagonalization: build a program that disagrees with every polynomial-time program.
+
+In the chain $\mathcal{P} \subseteq \mathcal{NP} \subseteq \mathcal{PSPACE} \subseteq \mathcal{EXP}$, at least one step is strict, but we can't prove which. EXP-Complete problems are **provably** not in $\mathcal{P}$.
+:::
+
+---
+
+## Up Next
+
+Post 30 is about chess and Go. When you blow up the board to $n \times n$, deciding who wins with perfect play is EXP-Complete. That makes them provably harder than anything in $\mathcal{P}$, and almost certainly harder than anything in $\mathcal{NP}$.
+
+Which raises an obvious question I had to think about for a while: if chess is provably that hard, how does a computer on my phone beat me every single time?
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
