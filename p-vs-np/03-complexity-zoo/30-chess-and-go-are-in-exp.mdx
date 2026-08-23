@@ -1,0 +1,142 @@
+---
+sidebar_position: 6
+title: "Chess and Go Are in EXP"
+description: "Blow chess and Go up to an n × n board and deciding who wins with perfect play becomes EXP-Complete, provably outside P. So how does the app on my phone beat me every time?"
+tags: [complexity-zoo, exp, chess, go, games, game-trees, alphago]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import GameTreeGrowth from '@site/src/components/GameTreeGrowth';
+
+# Chess and Go Are in EXP
+
+I'm not a strong chess player. I know the rules, I know a couple of openings, and I lose to the chess app on my phone on its medium setting more often than I'd like to admit. The Rubik's cube has always been more my thing.
+
+But chess comes up constantly when people talk about computers and difficulty. "Computers solved chess." "Go was the last game computers couldn't beat." When I started reading about the complexity of games, I realised almost every sentence like that is slightly wrong, and the way they're wrong is a really good lesson in what complexity theory actually measures.
+
+---
+
+## What "Solving" a Game Means
+
+When a complexity theorist says a game is "solved", they mean something very specific: for a given position, we can determine **who wins if both players play perfectly**. Not "plays well". Not "beats the world champion". Perfectly.
+
+Every finished game of chess ends in a win for White, a win for Black, or a draw. So in principle, every starting position has a fixed "true value". The question is how hard it is to compute.
+
+The way to compute it is the same game tree idea from Post 28. From the current position, list every legal move. For each of those, list every reply. And so on, until the games end. Then work backwards: a position is a win for the player to move if **some** move leads to a win, and a loss if **every** move leads to a loss. That's $\exists$ and $\forall$ again, alternating with every turn.
+
+The problem is the size of that tree.
+
+---
+
+## How Big the Tree Gets
+
+In 1950, Claude Shannon (the father of information theory) wrote one of the first papers on programming a computer to play chess. In it, he made a rough estimate: a typical position has about 30 to 35 legal moves, and a typical game lasts about 40 moves by each side. That gives a game tree with something like $10^{120}$ possible games. That number is now called the **Shannon number**.
+
+For comparison, the number of atoms in the observable universe is usually estimated at around $10^{80}$.
+
+Use the slider to see how quickly looking ahead gets out of hand, for chess and for Go.
+
+<GameTreeGrowth />
+
+Go is much worse. A $19 \times 19$ Go board has up to 361 places to play, and a typical position has a couple of hundred legal moves. In 2016, John Tromp and Gunnar Farnebäck finished computing the exact number of legal positions on a $19 \times 19$ board: about $2 \times 10^{170}$.
+
+These are enormous numbers. But they're **fixed** numbers.
+
+---
+
+## The Same Problem as Sudoku
+
+Remember the trap from Post 23. A $9 \times 9$ Sudoku has a fixed size, so solving it is technically constant time. The interesting question is how the difficulty **grows** as the grid grows.
+
+Exactly the same thing applies here. An $8 \times 8$ chess board is fixed. However huge $10^{120}$ is, it's a constant. So "how hard is chess?" has to be asked about **generalised** chess: chess on an $n \times n$ board, with a number of pieces that grows with $n$, using the same movement rules. Same for Go on an $n \times n$ board.
+
+And when you ask it that way, the answers are clean:
+
+| Game, generalised to $n \times n$ | Deciding who wins with perfect play | Proved by |
+|---|---|---|
+| Chess | EXP-Complete | Aviezri Fraenkel and David Lichtenstein, 1981 |
+| Checkers (draughts) | EXP-Complete | J. M. Robson, 1984 |
+| Go (with the Japanese "ko" rule) | EXP-Complete | J. M. Robson, 1983 |
+
+From Post 29, EXP-Complete means **provably** not in $\mathcal{P}$. This isn't "nobody has found a fast algorithm". It's "no fast algorithm can exist". Perfect play in generalised chess, checkers and Go requires exponential time. Full stop.
+
+---
+
+## Why Games Are Harder Than NP
+
+Here's the intuition, which ties together the last few posts.
+
+<Tabs>
+  <TabItem value="np" label="NP: one player" default>
+
+An $\mathcal{NP}$ problem is like a puzzle you play alone. "Is there a sequence of choices that works?" That's one long chain of $\exists$: there exists a first choice, there exists a second choice, and so on. A certificate is just the list of choices.
+
+  </TabItem>
+  <TabItem value="pspace" label="PSPACE: two players, short games">
+
+A two-player game alternates: there exists a move for me, **such that for all** replies, there exists a move for me... That's TQBF from Post 28.
+
+Now a single winning line isn't a certificate any more. To prove I can win, I have to show a response to **every** possible reply, which is a whole strategy tree, not a list. That's why games jump above $\mathcal{NP}$.
+
+If the game is guaranteed to end in polynomially many moves, the tree is deep but you can walk it with only one path in memory. That puts it in $\mathcal{PSPACE}$.
+
+  </TabItem>
+  <TabItem value="exp" label="EXP: two players, very long games">
+
+In chess, checkers and Go, pieces can move back and forth, and on an $n \times n$ board, a game can last **exponentially** many moves before it has to end. Then even one path through the tree can be exponentially long.
+
+That extra length is what pushes generalised chess and Go from PSPACE-type difficulty up into EXP-Complete.
+
+  </TabItem>
+</Tabs>
+
+And where does that leave $\mathcal{NP}$? If generalised chess were in $\mathcal{NP}$, then $\mathcal{NP}$ would have to equal $\mathcal{EXP}$, which almost no one believes. So, strictly speaking, it's "provably not in $\mathcal{P}$, and almost certainly not in $\mathcal{NP}$".
+
+---
+
+## So How Does My Phone Beat Me?
+
+This is the question I mentioned at the end of Post 29, and the answer is the most important idea in this post.
+
+**Playing well is not the same as playing perfectly.**
+
+A chess engine doesn't explore the whole tree. It looks a limited number of moves ahead, uses a scoring function to guess how good the resulting positions are, and cuts off branches that are obviously bad. That gives it moves that are extremely strong, not provably perfect. It doesn't know the true value of the starting position. Nobody does.
+
+Some milestones, and what they actually meant:
+
+- **1997:** IBM's Deep Blue beat world champion Garry Kasparov in a six-game match. It searched very deeply and very fast, but it did not solve chess.
+- **2007:** A team led by Jonathan Schaeffer announced that standard $8 \times 8$ checkers is **solved**: with perfect play from both sides, it's a draw. The computation took many years. This is one of the few times a popular game really has been solved in the complexity theorist's sense.
+- **2016:** DeepMind's AlphaGo beat Lee Sedol, one of the world's top Go players, 4 games to 1. AlphaGo used neural networks to judge positions and decide which moves were worth exploring. It played brilliantly. It did not solve Go.
+
+So when people say "computers solved chess", what they mean is "computers play chess better than any human". That's an engineering achievement, and an amazing one, but it's a statement about good-enough play on one fixed board size, not about the complexity of the general problem.
+
+:::tip The pattern again
+This is the same lesson as TSP in Post 20. A problem can be provably or probably hard in the worst case, and still be handled extremely well in practice with smart shortcuts. Phase 6 is the toolbox for those shortcuts.
+:::
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+Solving a game means determining the winner under perfect play. The game tree grows exponentially with how far you look ahead: about $10^{120}$ games for chess (Shannon's estimate) and about $2 \times 10^{170}$ legal positions for $19 \times 19$ Go.
+
+Because a fixed board is a fixed size, complexity is about **generalised** $n \times n$ versions. Generalised chess, checkers and Go (with Japanese ko) are EXP-Complete, so perfect play is **provably** not in $\mathcal{P}$.
+
+Two-player games are harder than $\mathcal{NP}$ because proving a win requires a whole strategy, not a single line. Engines like Deep Blue and AlphaGo play extremely well without solving the game. Standard checkers is one of the few popular games actually solved (a draw, 2007).
+:::
+
+---
+
+## Up Next
+
+So far, every algorithm in this series has been **deterministic**: the same input always produces exactly the same steps.
+
+Post 31 adds coin flips. It turns out that letting an algorithm make random choices, and accepting a tiny chance of being wrong, makes some problems dramatically easier. At least, it seems to. Whether randomness genuinely adds power is another open question, and the evidence points somewhere surprising.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
