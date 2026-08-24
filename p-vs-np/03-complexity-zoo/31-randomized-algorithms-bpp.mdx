@@ -1,0 +1,173 @@
+---
+sidebar_position: 7
+title: "Randomized Algorithms (BPP)"
+description: "What if an algorithm could flip coins, and was allowed to be wrong one time in a trillion? Some problems seem to get much easier. Whether randomness really adds power is open, and most researchers think the answer is no."
+tags: [complexity-zoo, bpp, randomized-algorithms, primality, miller-rabin, derandomization]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PrimalityDice from '@site/src/components/PrimalityDice';
+import ComplexityZoo from '@site/src/components/ComplexityZoo';
+
+# Randomized Algorithms (BPP)
+
+When I was first told that some of the most important algorithms in the world flip coins, I thought it was a joke. An algorithm, by the definition in Post 2, is a precise, unambiguous set of instructions. How can "flip a coin and do whatever it says" be precise?
+
+Then I learned how the computer I am typing this on decides whether a 300-digit number is prime when it generates encryption keys. It flips coins. And it's so reliable that the chance of it being wrong is smaller than the chance of the computer's hardware making an error from a cosmic ray during the calculation.
+
+That changed my mind quickly.
+
+---
+
+## Two Kinds of Uncertainty
+
+I want to be very clear about what "randomized" means here, because I mixed two ideas up at first.
+
+The **input** is not random. Someone hands the algorithm a specific number, a specific formula, a specific graph. The algorithm has to work for **that** input, including the worst one an enemy could choose.
+
+The randomness is **inside** the algorithm. At certain steps, it flips a coin and lets the result decide what to do next. Run it twice on the same input and it might take different paths.
+
+So the guarantee is: **for every input**, the algorithm is right with high probability, where the probability comes only from its own coin flips.
+
+---
+
+## The Class BPP
+
+:::info The Class BPP
+A yes/no problem is in $\mathcal{BPP}$ (Bounded-error Probabilistic Polynomial time) if there's an algorithm that:
+
+1. runs in polynomial time,
+2. may flip coins as it goes, and
+3. on **every** input, gives the correct answer with probability at least $\frac{2}{3}$.
+:::
+
+When I first read "two-thirds", I was not impressed. A one-in-three chance of being wrong is terrible. Would you trust a calculator that lied a third of the time?
+
+But that $\frac{2}{3}$ is a trick. It can be pushed as close to 1 as you like.
+
+---
+
+## Repeat and Vote
+
+Here's the idea, called **amplification**.
+
+Run the algorithm 100 times on the same input, each time with fresh coin flips. Then take a majority vote.
+
+Each run is right with probability at least $\frac{2}{3}$, independently of the others. For the majority to be wrong, more than half of the 100 runs would have to be wrong, even though each one is wrong only a third of the time. That's like flipping a coin that lands heads two-thirds of the time, a hundred times, and getting tails more than fifty times. It can happen, but the probability shrinks **exponentially** with the number of runs.
+
+With about a thousand runs, the chance of a wrong majority is smaller than one in a trillion trillion. And a thousand times a polynomial is still a polynomial.
+
+:::tip Why the 2/3 doesn't matter
+Any fixed success probability above $\frac{1}{2}$, even $0.51$, can be amplified to almost certainty in polynomial time. The $\frac{2}{3}$ in the definition is just a convenient choice. What matters is that the algorithm is **better than guessing** by a fixed margin.
+:::
+
+---
+
+## The Classic Example: Is This Number Prime?
+
+Let me show you the algorithm I mentioned at the start. It's based on a fact Pierre de Fermat noticed in the 1600s.
+
+<Tabs>
+  <TabItem value="fermat" label="Fermat's test" default>
+
+**Fermat's little theorem:** if $n$ is prime, then for every whole number $a$ between 1 and $n - 1$:
+
+$$a^{n-1} \bmod n = 1$$
+
+:::info New Symbol: $\bmod$
+"$x \bmod n$" means "the remainder when $x$ is divided by $n$". For example, $17 \bmod 5 = 2$, because $17 = 3 \times 5 + 2$. It's clock arithmetic: on a 12-hour clock, 15 o'clock is 3 o'clock, because $15 \bmod 12 = 3$.
+:::
+
+So here's a test: pick a random $a$, compute $a^{n-1} \bmod n$. If the answer **isn't** 1, then $n$ is **definitely not prime**. That $a$ is called a **witness**. If the answer is 1, $n$ is probably prime.
+
+  </TabItem>
+  <TabItem value="carmichael" label="The problem">
+
+Unfortunately, there are composite numbers that pass Fermat's test for every $a$ that shares no factor with them. They're called **Carmichael numbers**, and the smallest is $561 = 3 \times 11 \times 17$.
+
+For 561, the only witnesses are the bases that happen to share a factor with it, like multiples of 3. A random base hits one of those only some of the time. So Fermat's test can be fooled by 561 again and again.
+
+There are infinitely many Carmichael numbers (proved in 1994), so this isn't a rare glitch you can ignore.
+
+  </TabItem>
+  <TabItem value="mr" label="Miller–Rabin">
+
+The fix came from Gary Miller in 1976 and Michael Rabin in 1980. Their test adds one more check, based on another fact about primes: modulo a prime, the only numbers that square to 1 are 1 and $n - 1$. While computing $a^{n-1}$ by repeated squaring, the test watches for any other number that squares to 1, which would expose $n$ as composite.
+
+The key result: if $n$ is composite, **at least three quarters** of all possible bases are witnesses. No exceptions, not even Carmichael numbers.
+
+So each round of Miller–Rabin catches a composite with probability at least $\frac{3}{4}$. After $k$ rounds that all pass, the chance a composite slipped through is at most $\left(\frac{1}{4}\right)^k$. Forty rounds gives at most about $10^{-24}$.
+
+  </TabItem>
+</Tabs>
+
+Try it here. Pick 561 and run Fermat's test a few times. It'll often say "probably prime", and occasionally hit a base that shares a factor and catch it. Then switch to Miller–Rabin and watch it find a witness almost immediately.
+
+<PrimalityDice />
+
+Notice something about the direction of the errors. When the test says "composite", it is **always** right, because the witness proves it. It can only be wrong when it says "probably prime". Algorithms that can only make mistakes in one direction like this have their own class names, but they all sit inside $\mathcal{BPP}$.
+
+---
+
+## Wait, Isn't Primality in P?
+
+Yes. In Post 25, I mentioned the AKS algorithm from 2002, which tests primality in polynomial time **without** randomness.
+
+For about 25 years before that, primality was the most famous example of a problem that was easy with coins and not known to be easy without them. When AKS came out, that example disappeared.
+
+In practice, people still use Miller–Rabin. It's much faster than AKS, and an error chance of $10^{-24}$ is, for all practical purposes, zero. But theoretically, the gap closed.
+
+---
+
+## A Problem Where Coins Still Win
+
+There is a problem that's still in the "easy with coins, unknown without" category. It's called **polynomial identity testing**.
+
+You're given two complicated algebraic expressions, possibly huge, like a long product of brackets with many variables. Are they the same polynomial? Expanding them fully could create exponentially many terms.
+
+The randomized solution is beautifully simple: **plug in random numbers** and see if both sides give the same value. If the expressions are genuinely different, a lemma by Jack Schwartz and Richard Zippel (around 1980) shows they'll almost certainly disagree at a random point. If they agree on several random points, they're almost certainly identical.
+
+Nobody knows a deterministic polynomial-time algorithm for this in general. It's one of the main reasons the next question is still open.
+
+---
+
+## Does Randomness Actually Help?
+
+$\mathcal{P} \subseteq \mathcal{BPP}$, obviously: an algorithm that ignores its coins is still a randomized algorithm. The question is whether coins ever let you do something genuinely new.
+
+<ComplexityZoo focus="BPP" />
+
+Here's what surprised me most. **Most researchers believe $\mathcal{P} = \mathcal{BPP}$**: that randomness gives no real extra power, and every randomized algorithm can be replaced by a deterministic one with only a polynomial slowdown.
+
+The evidence is a deep line of research called **derandomization**. In 1997, Russell Impagliazzo and Avi Wigderson proved that if certain problems require very large circuits, a "hardness" assumption that most researchers believe is true, then $\mathcal{P} = \mathcal{BPP}$. The idea is that hard problems can be used to generate sequences that look random to any efficient algorithm, and those can stand in for real coin flips.
+
+So hardness and randomness are two sides of one coin. If hard problems exist, you can use them to fake randomness. That connection between hardness and randomness is going to come back, in a big way, in Post 41.
+
+And where does $\mathcal{BPP}$ sit relative to $\mathcal{NP}$? **Nobody knows.** There's no line between them on the map. That's not because they're different; it's because neither containment has been proved.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+$\mathcal{BPP}$ is the class of problems solvable in polynomial time by an algorithm that flips coins and is correct with probability at least $\frac{2}{3}$ on every input. Repeating and taking a majority vote pushes the error down exponentially fast.
+
+Miller–Rabin tests primality with error at most $\frac{1}{4}$ per round, even on Carmichael numbers like 561 that fool Fermat's test. Primality is now known to be in $\mathcal{P}$ (AKS, 2002), but polynomial identity testing is still easy with coins and not known to be easy without them.
+
+$\mathcal{P} \subseteq \mathcal{BPP}$. Most researchers believe $\mathcal{P} = \mathcal{BPP}$, supported by derandomization results such as Impagliazzo and Wigderson (1997). How $\mathcal{BPP}$ relates to $\mathcal{NP}$ is unknown.
+:::
+
+---
+
+## Up Next
+
+Coin flips are one kind of "unusual" computer. Post 32 is about a much stranger one.
+
+Quantum computers don't flip coins. They work with something called **amplitudes**, which can cancel each other out in a way probabilities never can. That one difference gives a class called $\mathcal{BQP}$, and it's the reason governments are already replacing their encryption.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

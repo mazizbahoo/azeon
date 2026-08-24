@@ -36,7 +36,7 @@ const PHASES: Phase[] = [
     slug: '/p-vs-np/complexity-zoo',
     color: 'var(--az-phase-03)',
     desc: "coNP, PSPACE, EXP, randomized algorithms, quantum computing, and Shor's algorithm.",
-    publishedPosts: 6,
+    publishedPosts: 7,
     totalPosts: 10,
   },
   {
