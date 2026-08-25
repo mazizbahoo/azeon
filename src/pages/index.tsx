@@ -31,7 +31,7 @@ interface Phase {
 const PHASES: Phase[] = [
   { num: '01', title: 'Foundations', slug: '/p-vs-np/foundations', color: 'var(--az-phase-01)', desc: 'Algorithms, Turing machines, Big-O notation, and the formal definitions of P and NP.', publishedPosts: 10, totalPosts: 10 },
   { num: '02', title: 'NP-Completeness', slug: '/p-vs-np/np-completeness', color: 'var(--az-phase-02)', desc: 'Reductions, Cook-Levin theorem, SAT, TSP, Graph Coloring, Sudoku, and the NP-Complete zoo.', publishedPosts: 14, totalPosts: 14 },
-  { num: '03', title: 'Complexity Zoo', slug: '/p-vs-np/complexity-zoo', color: 'var(--az-phase-03)', desc: "coNP, PSPACE, EXP, randomized algorithms, quantum computing, and Shor's algorithm.", publishedPosts: 7, totalPosts: 10 },
+  { num: '03', title: 'Complexity Zoo', slug: '/p-vs-np/complexity-zoo', color: 'var(--az-phase-03)', desc: "coNP, PSPACE, EXP, randomized algorithms, quantum computing, and Shor's algorithm.", publishedPosts: 8, totalPosts: 10 },
   { num: '04', title: 'Failed Proofs', slug: '/p-vs-np/failed-proofs', color: 'var(--az-phase-04)', desc: 'Relativization, Natural Proofs, Algebrization, GCT and every barrier that blocks a proof.', publishedPosts: 0, totalPosts: 16 },
   { num: '05', title: 'Real-World Impact', slug: '/p-vs-np/real-world-impact', color: 'var(--az-phase-05)', desc: 'RSA encryption, supply chains, protein folding, AI, and the cost of NP-Hardness.', publishedPosts: 0, totalPosts: 12 },
   { num: '06', title: 'Heuristics', slug: '/p-vs-np/heuristics', color: 'var(--az-phase-06)', desc: 'Approximation algorithms, greedy strategies, simulated annealing, and genetic algorithms.', publishedPosts: 0, totalPosts: 12 },

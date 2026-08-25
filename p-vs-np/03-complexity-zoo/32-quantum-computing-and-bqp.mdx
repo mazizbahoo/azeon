@@ -1,0 +1,150 @@
+---
+sidebar_position: 8
+title: "Quantum Computing and BQP"
+description: "A quantum computer is not a computer that tries every answer at once. It's a computer whose possibilities can cancel each other out. That one idea, interference, is what defines the class BQP."
+tags: [complexity-zoo, bqp, quantum-computing, qubits, interference, superposition]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import QubitInterference from '@site/src/components/QubitInterference';
+import ComplexityZoo from '@site/src/components/ComplexityZoo';
+
+# Quantum Computing and BQP
+
+If you've ever watched a video about quantum computers, you've probably heard this sentence: "a quantum computer tries every possible answer at the same time."
+
+I believed that sentence for a long time. It's the reason I assumed quantum computers would make P vs NP irrelevant. If you can try every answer at once, then $2^n$ possibilities is no problem, right?
+
+That sentence is wrong. Not slightly wrong, wrong in the way that matters most. Getting it right took me a few weeks of reading, mostly Scott Aaronson's writing and lecture notes, and this post and the next two are what came out of it. I'm going to try to explain it without any physics beyond what's absolutely necessary.
+
+---
+
+## Bits and Qubits
+
+A normal bit is 0 or 1. Always one, never both.
+
+A **qubit** is described by two numbers called **amplitudes**, one attached to 0 and one attached to 1. You can think of them as "how much 0" and "how much 1" the qubit currently has. We write the state as:
+
+$$\alpha \, |0\rangle + \beta \, |1\rangle$$
+
+:::info New Symbols: $|0\rangle$, $\alpha$, $\beta$
+$|0\rangle$ and $|1\rangle$ are just names for "the 0 state" and "the 1 state". The odd brackets are physics notation, and you can read them as labels.
+
+$\alpha$ (alpha) and $\beta$ (beta) are the amplitudes. In real quantum computers they can be complex numbers, but everything important in this post works with ordinary positive and **negative** numbers.
+:::
+
+When you **measure** a qubit, you don't see the amplitudes. You see a plain 0 or a plain 1, and the qubit becomes that value. The probability of seeing 0 is $\alpha^2$, and the probability of seeing 1 is $\beta^2$. Those two always add up to 1.
+
+So far this sounds like a coin that's been flipped but not looked at. 50% heads, 50% tails. And if that's all it was, quantum computers would just be randomized computers from Post 31.
+
+The difference is the minus sign.
+
+---
+
+## Amplitudes Can Cancel
+
+Probabilities are never negative. If two different paths lead to the same outcome, their probabilities add up, and the outcome gets **more** likely.
+
+Amplitudes **can** be negative. If two paths lead to the same outcome, one with amplitude $+0.5$ and the other with $-0.5$, they add up to **zero**. The outcome becomes **impossible**, even though each path on its own would have led there.
+
+That's called **interference**. It's the same thing that happens with waves on water: two crests meeting make a bigger wave, a crest meeting a trough flattens out.
+
+Here's a single qubit you can play with. It starts as a definite 0. There are three operations you can apply:
+
+- **H** (Hadamard) spreads the qubit evenly between 0 and 1, but with a minus sign on the 1 side when it starts from 1.
+- **X** swaps 0 and 1, like a NOT gate.
+- **Z** flips the sign of the 1 amplitude.
+
+<QubitInterference />
+
+Try the three presets:
+
+1. **H**: from 0, you get amplitudes $+0.707$ and $+0.707$. Each squares to 0.5. A fair 50/50 coin.
+2. **H H**: you'd expect two coin flips to still be a 50/50 coin. Instead, you're back to a definite **0**, 100%. The two paths leading to 1 had opposite signs and cancelled out. The paths leading to 0 had the same sign and reinforced.
+3. **H Z H**: the same as before, but the Z in the middle flips one sign. Now the cancellation happens on the other side, and you get a definite **1**.
+
+That second one is the whole of quantum computing in miniature. Applying a "randomizing" step twice produced **certainty**, because the possibilities interfered. No coin could ever do that.
+
+---
+
+## Many Qubits
+
+With $n$ qubits, there's an amplitude for **every** combination of $n$ bits. That's $2^n$ amplitudes. Ten qubits have 1,024 amplitudes. Three hundred qubits have more amplitudes than there are atoms in the observable universe.
+
+This is where the "tries every answer" story comes from. A quantum computer can, in a sense, put weight on all $2^n$ possibilities at once.
+
+But here's the catch: **you only get to measure once**, and when you do, you see **one** random outcome, with probability given by the squared amplitudes. If you just spread the amplitudes evenly and measure, you get a random answer. That's no better than guessing.
+
+:::caution The real job of a quantum algorithm
+A quantum algorithm has to arrange the operations so that the amplitudes of **wrong** answers cancel each other out, and the amplitudes of **right** answers reinforce. Then, when you measure, you're likely to see a right answer.
+
+That only works for problems with special structure that lets the cancellations line up. For most problems, nobody knows how to do it.
+:::
+
+That's the honest version. Not "tries every answer". It's "choreographs interference so wrong answers cancel".
+
+---
+
+## The Class BQP
+
+:::info The Class BQP
+A yes/no problem is in $\mathcal{BQP}$ (Bounded-error Quantum Polynomial time) if a quantum computer can solve it using a polynomial number of operations, giving the right answer with probability at least $\frac{2}{3}$ on every input.
+:::
+
+It's $\mathcal{BPP}$ from Post 31, with qubits instead of coins. The same "repeat and vote" amplification works, so $\frac{2}{3}$ can be pushed as close to 1 as you want. The class was defined formally by Ethan Bernstein and Umesh Vazirani in 1993.
+
+Where does it sit?
+
+<ComplexityZoo focus="BQP" />
+
+**$\mathcal{BPP} \subseteq \mathcal{BQP}$.** A quantum computer can produce fair coin flips (one H and a measurement), so it can do anything a randomized computer can.
+
+**$\mathcal{BQP} \subseteq \mathcal{PSPACE}$.** This one surprised me. It means a normal computer **can** simulate a quantum computer, with only polynomial memory. The trick is to compute the amplitude of each final outcome by adding up the contributions of all the paths that lead to it, one path at a time, reusing memory just like in Post 28. It takes exponential **time**, but not exponential memory.
+
+So quantum computers can't solve anything that's **impossible** for normal computers. The Halting Problem stays unsolvable. The question is only about **speed**.
+
+And the big one: **how does $\mathcal{BQP}$ relate to $\mathcal{NP}$?** Nobody knows. There are problems in $\mathcal{BQP}$, like factoring, that aren't known to be in $\mathcal{BPP}$. And there's strong evidence, which I'll explain in Post 34, that $\mathcal{NP}$-Complete problems are **not** in $\mathcal{BQP}$.
+
+---
+
+## Where the Speedups Come From
+
+Some history, so you can see this didn't come from nowhere.
+
+- **1982:** Richard Feynman argued that simulating quantum physics on normal computers seems to need exponential resources, and suggested building computers out of quantum systems instead.
+- **1985:** David Deutsch described a universal quantum computer, the quantum version of Turing's machine from Post 3.
+- **1994:** Daniel Simon found a problem, in a special "black box" setting, where quantum computers are exponentially faster than any randomized computer. His idea directly inspired the next one.
+- **1994:** Peter Shor found a quantum algorithm for factoring numbers in polynomial time. That's Post 33, and it's the reason governments care.
+
+---
+
+## Do Real Quantum Computers Exist?
+
+They do, but they're small and noisy. Today's machines have hundreds or a few thousand physical qubits, and those qubits make errors constantly. Fixing errors needs many physical qubits for every reliable "logical" qubit.
+
+In 2019, Google reported that its 53-qubit Sycamore processor had performed a specific sampling task in about 200 seconds that, by its estimate, would take a classical supercomputer thousands of years. IBM disputed that estimate, and later work found much faster classical methods for that particular task. That back-and-forth is pretty typical of the field right now: every claimed advantage gets tested hard, which is exactly how it should be.
+
+The tasks in these experiments were chosen because they suit quantum hardware, not because anyone needed the answers. They are demonstrations, on the road to machines big enough to run something like Shor's algorithm.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+A qubit is described by amplitudes, which can be negative. Measuring gives 0 or 1 with probability equal to the squared amplitude. Because amplitudes can cancel, quantum computers can make wrong answers interfere away. That's the real source of their power, not "trying every answer at once".
+
+$\mathcal{BQP}$ is the class of problems a quantum computer solves in polynomial time with error at most $\frac{1}{3}$. $\mathcal{BPP} \subseteq \mathcal{BQP} \subseteq \mathcal{PSPACE}$, so quantum computers can't solve anything a normal computer can't solve eventually. They may be exponentially faster on specially structured problems. How $\mathcal{BQP}$ relates to $\mathcal{NP}$ is unknown.
+:::
+
+---
+
+## Up Next
+
+Post 33 is Shor's algorithm. I'm going to show you how factoring a number can be turned into finding when a repeating pattern starts over, do the whole thing by hand for the number 15, and point out exactly the one step where the quantum computer is needed.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
