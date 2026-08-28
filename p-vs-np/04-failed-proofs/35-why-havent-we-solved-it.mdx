@@ -1,0 +1,133 @@
+---
+sidebar_position: 1
+title: "Why Haven't We Solved It?"
+description: "Over fifty years, thousands of researchers, and almost no progress on the main question. It's not lack of effort. It's that mathematicians have proved, three separate times, that whole families of proof techniques cannot work."
+tags: [failed-proofs, barriers, lower-bounds, relativization, natural-proofs, algebrization]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import BarrierTimeline from '@site/src/components/BarrierTimeline';
+
+# Why Haven't We Solved It?
+
+Welcome to Phase 4. This is the phase I was most nervous about writing, and the one I've been looking forward to most.
+
+When I started this project, I had a secret assumption that I'm a bit embarrassed by now. I assumed P vs NP was unsolved mostly because it was **hard**, in the normal sense: a long, complicated proof that nobody had quite managed to finish. Like a very difficult exam question that just needs more working.
+
+That's not the situation at all. The real situation is stranger, and honestly more interesting. It's not that people have run out of ideas. It's that people have **proved** that many of the best ideas cannot work. There are theorems about why the other theorems don't exist.
+
+This post is the overview. The next fifteen go through it piece by piece.
+
+---
+
+## Two Kinds of Results
+
+Every result about how hard a problem is falls into one of two kinds.
+
+<Tabs>
+  <TabItem value="upper" label="Upper bounds" default>
+
+An **upper bound** says: "this problem can be solved in at most this much time".
+
+To prove one, you write down **one** algorithm and show it works and runs fast enough. That's it. All of Phase 2's "it's in $\mathcal{NP}$" arguments were upper bounds. So is every algorithm you've ever been taught.
+
+Upper bounds are about **existence**: there exists an algorithm.
+
+  </TabItem>
+  <TabItem value="lower" label="Lower bounds">
+
+A **lower bound** says: "this problem **cannot** be solved in less than this much time, by **any** algorithm".
+
+To prove one, you have to rule out every algorithm that could ever be written. Not just the ones people have tried. Not just the ones that look sensible. Every possible sequence of instructions, including ones nobody will ever think of.
+
+Lower bounds are about **impossibility**: there does not exist an algorithm.
+
+  </TabItem>
+</Tabs>
+
+$\mathcal{P} \neq \mathcal{NP}$ is a lower bound. It says: there is **no** polynomial-time algorithm for SAT. To prove it, you'd have to rule out infinitely many possible algorithms at once.
+
+Post 10 already mentioned this asymmetry. Phase 4 is about why it's so severe.
+
+---
+
+## How Bad Our Lower Bounds Are
+
+Here's the part that genuinely shocked me when I first read it.
+
+It's not just that we can't prove SAT needs **exponential** time. On realistic models of computers, nobody has even proved that SAT needs substantially more than **linear** time, meaning about as long as it takes to read the formula once.
+
+Think about that. SAT is believed to need something like $2^n$ steps in the worst case. The best proven lower bound for general algorithms is barely more than "you have to at least read the input". The gap between what we believe and what we can prove is almost the entire universe of possible running times.
+
+It's the same story with circuits, which we'll meet properly in Post 39. Most functions need enormous circuits; Claude Shannon proved that in 1949 by counting. But for any **specific** function in $\mathcal{NP}$, the best lower bound anyone has proved on general circuit size is only a little over $3n$ gates, where $n$ is the number of inputs.
+
+We know hard problems are everywhere. We can almost never prove that a **particular** one is hard.
+
+---
+
+## What a Barrier Is
+
+A **barrier** is a theorem that says: "any proof built in **this** particular way can never settle P vs NP".
+
+It doesn't say P vs NP is unsolvable. It says a certain **kind** of argument is a dead end. It's like a map that marks entire regions with "no path through here". You still don't know where the path is, but you know where it isn't.
+
+There are three major barriers, and Phase 4 explains each one:
+
+| Barrier | Year | By | What it rules out |
+|---|---|---|---|
+| **Relativization** | 1975 | Theodore Baker, John Gill, Robert Solovay | Arguments that would still work if every computer had the same magic "oracle" bolted on, which includes simple diagonalization |
+| **Natural Proofs** | 1994 | Alexander Razborov, Steven Rudich | A broad family of arguments that find a simple property that hard functions have, assuming strong cryptography exists |
+| **Algebrization** | 2008 | Scott Aaronson, Avi Wigderson | An upgraded version of relativization, covering the algebraic techniques that got past the first barrier |
+
+Each barrier was a response to a burst of progress. Someone develops a powerful new technique, it proves impressive new results, people get excited that it might crack P vs NP, and then someone proves that it can't.
+
+Here's the timeline. Barriers are highlighted. Click any milestone to see what it was.
+
+<BarrierTimeline />
+
+---
+
+## Is It Even Provable?
+
+When I tell people about the barriers, the question I get most often is: "maybe P vs NP is just unprovable?"
+
+It's a fair question. In 1931, Kurt Gödel showed that in any reasonable system of mathematical axioms, there are true statements that can't be proved from those axioms. And there are real examples: the Continuum Hypothesis, a question about the sizes of infinite sets, was shown to be neither provable nor disprovable from the standard axioms of mathematics.
+
+Could P vs NP be like that? Nobody has ruled it out. But very few researchers think it's likely. Most people believe P vs NP has a definite answer that can be proved; we just don't have the tools yet.
+
+I like this because it connects to what I wrote in the founder blog when I started Azeon: I think the answer already exists, and the problem is the gap between where we are and where the answer lives. The barriers are a map of that gap.
+
+---
+
+## What Phase 4 Covers
+
+Here's the plan for the next fifteen posts:
+
+- **Posts 36 to 38:** oracles, the relativization barrier, and why we need techniques that look **inside** a computation.
+- **Posts 39 to 41:** circuits, the natural proofs barrier, and the surprising way cryptography blocks it.
+- **Posts 42 and 43:** interactive proofs, a technique that got past relativization, and the algebrization barrier that caught up with it.
+- **Posts 44 and 45:** Geometric Complexity Theory, an ambitious program using deep algebra, and the difficulties it's run into.
+- **Posts 46 and 47:** diagonalization, the oldest trick in the book, and exactly why it fails here.
+- **Posts 48 and 49:** common mistakes in claimed proofs, and the burden of proof.
+- **Post 50:** a summary of everything, and what a successful proof would seem to need.
+
+:::note What We Have Established
+P vs NP is unsolved not for lack of effort, but because proving a **lower bound** (that no algorithm exists) is fundamentally harder than proving an **upper bound** (that one does). Our current lower bounds are extremely weak: on general models, nothing much beyond linear time for SAT.
+
+Three **barriers** (relativization in 1975, natural proofs in 1994, algebrization in 2008) are theorems proving that entire families of proof techniques cannot settle P vs NP. A successful proof must avoid all of them.
+:::
+
+---
+
+## Up Next
+
+The first barrier is built on a strange imaginary device called an **oracle**: a black box that answers one specific question instantly, no matter how hard it is.
+
+Post 36 explains what oracles are, why Alan Turing invented them, and how adding one to every computer changes the P vs NP question in completely different ways depending on which oracle you pick.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
