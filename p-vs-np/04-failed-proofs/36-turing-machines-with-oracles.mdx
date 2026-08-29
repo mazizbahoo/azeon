@@ -1,0 +1,133 @@
+---
+sidebar_position: 2
+title: "Turing Machines with Oracles"
+description: "Imagine a computer with a magic black box attached that instantly answers one kind of hard question. Turing invented the idea in 1939. It sounds like a fantasy, but it's the tool that built the first great barrier."
+tags: [failed-proofs, oracles, oracle-machines, turing, relativization, self-reducibility]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import OracleSearch from '@site/src/components/OracleSearch';
+
+# Turing Machines with Oracles
+
+When I was in school, we had a teacher who allowed one "lifeline" per test. You could raise your hand once, ask one question, and she would answer it truthfully. Everyone saved it for the hardest question on the paper, and we used to argue about how to phrase that one question to get the most out of it.
+
+I didn't know it then, but that's exactly the idea of an **oracle**, except an oracle lets you ask as many times as you like.
+
+This post is a setup post. Oracles on their own don't prove anything about P vs NP. But they're the tool that the first barrier is built from, so we need them first.
+
+---
+
+## The Idea
+
+An **oracle** is an imaginary black box that answers one specific yes/no question, instantly, every time.
+
+For example, a **SAT oracle**: you hand it any formula, and in a single step it tells you whether that formula is satisfiable. It doesn't show its work. It doesn't tell you the satisfying assignment. It just says yes or no, and it's always right.
+
+We don't care **how** the box works. That's the whole point. We're asking: **if** you had this box, what could you do?
+
+An **oracle machine** is a normal Turing machine (Post 3) with one extra feature: it can write a question on a special tape, press a button, and the oracle's answer appears in one step.
+
+:::info Where oracles came from
+Alan Turing introduced oracle machines in 1939, in his PhD thesis, three years after his famous paper on computation. He used them to talk about problems that are even harder than the Halting Problem: what could you compute if you had a box that solved the Halting Problem? (Answer: more than before, but there's a new Halting Problem for oracle machines that the box can't solve. The ladder of difficulty goes up forever.)
+:::
+
+---
+
+## Notation
+
+If $A$ is an oracle, we write:
+
+- $\mathcal{P}^A$ for problems solvable in polynomial time by a normal machine that can ask oracle $A$ questions.
+- $\mathcal{NP}^A$ for problems solvable in polynomial time by a nondeterministic machine that can ask oracle $A$ questions.
+
+Each question costs one step. The machine can ask as many questions as it has time for, which is a polynomial number.
+
+The little $A$ up top isn't an exponent. It just means "with access to $A$". Read $\mathcal{P}^{\text{SAT}}$ as "P with a SAT oracle".
+
+---
+
+## What a SAT Oracle Buys You
+
+Let's think about $\mathcal{P}^{\text{SAT}}$: ordinary polynomial-time computers with a SAT box attached.
+
+<Tabs>
+  <TabItem value="np" label="All of NP" default>
+
+Any problem in $\mathcal{NP}$ reduces to SAT (Cook-Levin, Post 12). So: convert the input into a formula in polynomial time, ask the oracle once, return its answer.
+
+So $\mathcal{NP} \subseteq \mathcal{P}^{\text{SAT}}$.
+
+  </TabItem>
+  <TabItem value="conp" label="All of coNP">
+
+For a $co\mathcal{NP}$ problem, convert the input into a formula the same way, ask the oracle, and **flip** the answer.
+
+So $co\mathcal{NP} \subseteq \mathcal{P}^{\text{SAT}}$ as well. A normal machine can ask a question and then negate the answer, which is something a nondeterministic machine can't easily do.
+
+  </TabItem>
+  <TabItem value="search" label="Actual solutions">
+
+This is my favourite one, and it's the figure below.
+
+The SAT oracle only answers yes or no. It never tells you a satisfying assignment. Can you still **find** one?
+
+Yes. Ask: "is the formula still satisfiable if I set $x_1$ to true?" If yes, fix $x_1$ true. If no, then (assuming the formula was satisfiable to begin with) $x_1$ must be false in every solution, so fix it false. Then do the same for $x_2$, with $x_1$ already fixed. And so on.
+
+After $n$ questions, every variable is fixed, and the formula is satisfied. That's $n$ oracle calls instead of $2^n$ guesses.
+
+  </TabItem>
+</Tabs>
+
+Step through it here. The oracle never reveals an assignment. Each answer just tells you which way to go next.
+
+<OracleSearch />
+
+That trick has a name: **self-reducibility**. It shows that for SAT, **deciding** (yes/no) and **finding** (an actual solution) are equally hard, up to a polynomial factor. If $\mathcal{P} = \mathcal{NP}$, you wouldn't just know that solutions exist; you'd be able to find them quickly. That's one reason a proof of $\mathcal{P} = \mathcal{NP}$ would be so practically important. Post 75 will come back to that.
+
+---
+
+## Different Oracles, Different Worlds
+
+Here's the key idea for the next post.
+
+An oracle changes what computers can do. But it changes **both** sides of the P vs NP question at once. So we can ask a new, slightly odd question: for a given oracle $A$, is $\mathcal{P}^A = \mathcal{NP}^A$?
+
+It sounds like a strange thing to care about. Why would anyone ask about an imaginary world where every computer has a magic box?
+
+Here's why. Suppose you have a proof technique that only uses very general facts about computers: that you can simulate one program inside another, that you can list all programs, that you can run a program step by step. Those facts stay true even if every computer has the same oracle attached. Simulating a program that uses an oracle is easy if you have the same oracle.
+
+So any proof that only uses those general facts would work **equally well in every oracle world**. If it proved $\mathcal{P} \neq \mathcal{NP}$ in our world, it would also prove $\mathcal{P}^A \neq \mathcal{NP}^A$ for **every** oracle $A$.
+
+:::tip The crucial observation
+If we could find **even one** oracle $A$ where $\mathcal{P}^A = \mathcal{NP}^A$, then any proof technique that "doesn't care about oracles" could never prove $\mathcal{P} \neq \mathcal{NP}$. It would prove something false in that world.
+
+And if we could find **another** oracle $B$ where $\mathcal{P}^B \neq \mathcal{NP}^B$, then the same kind of technique could never prove $\mathcal{P} = \mathcal{NP}$ either.
+:::
+
+In 1975, three researchers found both. That's the Relativization Barrier, and it's the subject of the next post.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+An **oracle** is a black box that answers one kind of yes/no question in a single step. An oracle machine is a Turing machine that can ask it questions. Turing introduced them in 1939.
+
+$\mathcal{P}^A$ and $\mathcal{NP}^A$ are $\mathcal{P}$ and $\mathcal{NP}$ for machines with oracle $A$. With a SAT oracle, a normal machine can solve all of $\mathcal{NP}$ and $co\mathcal{NP}$, and can even **find** satisfying assignments with $n$ questions (self-reducibility).
+
+Proof techniques that only use general facts about simulation work in every oracle world. That's what makes oracles a test for proof techniques.
+:::
+
+---
+
+## Up Next
+
+Post 37 is the Baker-Gill-Solovay theorem. It constructs one oracle where $\mathcal{P}$ equals $\mathcal{NP}$, and another where they're different. And with that, it shows that the most natural way to attack P vs NP, the trick that proved the Time Hierarchy Theorem in Post 29, cannot possibly work.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
