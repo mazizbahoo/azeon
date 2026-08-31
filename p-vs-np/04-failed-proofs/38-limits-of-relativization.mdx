@@ -1,0 +1,122 @@
+---
+sidebar_position: 4
+title: "Limits of Relativization"
+description: "If oracle-blind proofs can't work, a proof has to look inside the machine. In 1990, a technique called arithmetization did exactly that, proved a famous result that cannot relativize, and briefly made people think the first barrier had fallen."
+tags: [failed-proofs, relativization, arithmetization, ip-equals-pspace, non-relativizing, barriers]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import Arithmetization from '@site/src/components/Arithmetization';
+
+# Limits of Relativization
+
+After I finished writing Post 37, I sat with one question for a few days: what would a proof that **doesn't** relativize even look like?
+
+The barrier says that any argument which treats machines as sealed boxes, things you can list, run and simulate but not look inside, will fail. So a real proof must open the box. It has to use some fact about how a computation actually unfolds, step by step, that would stop being true if an oracle were bolted on.
+
+That sounds vague. This post is about making it concrete, because there's a real example, and it's one of the most exciting stories in the field.
+
+---
+
+## Why Oracles Break "Looking Inside"
+
+Start with why some techniques survive oracles and others don't.
+
+A normal computation is **local**. Each step of a Turing machine only looks at one cell of the tape and the current state, and changes a tiny amount. Cook-Levin (Post 12) depends heavily on this: it builds a giant grid of the machine's entire history, and writes small clauses that check every neighbouring pair of cells is consistent with the rules.
+
+An oracle question breaks that locality. In a single step, the machine writes a long question and gets back an answer that depends on the **entire** question at once, according to rules nobody can see. There's no small local check that says "this oracle answer was correct". The oracle is a black hole in the middle of the grid.
+
+So techniques that rely on computations being made of small, checkable, local steps tend **not** to relativize. That's exactly the kind of technique the barrier leaves open.
+
+---
+
+## Arithmetization: Turning Logic Into Algebra
+
+Around 1990, researchers developed a technique that exploits that locality in a powerful way. It's called **arithmetization**, and the idea is to replace logic with ordinary arithmetic on numbers.
+
+Here's the dictionary. Use 1 for true and 0 for false. Then:
+
+| Logic | Arithmetic | Why it works on 0 and 1 |
+|---|---|---|
+| $x \wedge y$ | $x \cdot y$ | Only $1 \cdot 1 = 1$ |
+| $\neg x$ | $1 - x$ | $1 - 1 = 0$, $1 - 0 = 1$ |
+| $x \vee y$ | $1 - (1 - x)(1 - y)$ | Only false if both $x$ and $y$ are 0 |
+
+Using that dictionary, any Boolean formula becomes a **polynomial**: a formula built from numbers, variables, adding and multiplying. On inputs of 0 and 1, the polynomial gives exactly the same answer as the formula.
+
+But here's the important bit. A polynomial doesn't care whether you plug in 0 and 1. You can plug in 2, or 5, or 1,000. A formula has no idea what "$x = 5$" would mean. A polynomial gives you a perfectly good number.
+
+<Arithmetization />
+
+Set all three sliders to 0 or 1 and check that the polynomial agrees with the formula. Then push one up to 3 or 4 and watch the polynomial keep going where the logic has nothing to say.
+
+Why would anyone want that? Because polynomials have a powerful property that formulas don't: **two different low-degree polynomials can only agree at a few points**. If two polynomials of low degree are different, and you plug in a random number from a big range, they'll almost certainly give different answers. (This is the Schwartz–Zippel idea from Post 31.)
+
+So by moving from 0s and 1s into a much bigger number system, you get a way to **detect cheating with a random spot check**. A tiny lie somewhere in a huge computation gets spread out over almost all the points of the polynomial, where a random check will catch it.
+
+---
+
+## The Result: IP = PSPACE
+
+The big application was to **interactive proofs**, which we'll cover properly in Post 42. Very briefly: a weak, randomized verifier talks to an all-powerful but untrustworthy prover, asking it questions, and at the end has to be convinced that some statement is true. The class of statements that can be proved this way is called $\mathcal{IP}$.
+
+In 1990, building on work by Carsten Lund, Lance Fortnow, Howard Karloff and Noam Nisan, Adi Shamir proved:
+
+$$\mathcal{IP} = \mathcal{PSPACE}$$
+
+Every problem that can be solved with polynomial memory, including TQBF, including perfect play in polynomial-length games, can be **proved** to a quick, randomized verifier through a conversation. The prover arithmetizes the formula and the verifier checks the polynomial at random points, one variable at a time.
+
+Here's why this mattered so much for barriers:
+
+:::info IP = PSPACE does not relativize
+In 1988, before Shamir's proof, Lance Fortnow and Michael Sipser had constructed an oracle relative to which $co\mathcal{NP}$ is **not** contained in $\mathcal{IP}$. In that oracle world, $\mathcal{IP} \neq \mathcal{PSPACE}$.
+
+So $\mathcal{IP} = \mathcal{PSPACE}$ is true in our world but false in some oracle world. Any proof of it **must** use a non-relativizing technique. And arithmetization was that technique.
+:::
+
+This was the first really big, natural result in complexity theory that provably could not have been proved by relativizing methods. Researchers had broken through the first barrier, in at least one place.
+
+---
+
+## Why People Got Excited
+
+Think about where this left the field around 1990.
+
+- For fifteen years, BGS had said: "your usual techniques can't touch P vs NP".
+- Then a new technique arrived that provably goes beyond the usual techniques.
+- It proved a stunning equality between two classes that look very different.
+
+It was natural to wonder whether arithmetization was the tool that would finally crack P vs NP. Several more major non-relativizing results followed in the next few years, including the PCP theorem in 1992, which we'll meet in Post 42 too.
+
+And yet, none of them came close to separating $\mathcal{P}$ from $\mathcal{NP}$. Something else was stopping them. It took eighteen years to figure out what, and the answer is the third barrier, algebrization, in Post 43.
+
+---
+
+## What This Taught Me
+
+Here's how I now think about the first barrier, after writing these three posts.
+
+Relativization didn't say "give up". It said "**look inside the machine**". A successful proof has to use some specific property of real computation: that it's built from small, local steps, or that it can be described by polynomials, or something else no oracle can fake.
+
+The history since 1975 is basically people finding new ways to look inside, getting some impressive results, and then discovering a new, subtler reason why that particular way of looking still isn't enough for P vs NP.
+
+:::note What We Have Established
+Real computations are **local**: each step touches only a small part of the machine. Oracle questions break that locality, so techniques that rely on it tend not to relativize.
+
+**Arithmetization** turns Boolean formulas into polynomials (AND to multiplication, NOT $x$ to $1 - x$). The polynomial agrees with the formula on 0s and 1s but is defined everywhere, which lets random spot checks catch errors.
+
+Using it, Shamir (1990), building on Lund, Fortnow, Karloff and Nisan, proved $\mathcal{IP} = \mathcal{PSPACE}$. Since there are oracle worlds where that's false (Fortnow and Sipser, 1988), the result is non-relativizing: it got past the first barrier. It didn't get anywhere near P vs NP.
+:::
+
+---
+
+## Up Next
+
+Before the second barrier, we need a different way of measuring computation. Post 39 introduces **Boolean circuits**: computation drawn as a diagram of AND, OR and NOT gates, with no tape and no program at all. For about a decade, circuits looked like the most promising road to proving $\mathcal{P} \neq \mathcal{NP}$, and they produced some of the only real lower bounds we have.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
