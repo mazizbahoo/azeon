@@ -1,0 +1,159 @@
+---
+sidebar_position: 6
+title: "The Natural Proofs Barrier"
+description: "Razborov and Rudich noticed that every circuit lower bound proof of their time had the same simple shape. Then they proved that, if strong cryptography exists, no proof of that shape can ever separate P from NP."
+tags: [failed-proofs, natural-proofs, razborov-rudich, circuits, lower-bounds, barriers, cryptography]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# The Natural Proofs Barrier
+
+The second barrier was the one that took me the longest to understand. I read the summary in three different places, and each time I came away with a slightly different, slightly wrong picture. What finally worked was ignoring the formal definitions for a day and asking a simple question: what do all the successful circuit lower bounds from Post 39 have in common?
+
+That's exactly the question Alexander Razborov and Steven Rudich asked in 1994. Their answer won them the Gödel Prize in 2007, one of the top awards in theoretical computer science.
+
+---
+
+## Functions as Long Strings
+
+First, one change of viewpoint that makes everything easier.
+
+A Boolean function with $n$ inputs is completely described by its **truth table**: a list of its output for each of the $2^n$ possible inputs. So a function is just a long string of 0s and 1s, of length $2^n$.
+
+For $n = 3$, "Majority" from Post 39 is the 8-bit string you get by listing its output on 000, 001, 010, ..., 111:
+
+$$0\,0\,0\,1\,0\,1\,1\,1$$
+
+For $n = 20$, a truth table is about a million bits long. That's the object we'll be talking about: not a program, not a circuit, but this big string.
+
+---
+
+## The Shape of Every Known Proof
+
+Here's what Razborov and Rudich noticed. Every circuit lower bound proof they examined, including the $\mathcal{AC}^0$ and monotone results from Post 39, worked by finding a **property** of truth tables with three features.
+
+<Tabs>
+  <TabItem value="useful" label="1. Useful" default>
+
+**Every function that has the property is hard**: it can't be computed by small circuits of the kind being studied.
+
+This is the whole point of the property. It's the thing that proves the lower bound. Then you show that your target function, like parity, has the property.
+
+  </TabItem>
+  <TabItem value="large" label="2. Large">
+
+**Lots of functions have the property.** Not all of them, but a noticeable fraction of all possible truth tables.
+
+This sounds like an odd thing to require. But it isn't a requirement anyone chose. It's just what happened: the properties people found were all "typical" properties that random functions tend to have. That makes sense, since Post 39 showed random functions are almost always hard.
+
+  </TabItem>
+  <TabItem value="constructive" label="3. Constructive">
+
+**You can check the property quickly, given the truth table.** "Quickly" here means in time polynomial in the length of the truth table, which is $2^n$.
+
+That sounds like a huge amount of time, and it is. But it's still a precise, efficient procedure on the truth table: you could run it if someone handed you the whole string.
+
+  </TabItem>
+</Tabs>
+
+A proof that uses a property with all three features is called a **natural proof**. Razborov and Rudich chose the word "natural" because, at the time, essentially every known lower bound proof was naturally of this kind, or could be turned into one.
+
+### An example
+
+For parity and $\mathcal{AC}^0$, the property is roughly: "if you randomly fix most of the inputs to 0 or 1, the function still doesn't become constant". Shallow circuits collapse to constants under random fixing; parity doesn't (fix all but one input, and parity still depends on that one). Most random functions don't collapse either, so the property is **large**. And you can check it on a truth table by trying fixings, so it's **constructive**.
+
+---
+
+## The Theorem
+
+Here's what they proved, in plain words.
+
+> **Razborov–Rudich (1994):** if there exist pseudorandom functions that are computed by small circuits and that no reasonably fast algorithm can tell apart from truly random functions, then **no natural proof** can show that a problem in $\mathcal{NP}$ requires superpolynomial-size general circuits.
+
+The "if" is about cryptography. Pseudorandom functions are one of the basic building blocks of modern encryption, and the assumption that strong ones exist is widely believed. Post 41 is entirely about why this assumption blocks natural proofs, but here is the core of the argument.
+
+---
+
+## Why It Works: A Natural Property Is a Detector
+
+Suppose you had a natural property that proves circuit lower bounds. What would it let you do?
+
+<Tabs>
+  <TabItem value="random" label="Random functions" default>
+
+Take a truly random function: a random truth table. Because the property is **large**, a random function has it with noticeable probability.
+
+  </TabItem>
+  <TabItem value="pseudo" label="Pseudorandom functions">
+
+Now take a **pseudorandom** function: one that looks random but is actually computed by a small circuit, from a short secret key. Because the property is **useful**, every function that has it needs a big circuit. A pseudorandom function has a small circuit. So it **never** has the property.
+
+  </TabItem>
+  <TabItem value="detect" label="So you can tell them apart">
+
+The property is **constructive**, so you can check it quickly on any truth table. Check it, and:
+
+- if the property holds, you're probably looking at a truly random function,
+- if it doesn't, you're probably looking at a pseudorandom one.
+
+That's a way to tell pseudorandom functions from truly random ones. Which is exactly what secure pseudorandom functions are supposed to make impossible.
+
+  </TabItem>
+</Tabs>
+
+So you can't have both. Either strong pseudorandom functions don't exist, or natural properties that prove strong circuit lower bounds don't exist.
+
+:::caution The Natural Proofs Barrier
+If strong cryptography exists, then no natural proof can show $\mathcal{NP} \not\subseteq \mathcal{P}/\text{poly}$, and so no natural circuit-based argument can prove $\mathcal{P} \neq \mathcal{NP}$.
+:::
+
+---
+
+## The Irony
+
+This is the part I keep coming back to.
+
+To prove $\mathcal{P} \neq \mathcal{NP}$, we want to show that some problems are genuinely hard. Strong cryptography is **also** based on some problems being genuinely hard. You'd expect those two goals to work together.
+
+Instead, they fight. If hardness is strong enough to support good cryptography, then hardness is strong enough to **hide itself** from the most natural ways of proving it. Hard functions disguise themselves as random ones so well that a typical property can't tell the difference.
+
+People often describe this as self-defeating: a natural proof of hardness would undermine the very hardness assumptions most researchers believe.
+
+---
+
+## What It Doesn't Rule Out
+
+As always, a barrier only blocks a certain kind of road.
+
+A proof could get around natural proofs by using a property that is:
+
+- **not large**: something that only a tiny, special set of functions has, not random ones. This is sometimes described as needing to use some special feature of the specific function, like SAT, that random functions don't share.
+- **not constructive**: a property that's hard to check even given the whole truth table.
+
+Both escape routes are open. But it's hard to even imagine how a lower bound proof would work through them, which is exactly why the barrier is so powerful. It says the techniques that came naturally to everyone are the ones that can't work.
+
+I also want to be clear about one thing: natural proofs say nothing about **relativization**. They block a different set of techniques. A successful proof has to avoid **both** barriers at once. Circuit arguments got past relativization by looking inside the computation; natural proofs then caught almost all of them.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+A function's **truth table** is a string of length $2^n$. Razborov and Rudich (1994) observed that known circuit lower bounds use a property of truth tables that is **useful** (only hard functions have it), **large** (many random functions have it) and **constructive** (checkable in time polynomial in $2^n$). They called these **natural proofs**.
+
+They proved that if strong pseudorandom functions exist, no natural proof can show an NP problem needs superpolynomial circuits, because a natural property would distinguish pseudorandom functions from truly random ones and break them. A successful proof must use a property that is rare, hard to check, or both.
+:::
+
+---
+
+## Up Next
+
+I've been using the word "pseudorandom" a lot without explaining it properly. Post 41 slows down on exactly that: what it means for a function to look random, why cryptographers believe such functions exist, and why the existence of secure encryption is, strangely, one of the main reasons we can't prove the thing encryption depends on.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

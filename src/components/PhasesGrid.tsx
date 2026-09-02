@@ -45,7 +45,7 @@ const PHASES: Phase[] = [
     slug: '/p-vs-np/failed-proofs',
     color: 'var(--az-phase-04)',
     desc: 'Relativization, Natural Proofs, Algebrization, GCT — every barrier that blocks a proof.',
-    publishedPosts: 5,
+    publishedPosts: 6,
     totalPosts: 16,
   },
   {
