@@ -1,0 +1,156 @@
+---
+sidebar_position: 8
+title: "Interactive Proof Systems"
+description: "What if a proof wasn't a written document, but a conversation? A weak, coin-flipping verifier questions a powerful prover. This simple change led to IP = PSPACE, zero-knowledge proofs and the PCP theorem."
+tags: [failed-proofs, interactive-proofs, ip, zero-knowledge, pcp-theorem, graph-isomorphism]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import GraphNonIsoGame from '@site/src/components/GraphNonIsoGame';
+
+# Interactive Proof Systems
+
+Every proof in this series so far has been a **document**. A certificate you can check, a chain of reductions, a written argument. You read it, you check it, you're convinced.
+
+In the mid-1980s, a few researchers asked what happens if a proof is a **conversation** instead. Not a fixed document, but a back-and-forth, where you ask questions and the other side has to answer on the spot.
+
+That sounds like a small change. It turned out to be one of the most productive ideas in complexity theory. It's the setting where relativization was first beaten (Post 38), and it's where cryptographers got zero-knowledge proofs, which are now used in real systems.
+
+---
+
+## The Setup
+
+There are two players.
+
+- The **prover** is all-powerful. It can do any amount of computation. But it's **not trusted**: it might be lying.
+- The **verifier** is weak: it runs in polynomial time. But it can **flip coins**, like the algorithms in Post 31, and it can ask the prover questions.
+
+They exchange messages for a polynomial number of rounds. At the end, the verifier accepts or rejects.
+
+:::info The Class IP
+A problem is in $\mathcal{IP}$ (Interactive Polynomial time) if there's a verifier such that:
+- **Completeness:** if the answer is yes, an honest prover can convince the verifier with high probability.
+- **Soundness:** if the answer is no, then **no** prover, however clever or dishonest, can convince the verifier except with small probability.
+:::
+
+$\mathcal{NP}$ fits inside this immediately: the prover just sends the certificate, and the verifier checks it. One message, no coins. The question is how much **more** you get by adding conversation and randomness.
+
+The idea came from two papers published in 1985: one by Shafi Goldwasser, Silvio Micali and Charles Rackoff, and one by László Babai. They shared the first Gödel Prize in 1993 (Babai with Shlomo Moran, for a related paper).
+
+---
+
+## A Proof Without a Certificate
+
+Here's the example that made it click for me.
+
+Two graphs are **isomorphic** if they're the same graph with the nodes relabelled: same shape, different names. Deciding whether two graphs are isomorphic is in $\mathcal{NP}$: the certificate is the relabelling.
+
+Now flip it. How would a prover convince you two graphs are **not** isomorphic? There's no obvious certificate. "I tried all the relabellings and none worked" is not something you can check quickly. Graph non-isomorphism is not known to be in $\mathcal{NP}$.
+
+But with a conversation, it's easy. This protocol is by Oded Goldreich, Silvio Micali and Avi Wigderson, from 1986:
+
+<Tabs>
+  <TabItem value="v" label="Verifier's move" default>
+
+The verifier secretly flips a coin to choose graph 0 or graph 1. It then randomly scrambles the labels of the chosen graph, and sends the scrambled graph to the prover.
+
+  </TabItem>
+  <TabItem value="p" label="Prover's move">
+
+The prover has to say which graph, 0 or 1, the scrambled one came from.
+
+  </TabItem>
+  <TabItem value="why" label="Why it works">
+
+**If the graphs are really different**, the scrambled graph is still isomorphic to exactly one of them. The all-powerful prover can work out which one, and answers correctly every time.
+
+**If the graphs are secretly the same**, a scrambled copy of graph 0 looks exactly like a scrambled copy of graph 1. The prover has no information at all about the coin flip. It can only guess, and it's right half the time.
+
+Repeat 20 times. An honest prover with different graphs gets all 20 right. A cheating prover with identical graphs gets all 20 right with probability $\left(\frac{1}{2}\right)^{20}$, about one in a million.
+
+  </TabItem>
+</Tabs>
+
+You get to be the verifier here. With **Really different**, the two graphs have the same number of nodes and edges but different shapes (a ring versus a triangle with a tail). With **Secretly the same**, graph 1 is the ring with its nodes relabelled, so it looks like a star but is the same graph.
+
+<GraphNonIsoGame />
+
+Play a few rounds in each mode. With different graphs, the prover never misses. With the same graph, it will slip up within a few rounds. The verifier never solves graph isomorphism itself. It just asks questions whose answers it already knows, and watches whether the prover could know them too.
+
+---
+
+## How Far It Goes: IP = PSPACE
+
+For a few years after 1985, people expected $\mathcal{IP}$ to be only a little bigger than $\mathcal{NP}$.
+
+Then in 1990, everything changed. First, Carsten Lund, Lance Fortnow, Howard Karloff and Noam Nisan showed that interactive proofs can prove that a formula has **no** satisfying assignment, and even exactly how many it has. That's far beyond $\mathcal{NP}$. Weeks later, Adi Shamir extended their method to prove:
+
+$$\mathcal{IP} = \mathcal{PSPACE}$$
+
+Anything that can be computed with polynomial memory can be proved to a polynomial-time, coin-flipping verifier through a conversation. Including TQBF, and perfect play in games of polynomial length.
+
+The method was arithmetization from Post 38: turn the formula into a polynomial, and have the prover commit to values of it that the verifier checks at random points, one variable at a time. A lie anywhere gets spread across the polynomial, and a random check catches it.
+
+And as Post 38 explained, this result **cannot** be proved by any relativizing technique. That was the first big crack in the first barrier.
+
+---
+
+## Two Things That Came Out of It
+
+<Tabs>
+  <TabItem value="zk" label="Zero-knowledge proofs" default>
+
+Look back at the graph game. At the end, the verifier is convinced the graphs are different. But what did it learn? Only answers to questions it already knew the answers to. It learned nothing else at all.
+
+That's a **zero-knowledge proof**: convincing someone a statement is true while revealing nothing beyond the fact that it's true. Goldwasser, Micali and Rackoff introduced the idea in their 1985 paper.
+
+Today, zero-knowledge proofs are used in real systems. For example, some cryptocurrencies use them to prove a transaction is valid without revealing who paid whom or how much, and researchers are working on using them to prove someone is over 18 without revealing their birth date.
+
+  </TabItem>
+  <TabItem value="pcp" label="The PCP theorem">
+
+Researchers then asked: what if there are **several** provers who can't talk to each other, or what if the proof is written down but the verifier only reads a few random bits of it?
+
+The answer, proved in 1992 by Sanjeev Arora and Shmuel Safra, and by Arora, Carsten Lund, Rajeev Motwani, Madhu Sudan and Mario Szegedy, is the **PCP theorem** (Probabilistically Checkable Proofs). It says:
+
+> Every $\mathcal{NP}$ statement has a proof format where a verifier can check it by reading only a **constant** number of randomly chosen bits.
+
+You can be convinced a 1,000-page proof is correct by reading a handful of characters, chosen at random. That sounds impossible, and it's one of the deepest results in the field. It also turned out to be the key to proving that many problems can't even be **approximately** solved quickly, which matters a lot in Phase 6.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Why It Didn't Crack P vs NP
+
+Interactive proofs gave the field powerful non-relativizing tools. So why didn't they lead to $\mathcal{P} \neq \mathcal{NP}$?
+
+They proved **equalities** between classes and **upper bounds**: "this class can be verified this way". What P vs NP needs is a **lower bound**: "this cannot be done". Arithmetization turned out to be very good at the first kind of result and weak at the second.
+
+In 2008, Scott Aaronson and Avi Wigderson found the precise reason. That's the third barrier, algebrization, and it's next.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+An **interactive proof** is a conversation between an all-powerful but untrusted prover and a polynomial-time, coin-flipping verifier. Completeness: true statements can be proved. Soundness: false ones can't, except with small probability. Introduced in 1985 by Goldwasser, Micali and Rackoff, and by Babai.
+
+Graph non-isomorphism has a simple interactive proof (Goldreich, Micali and Wigderson, 1986) even though no short certificate is known. $\mathcal{IP} = \mathcal{PSPACE}$ (Shamir, 1990, building on Lund, Fortnow, Karloff and Nisan), using arithmetization, which doesn't relativize.
+
+The same ideas led to zero-knowledge proofs and to the PCP theorem (1992). They give powerful upper bounds, but not the lower bounds P vs NP needs.
+:::
+
+---
+
+## Up Next
+
+Post 43 is the Algebrization barrier. Aaronson and Wigderson took relativization, upgraded it to cover the algebraic tricks from arithmetization, and showed that the upgraded version still can't settle P vs NP. The second time the field broke through a wall, it found another one right behind it.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
