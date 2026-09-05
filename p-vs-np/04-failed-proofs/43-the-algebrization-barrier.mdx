@@ -1,0 +1,139 @@
+---
+sidebar_position: 9
+title: "The Algebrization Barrier"
+description: "Arithmetization broke through the first barrier. In 2008, Aaronson and Wigderson upgraded relativization to cover it, and showed that the upgraded version still can't settle P vs NP. A second wall, right behind the first."
+tags: [failed-proofs, algebrization, aaronson-wigderson, arithmetization, relativization, barriers]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import Arithmetization from '@site/src/components/Arithmetization';
+
+# The Algebrization Barrier
+
+The story of this barrier has a shape I've now seen three times in Phase 4, and it's starting to feel almost like a law of nature.
+
+A barrier blocks a family of techniques. Someone finds a technique outside that family. It produces amazing results. Everyone hopes it's the key. Then someone shows that it falls inside a slightly bigger family, which is also blocked.
+
+For relativization, the technique that broke through was arithmetization (Post 38). It proved $\mathcal{IP} = \mathcal{PSPACE}$, which provably can't be proved by relativizing methods. For almost twenty years, it was the main hope for getting past the first barrier.
+
+In 2008, Scott Aaronson and Avi Wigderson published a paper called *Algebrization: A New Barrier in Complexity Theory*. It closed that door too.
+
+---
+
+## The Problem With the Old Test
+
+Here's why arithmetization escaped relativization, using the figure from Post 38 again.
+
+<Arithmetization />
+
+Arithmetization takes a Boolean formula and turns it into a polynomial that agrees with the formula on 0s and 1s, but also has values at **other** points, like $x = 3$. The interactive proofs in Post 42 work by checking the polynomial at random non-Boolean points.
+
+Now think about an oracle $A$. It's a black box that only answers questions about strings of 0s and 1s. If a proof needs to arithmetize a computation that **uses** the oracle, it needs to know what the oracle "would say" at a point like $x = 3$. A plain oracle has no answer for that. So the proof breaks when an oracle is attached. That's exactly why it doesn't relativize.
+
+So relativization was the wrong test for this kind of technique. It was too harsh: it took away something arithmetization depends on. Aaronson and Wigderson asked: what's the **fair** test?
+
+---
+
+## The Fair Test: Give the Oracle a Polynomial Too
+
+Their idea: when you attach an oracle $A$ to a machine, also allow the machine (on one side of the comparison) to ask about a **polynomial extension** of $A$, which they wrote as $\tilde{A}$.
+
+:::info New Symbol: $\tilde{A}$
+Say it as "A tilde". It's a low-degree polynomial that agrees with the oracle $A$ on every string of 0s and 1s, but is also defined on other numbers. It's the same move as the figure above, applied to the oracle itself instead of a formula.
+:::
+
+Now a proof that arithmetizes can do what it needs: when it reaches an oracle question at a non-Boolean point, it asks $\tilde{A}$.
+
+They defined:
+
+<Tabs>
+  <TabItem value="inclusion" label="An inclusion algebrizes" default>
+
+A result of the form "class $C$ is inside class $D$" **algebrizes** if, for every oracle $A$ and every polynomial extension $\tilde{A}$ of it:
+
+$$C^A \subseteq D^{\tilde{A}}$$
+
+The bigger class gets the more powerful, polynomial version of the oracle.
+
+  </TabItem>
+  <TabItem value="separation" label="A separation algebrizes">
+
+A result of the form "class $C$ is not inside class $D$" **algebrizes** if, for every $A$ and $\tilde{A}$:
+
+$$C^{\tilde{A}} \not\subseteq D^A$$
+
+Here the class that's supposed to be bigger gets the polynomial version.
+
+  </TabItem>
+</Tabs>
+
+The asymmetry looks odd, but it's chosen so that the test is as generous as possible to arithmetization-style proofs.
+
+Then they checked: does $\mathcal{IP} = \mathcal{PSPACE}$ pass this test? **Yes.** So do the other famous non-relativizing results from that era, and the techniques used to prove them. The new definition captures exactly the kind of technique that broke the first barrier.
+
+---
+
+## The Barrier
+
+Then they did what Baker, Gill and Solovay did in 1975, but in the new, algebraic setting. They built oracle worlds.
+
+> **Aaronson–Wigderson (2008):**
+> - There is an $A$ and an extension $\tilde{A}$ with $\mathcal{NP}^{\tilde{A}} \subseteq \mathcal{P}^{A}$.
+> - There is an $A$ and an extension $\tilde{A}$ with $\mathcal{NP}^{A} \not\subseteq \mathcal{P}^{\tilde{A}}$.
+
+The first world means no algebrizing technique can prove $\mathcal{P} \neq \mathcal{NP}$. The second means no algebrizing technique can prove $\mathcal{P} = \mathcal{NP}$.
+
+:::caution The Algebrization Barrier
+Any proof technique that algebrizes, which includes arithmetization and the methods behind $\mathcal{IP} = \mathcal{PSPACE}$, cannot settle P vs NP in either direction.
+:::
+
+They also showed it blocks many other open questions, including several about circuits. So algebrization isn't only a P vs NP barrier; it marks a whole region of complexity theory where current tools can't reach.
+
+---
+
+## How the Second World Is Built
+
+The way they build the second world is surprisingly connected to things from earlier in this series. Roughly:
+
+In Post 37, the BGS oracle hid a gem in one of $2^n$ boxes, and a deterministic machine couldn't find it with polynomially many questions.
+
+In the algebraic setting, the machine can ask about the polynomial $\tilde{A}$ at non-Boolean points, which might seem to leak information about where the gem is. Aaronson and Wigderson use facts about low-degree polynomials, in particular that you can design polynomials which are zero on all the points the machine asked about while still being nonzero somewhere else, to show that polynomially many such questions **still** can't locate the gem.
+
+It's the same adversary as Post 37, but now it has to fool a much more powerful questioner, and it uses algebra to do it.
+
+---
+
+## What's Left
+
+After three barriers, here's what a successful proof of $\mathcal{P} \neq \mathcal{NP}$ seems to need:
+
+| Barrier | The proof must... |
+|---|---|
+| Relativization | use something about how real computation works inside the machine |
+| Natural proofs | not rely on a large, easily checkable property of truth tables |
+| Algebrization | go beyond extending computations into polynomials |
+
+Very few known techniques get past all three at once. Post 50 talks about one notable result that did, for a much weaker question.
+
+And I want to be honest about how this felt to read. I'd just spent a week getting excited about interactive proofs and arithmetization, and then this paper showed, quite precisely, why that excitement had been premature. It's frustrating. It's also clarifying. The field knows **where not to look**, and that's genuine knowledge.
+
+:::note What We Have Established
+Arithmetization escaped relativization because a plain oracle can't be evaluated at non-Boolean points. Aaronson and Wigderson (2008) made the test fairer: let one side also query $\tilde{A}$, a low-degree polynomial extension of the oracle. Results that survive this test **algebrize**, and $\mathcal{IP} = \mathcal{PSPACE}$ does.
+
+They then built worlds where $\mathcal{NP}^{\tilde{A}} \subseteq \mathcal{P}^A$ and others where $\mathcal{NP}^A \not\subseteq \mathcal{P}^{\tilde{A}}$, so no algebrizing technique can settle P vs NP. A proof must get past relativization, natural proofs and algebrization together.
+:::
+
+---
+
+## Up Next
+
+If every combinatorial and algebraic trick seems blocked, maybe the answer needs much deeper mathematics.
+
+That's the bet behind **Geometric Complexity Theory**, a program started by Ketan Mulmuley and Milind Sohoni around 2001. It tries to separate complexity classes using symmetry, algebraic geometry and representation theory, areas of maths that had almost nothing to do with computer science before. Post 44 is about the idea.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
