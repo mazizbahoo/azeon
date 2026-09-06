@@ -1,0 +1,144 @@
+---
+sidebar_position: 10
+title: "Geometric Complexity Theory (GCT)"
+description: "If combinatorics and simple algebra are blocked, maybe P vs NP needs the deepest mathematics we have. Mulmuley and Sohoni's program tries to separate classes using symmetry, geometry and representation theory, starting with two almost identical formulas."
+tags: [failed-proofs, gct, geometric-complexity-theory, permanent, determinant, valiant, representation-theory]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PermDet from '@site/src/components/PermDet';
+
+# Geometric Complexity Theory (GCT)
+
+This is the post where I have to be most upfront about the limits of my own understanding.
+
+Geometric Complexity Theory uses mathematics I haven't studied: algebraic geometry and representation theory. These are subjects people usually meet in the later years of a maths degree, or in graduate school. I've read the overview papers, a couple of survey articles and some lecture notes, and I can follow the **idea**. I can't follow the details yet.
+
+So this post explains the idea, which I think is genuinely beautiful, and points out clearly where the deep mathematics takes over. If you're a mathematician reading this and I've oversimplified something, please open an issue.
+
+---
+
+## Two Almost Identical Formulas
+
+GCT starts not with P vs NP directly, but with a cleaner algebraic cousin of it, about two formulas.
+
+You may have met the **determinant** of a matrix in school. For a $3 \times 3$ grid of numbers, you pick one number from each row, each from a different column, and multiply them. There are $3! = 6$ ways to do that. Then you add three of those products and **subtract** the other three, according to a fixed rule of signs.
+
+The **permanent** is the same thing, without the signs. Add all six products.
+
+That's the only difference: some minus signs.
+
+<PermDet />
+
+Change some cells and watch both numbers. Hover a product to see which cells it multiplies. With all six products right in front of you, it's hard to believe one of these is easy and the other is hard. But that's exactly the situation.
+
+---
+
+## Easy and Hard
+
+<Tabs>
+  <TabItem value="det" label="The determinant is easy" default>
+
+For an $n \times n$ matrix, the determinant has $n!$ products in its formula. That's astronomically many. But you never compute them one by one. Gaussian elimination, the row-reduction method from school algebra, finds the determinant in about $n^3$ steps.
+
+It works **because** of the minus signs. Row operations change the determinant in simple, predictable ways, and the signs make huge numbers of products cancel out without you ever writing them down.
+
+  </TabItem>
+  <TabItem value="perm" label="The permanent is hard">
+
+Remove the signs, and nothing cancels any more. No fast method is known.
+
+In 1979, Leslie Valiant proved that computing the permanent is **#P-complete**. #P (pronounced "sharp P") is the class of **counting** problems: not "is there a solution?" but "how many solutions are there?". Counting the satisfying assignments of a formula is #P-complete, and it's at least as hard as anything in $\mathcal{NP}$.
+
+There's a nice concrete meaning: if you have a matrix of 0s and 1s showing which workers can do which jobs, the permanent counts the number of ways to give every worker a different job they can do. That count is #P-complete to compute.
+
+  </TabItem>
+</Tabs>
+
+Valiant also set up an **algebraic version of P vs NP**, now called **VP vs VNP**. Roughly: the determinant plays the role of an easy, "P-like" polynomial, and the permanent plays the role of a hard, "NP-like" one. Showing that the permanent genuinely can't be expressed as a reasonably small determinant would be the algebraic analogue of proving $\mathcal{P} \neq \mathcal{NP}$. It's widely seen as an easier first target, and a necessary stepping stone.
+
+### How big a determinant does the permanent need?
+
+Here's the precise question. Can you write the permanent of an $n \times n$ matrix as the determinant of some **bigger** $m \times m$ matrix, whose entries are simple combinations of the original entries? If yes, the permanent would be easy too. The smallest such $m$ is called the **determinantal complexity** of the permanent.
+
+What's known:
+
+- **Upper bound:** you can always do it with $m$ around $2^n$ (Bruno Grenet, 2011). Exponential.
+- **Lower bound:** you need at least $m \geq n^2 / 2$ (Thierry Mignon and Nicolas Ressayre, 2004). Only quadratic.
+
+**Valiant's conjecture** is that $m$ must grow faster than any polynomial in $n$. The gap between $n^2/2$ and $2^n$ is where the whole problem lives.
+
+---
+
+## The Idea of GCT: Symmetry
+
+Around 2001, Ketan Mulmuley and Milind Sohoni proposed a way to attack this using **symmetry**.
+
+Both the determinant and the permanent have many symmetries: ways you can shuffle or transform the matrix without changing the value. Swap two rows and the permanent doesn't change at all. The determinant changes sign. Transpose the matrix, and both stay the same.
+
+The key observation behind GCT is that the permanent and the determinant are each **characterised** by their symmetries: they're essentially the only polynomials with exactly those symmetries. That's unusual. Most polynomials don't have that property.
+
+<Tabs>
+  <TabItem value="orbits" label="1. Shapes from symmetry" default>
+
+Take the determinant and apply every possible linear change of variables to it. You get a huge family of polynomials: everything you can reach from the determinant. Mathematicians picture this family as a **geometric shape** in a very high-dimensional space. Do the same with the permanent (padded so the sizes match) to get a second shape.
+
+  </TabItem>
+  <TabItem value="contain" label="2. Is one shape inside the other?">
+
+If the permanent could be written as a small determinant, the permanent's shape would sit **inside** the determinant's shape.
+
+So the algebraic P vs NP question becomes a geometric one: is shape P (from the permanent) contained in shape D (from the determinant)?
+
+  </TabItem>
+  <TabItem value="obstruct" label="3. Find an obstruction">
+
+To prove one shape is **not** inside the other, GCT looks for an **obstruction**: a mathematical object that "fits" with one shape but not the other.
+
+Because both shapes are built from symmetry, the objects that describe them come from **representation theory**, the mathematics of how symmetries act. An obstruction would be a particular kind of symmetric pattern that appears in the permanent's shape but can't appear in the determinant's.
+
+Finding one, for every size $n$, would separate them.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Why GCT Might Get Past the Barriers
+
+This is the part that made GCT exciting to people, and that made me want to understand it.
+
+Remember the natural proofs barrier: a proof can't use a property that lots of random functions have. GCT's obstructions come from the **very specific** symmetries of the permanent. Random polynomials don't have those symmetries at all. So the property GCT uses is **not large**. It's about one special object, not a typical one.
+
+That's exactly the escape route from natural proofs that Post 41 described. Mulmuley has argued that GCT, by relying on these exceptional symmetries, is designed to avoid the known barriers.
+
+It's also not a relativizing argument: it's about the internal algebraic structure of specific polynomials, not about machines with oracles.
+
+---
+
+## Where It Stands
+
+GCT is a **program**, not a proof. It's a proposed route, with many steps, several of which are major open problems in mathematics on their own.
+
+Mulmuley has been open that he expects it to take a long time. The program requires understanding certain numbers from representation theory (with names like Kronecker coefficients and plethysm coefficients) much better than anyone currently does.
+
+And in 2016, a significant setback arrived: the simplest kind of obstruction GCT had hoped to use was proved not to exist. That's the next post.
+
+:::note What We Have Established
+The **determinant** and the **permanent** use the same $n!$ products; the determinant attaches signs, the permanent doesn't. The determinant takes about $n^3$ steps (Gaussian elimination); the permanent is #P-complete (Valiant, 1979). Proving the permanent can't be written as a small determinant is an algebraic version of P vs NP (VP vs VNP). Known bounds on the size needed range from $n^2/2$ to about $2^n$.
+
+**Geometric Complexity Theory** (Mulmuley and Sohoni, around 2001) turns this into geometry: each polynomial generates a shape through its symmetries, and a separation would follow from an **obstruction** from representation theory. Because it depends on the permanent's very special symmetries, it is designed to avoid the natural proofs barrier. It's a long-term program, not a proof.
+:::
+
+---
+
+## Up Next
+
+Post 45 is about the difficulties GCT has run into: what an "occurrence obstruction" is, why Peter Bürgisser, Christian Ikenmeyer and Greta Panova proved in 2016 that they can't do the job, and what's still open after that.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
