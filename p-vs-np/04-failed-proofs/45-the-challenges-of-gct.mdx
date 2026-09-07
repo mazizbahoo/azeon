@@ -1,0 +1,127 @@
+---
+sidebar_position: 11
+title: "The Challenges of GCT"
+description: "Geometric Complexity Theory hoped the simplest kind of obstruction would be enough. In 2016, three mathematicians proved it can't be. Here's what that setback means, and what's still alive."
+tags: [failed-proofs, gct, occurrence-obstructions, kronecker-coefficients, representation-theory, lower-bounds]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# The Challenges of GCT
+
+Post 44 ended with GCT as a hopeful, ambitious program: turn the permanent versus the determinant into a question about geometric shapes, then find a symmetric "obstruction" that fits one shape but not the other.
+
+This post is about what happened when people actually tried. It's partly a story about a setback. But I've come to think it's also a story about what progress looks like on a problem this hard: you rule out the simple version, so you know exactly how hard the real version has to be.
+
+Same warning as last time: the mathematics underneath is beyond what I've studied. I'll describe the shape of the results as carefully as I can.
+
+---
+
+## Two Kinds of Obstruction
+
+Recall the plan. Each polynomial (the permanent, padded to the right size, and the determinant) generates a geometric shape from its symmetries. To prove the permanent's shape is **not** inside the determinant's, find an obstruction.
+
+Representation theory gives a way to break each shape's description into basic symmetric building blocks, a bit like breaking a sound into pure musical notes. Each building block can appear some number of times. That number is called its **multiplicity**.
+
+There are two kinds of obstruction you could look for:
+
+<Tabs>
+  <TabItem value="occ" label="Occurrence obstructions" default>
+
+A building block that **appears** in the permanent's shape, but **doesn't appear at all** in the determinant's.
+
+If the permanent's shape were inside the determinant's, every building block of the first would have to appear in the second. So one block that shows up for the permanent and is completely absent for the determinant proves they're different.
+
+This is the simplest possible kind of evidence. You only need to know whether a number is zero or not.
+
+  </TabItem>
+  <TabItem value="mult" label="Multiplicity obstructions">
+
+A building block that appears **more times** in the permanent's shape than in the determinant's.
+
+Again, if one shape were inside the other, the multiplicities couldn't be bigger for the inner one. So a block whose count is larger for the permanent also proves they're different.
+
+This needs much more information: not just whether a count is zero, but its exact value, and a comparison between two of them.
+
+  </TabItem>
+</Tabs>
+
+Mulmuley and Sohoni's original papers hoped occurrence obstructions would be enough. They're simpler to reason about, and the hope was that the special symmetries of the permanent would make some building blocks completely impossible for the determinant.
+
+---
+
+## The 2016 Result
+
+In 2016, Peter Bürgisser, Christian Ikenmeyer and Greta Panova published a paper with a very direct title: *No occurrence obstructions in geometric complexity theory*.
+
+They proved that occurrence obstructions **cannot** prove the superpolynomial lower bound GCT was aiming for, in the standard setup comparing the permanent with the determinant. Every building block that shows up for the padded permanent also shows up, somewhere, for the determinant, once the sizes are large enough to matter.
+
+The reason, very roughly, is the **padding** itself. To compare a small permanent with a big determinant, you have to multiply the permanent by extra powers of a variable so the degrees match. That padding introduces so much extra structure that it washes out the differences GCT was hoping to see at the occurrence level.
+
+So the simplest version of the program is ruled out. Not by a barrier in the sense of Phase 4's three big ones, but by a direct mathematical theorem about this particular approach.
+
+---
+
+## Why Even the Numbers Are Hard
+
+The second big challenge isn't a theorem saying "this can't work". It's that the numbers GCT needs to understand are themselves extremely hard to get a handle on.
+
+The multiplicities in GCT are related to quantities that representation theorists have studied for over a century, with names like **Kronecker coefficients** and **plethysm coefficients**. They describe how symmetric patterns combine.
+
+- For many related quantities, mathematicians have beautiful counting rules: draw certain diagrams, count them, and that's the number. For Kronecker coefficients, **no such rule is known**. Finding one is listed among the major open problems in algebraic combinatorics.
+- In 2017, Christian Ikenmeyer, Ketan Mulmuley and Michael Walter proved that even deciding whether a Kronecker coefficient is **zero or not** is NP-hard.
+
+I find that second result almost funny. GCT tries to prove that NP-Complete problems are hard by understanding certain numbers. It turns out that understanding those numbers is itself an NP-hard problem. It doesn't make GCT impossible, since a proof only needs to understand the **specific** numbers that matter, not all of them. But it shows how rough the terrain is.
+
+---
+
+## What's Still Alive
+
+After 2016, some people wrote GCT off. That's not quite fair, and I want to be accurate about where things stand.
+
+<Tabs>
+  <TabItem value="mult" label="Multiplicity obstructions" default>
+
+The 2016 result rules out **occurrence** obstructions. **Multiplicity** obstructions, comparing how many times a building block appears, are not ruled out. That's harder to work with, but it's still a possible route.
+
+  </TabItem>
+  <TabItem value="setups" label="Other setups">
+
+The no-go result applies to the standard comparison of the padded permanent with the determinant. Researchers have looked at modified setups that avoid the padding problem, and related questions about other polynomials, where occurrence-style ideas might still say something useful.
+
+  </TabItem>
+  <TabItem value="math" label="The mathematics itself">
+
+GCT has pushed representation theory and algebraic geometry in new directions. Questions it raised about these coefficients are now studied for their own sake. Even if GCT never separates any classes, it will have produced real mathematics.
+
+  </TabItem>
+</Tabs>
+
+There's also a broader lesson here that I think applies to all of Phase 4. Every approach that's been seriously tried has taught the field something precise about what **won't** work. The three barriers, and now the occurrence obstruction result, are not just failures. They're constraints that any eventual proof has to satisfy. Each one makes the space of possible proofs smaller and better mapped.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+GCT looks for **obstructions**: symmetric building blocks whose multiplicity shows that the permanent's shape can't fit inside the determinant's. **Occurrence obstructions** (a block that appears for one and not at all for the other) were the original hope. **Multiplicity obstructions** (a block that appears more often for one) need finer information.
+
+Bürgisser, Ikenmeyer and Panova (2016) proved occurrence obstructions can't give the superpolynomial lower bound GCT aimed for, largely because of the padding needed to match sizes. The underlying numbers, such as Kronecker coefficients, have no known counting rule, and deciding whether one is zero is NP-hard (Ikenmeyer, Mulmuley and Walter, 2017).
+
+Multiplicity obstructions and modified setups remain open. GCT is not dead, but its simplest form is ruled out.
+:::
+
+---
+
+## Up Next
+
+After two posts of very modern, very deep mathematics, I want to go back to the oldest tool in this whole story.
+
+Post 46 is about **diagonalization**: Cantor's 1891 proof that some infinities are bigger than others, and how Turing turned it into the proof that the Halting Problem can't be solved. It's one of the most elegant arguments I know, and you can see it work with your own eyes.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
