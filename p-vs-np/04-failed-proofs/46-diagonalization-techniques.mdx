@@ -1,0 +1,146 @@
+---
+sidebar_position: 12
+title: "Diagonalization Techniques"
+description: "Cantor used it to show some infinities are bigger than others. Turing used it to show some problems can't be solved by any computer. It's the oldest trick in complexity theory, and you can watch it work in a table of 0s and 1s."
+tags: [failed-proofs, diagonalization, cantor, halting-problem, turing, self-reference]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import DiagonalTable from '@site/src/components/DiagonalTable';
+
+# Diagonalization Techniques
+
+I've mentioned diagonalization four times now without explaining it properly. Post 29 used it to prove the Time Hierarchy Theorem. Post 37 used it to build an oracle world, and then showed that it can't settle P vs NP. Post 27 used the Halting Problem, which is proved by it.
+
+It's time to look at it directly. I think it's the single most elegant argument in this whole series, and I remember exactly where I was when I first understood it: sitting on the steps outside the library at college, reading it on my phone, and then reading it again because I didn't believe something that simple could be a real proof.
+
+---
+
+## Cantor's Question: Are All Infinities the Same Size?
+
+In the 1870s and 1880s, Georg Cantor was thinking about something that sounds like a children's question: how big is infinity?
+
+He compared sizes of infinite sets by **pairing up** their elements. Two sets are the same size if you can pair every element of one with exactly one element of the other, with nothing left over on either side.
+
+That gives some surprising results. The whole numbers $1, 2, 3, \ldots$ and the even numbers $2, 4, 6, \ldots$ are the **same** size: pair $1$ with $2$, $2$ with $4$, $3$ with $6$, and so on forever. Nothing is left over.
+
+A set that can be paired with the whole numbers like this is called **countable**: you can list its elements as item 1, item 2, item 3, and so on, without missing any.
+
+Cantor asked: is **every** infinite set countable? Can every infinite collection be written as a list?
+
+---
+
+## The Diagonal Argument
+
+In 1891, Cantor published a short proof that the answer is no. Here's the version with 0s and 1s.
+
+Consider all **infinite sequences** of 0s and 1s, like $0110100\ldots$ or $1111\ldots$. Is this set countable?
+
+Suppose someone claims it is, and hands you their list: sequence 1, sequence 2, sequence 3, and so on, supposedly containing every possible sequence.
+
+Here's how to prove them wrong. Build a **new** sequence, one bit at a time:
+
+- Look at bit 1 of sequence 1. Make bit 1 of your new sequence the **opposite**.
+- Look at bit 2 of sequence 2. Make bit 2 of your new sequence the opposite.
+- Look at bit 3 of sequence 3. Make bit 3 the opposite.
+- And so on, forever.
+
+You're walking down the **diagonal** of the list, flipping each bit as you go. That's where the name comes from.
+
+Now, is your new sequence anywhere in the list?
+
+- It's not sequence 1, because it differs from sequence 1 at bit 1.
+- It's not sequence 2, because it differs from sequence 2 at bit 2.
+- It's not sequence $k$, for **any** $k$, because it differs from sequence $k$ at bit $k$.
+
+So it's not in the list. But the list was supposed to contain every sequence. Contradiction. **No list can contain all infinite sequences.** The set is uncountable: a bigger infinity than the whole numbers.
+
+Here it is in a table. Each row is the start of one sequence in someone's list. The highlighted cells are the diagonal. The bottom row is built by flipping each diagonal bit. Change any bits you like, and the new row updates. Hover over a bit of the new row to see exactly which row it disagrees with.
+
+<DiagonalTable />
+
+Whatever you do to the list, the bottom row always differs from every row above it. That's the whole proof. I love that it's **constructive**: it doesn't just say a missing sequence exists, it tells you exactly how to build one.
+
+---
+
+## Turing's Version: The Halting Problem
+
+In 1936, Alan Turing used the same idea on programs.
+
+Every program is a finite piece of text, so programs can be listed: program 1, program 2, program 3, and so on. (They're countable.) Now imagine a giant table. Row $i$ is program $i$. Column $j$ is "what happens when you run program $i$ on input $j$": does it **halt** (stop), or **loop** forever?
+
+Suppose there were a program `HALTS(P, x)` that could always correctly fill in any cell of this table: given any program $P$ and input $x$, it tells you whether $P$ halts on $x$.
+
+Then you could build a new, troublemaking program:
+
+<Tabs>
+  <TabItem value="d" label="The program D" default>
+
+`D(P)`:
+1. Ask `HALTS(P, P)`: does program $P$ halt when given its **own** text as input?
+2. If the answer is "halts", go into an infinite loop.
+3. If the answer is "loops", stop immediately.
+
+`D` walks down the **diagonal** of the table (program $P$ on input $P$) and does the **opposite**.
+
+  </TabItem>
+  <TabItem value="dd" label="Run D on itself">
+
+What happens when you run `D` on its own text, `D(D)`?
+
+- If `D(D)` halts, then `HALTS(D, D)` said "halts", so by step 2, `D(D)` loops forever. Contradiction.
+- If `D(D)` loops, then `HALTS(D, D)` said "loops", so by step 3, `D(D)` stops. Contradiction.
+
+Either way, impossible. So the program `HALTS` cannot exist.
+
+  </TabItem>
+</Tabs>
+
+It's exactly Cantor's argument. The list of programs is the list of rows. `D` is the flipped diagonal. And just like Cantor's new sequence can't be any row, `D` can't be any program in the list, which it would have to be if `HALTS` existed.
+
+---
+
+## The Pattern
+
+Strip away the details and every diagonal argument has the same three steps:
+
+1. **List** all the objects of some kind (sequences, programs, polynomial-time machines).
+2. **Build** a new object that, for each $i$, does the **opposite** of object $i$ on input $i$.
+3. **Conclude** that the new object isn't in the list, so the list is missing something.
+
+The Time Hierarchy Theorem in Post 29 is exactly this: list all polynomial-time programs, build one that disagrees with each on its own index, and show it runs in exponential time. The new program solves something no polynomial-time program solves.
+
+Kurt Gödel's 1931 incompleteness theorem, which I mentioned in Post 35, uses a related self-reference trick: a statement that says, in effect, "this statement cannot be proved".
+
+Diagonalization is how mathematics first proved that some things are **impossible**: some infinities can't be listed, some problems can't be solved, some truths can't be proved. That's exactly the kind of statement $\mathcal{P} \neq \mathcal{NP}$ is.
+
+So why doesn't it work there?
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+**Diagonalization** proves something is missing from a list by building an object that differs from the $i$-th item at position $i$.
+
+**Cantor (1891):** infinite 0/1 sequences can't be listed, so there are different sizes of infinity.
+
+**Turing (1936):** list all programs, build one that does the opposite of program $P$ on input $P$; if a halting-decider existed, this program would contradict itself. So the Halting Problem is undecidable.
+
+The same pattern proves the Time Hierarchy Theorem, and is closely related to Gödel's incompleteness theorem. It's the classic tool for proving things impossible.
+:::
+
+---
+
+## Up Next
+
+Post 47 asks the obvious question. Diagonalization separated $\mathcal{P}$ from $\mathcal{EXP}$. It proved the Halting Problem undecidable. Why can't we just list all polynomial-time programs, build an $\mathcal{NP}$ problem that disagrees with each one, and be done?
+
+There are two separate reasons, one about oracles and one about what "being in $\mathcal{NP}$" really demands. Both are worth understanding.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
