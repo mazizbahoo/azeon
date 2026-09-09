@@ -1,0 +1,131 @@
+---
+sidebar_position: 13
+title: "Why Diagonalization Fails for P vs NP"
+description: "Building a problem outside P is easy: diagonalization does it in one line. The hard part is building one that is also inside NP. Here are the two reasons the oldest trick can't finish the job, and the clever things it can still do."
+tags: [failed-proofs, diagonalization, relativization, ladner, np-intermediate, time-hierarchy]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Why Diagonalization Fails for P vs NP
+
+After writing Post 46, I tried something that I suspect a lot of people try at some point. I sat with a notebook and attempted to diagonalize my way to $\mathcal{P} \neq \mathcal{NP}$.
+
+The plan felt obvious. List every polynomial-time program. Build a problem that disagrees with program $i$ on input $i$. That problem can't be in $\mathcal{P}$. Now just make sure it's in $\mathcal{NP}$, and you're done.
+
+I got stuck on "just make sure it's in $\mathcal{NP}$". It took me a while to realise that I'd been stuck in exactly the right place. That step is the whole problem, and there's a theorem explaining why it can't be done with this method alone.
+
+---
+
+## Getting Outside P Is the Easy Part
+
+Diagonalization is extremely good at one thing: building a problem that isn't in a class.
+
+Post 29 did it. List all polynomial-time programs $M_1, M_2, \ldots$. Define the problem $D$: on input $i$, run $M_i$ on input $i$ and give the opposite answer. $D$ disagrees with every polynomial-time program somewhere, so $D \notin \mathcal{P}$.
+
+:::info New Symbol: $\notin$
+"Is not an element of", or just "is not in". $D \notin \mathcal{P}$ means the problem $D$ is not in the class $\mathcal{P}$.
+:::
+
+That's not the issue. Getting outside $\mathcal{P}$ is the easy half. The question is whether you can get outside $\mathcal{P}$ while staying **inside** $\mathcal{NP}$.
+
+---
+
+## Reason 1: Nothing Puts D Inside NP
+
+Look at what it takes to compute $D$. On input $i$, you have to simulate program $M_i$ and flip its answer. Since $M_i$ could be any polynomial-time program, with any polynomial running time, $D$ has to be prepared to run longer than every polynomial. That's what puts $D$ in $\mathcal{EXP}$.
+
+For $D$ to be in $\mathcal{NP}$, every yes-instance would need a **short certificate** that's quick to check. But what would that certificate be? "Here's proof that $M_i$ rejects input $i$" means proving a program **doesn't** do something, which is a $co\mathcal{NP}$-style claim, about a computation that might be long.
+
+Nondeterminism helps you find a needle in a haystack. It doesn't help you predict what an arbitrary program will do and then contradict it. Guessing is good for **there exists**. Diagonalization needs **for all**: "for every polynomial-time program, this disagrees with it". Those don't fit together in the way the proof needs.
+
+So the diagonal problem lands in $\mathcal{EXP}$, comfortably outside $\mathcal{P}$, but with no reason at all to be in $\mathcal{NP}$.
+
+---
+
+## Reason 2: Relativization
+
+Suppose someone found a much cleverer diagonal construction, one that somehow did put its problem inside $\mathcal{NP}$. Post 37 already explains why it couldn't work.
+
+Diagonalization only uses two facts about programs:
+- they can be **listed**, and
+- one program can **simulate** another.
+
+Both facts stay true if every program has the same oracle attached. A program with an oracle can still be written down, and simulating it just means passing along its oracle questions.
+
+So any pure diagonalization argument **relativizes**. If it proved $\mathcal{P} \neq \mathcal{NP}$, it would also prove $\mathcal{P}^A \neq \mathcal{NP}^A$ for every oracle $A$. But Baker, Gill and Solovay built an $A$ where $\mathcal{P}^A = \mathcal{NP}^A$. So no such argument exists.
+
+:::caution Two separate failures
+Reason 1 is about this specific construction: the diagonal problem has no reason to be in $\mathcal{NP}$.
+
+Reason 2 is about every construction of this kind: any argument that only lists and simulates machines is blocked by relativization.
+
+Reason 2 is the deeper one. It says no amount of cleverness inside the pure diagonal framework will help.
+:::
+
+---
+
+## Things Diagonalization Can Still Do
+
+I don't want to leave the impression that diagonalization is useless for $\mathcal{NP}$. It proves some genuinely interesting things, just not the main question.
+
+<Tabs>
+  <TabItem value="hier" label="NP has its own hierarchy" default>
+
+There's a version of the Time Hierarchy Theorem for nondeterministic machines, built up in the 1970s and 1980s by Stephen Cook, Joel Seiferas, Michael Fischer, Albert Meyer and Stanislav Žák. It says that nondeterministic machines with more time can solve strictly more problems.
+
+So, for example, there are problems solvable by a nondeterministic machine in $n^3$ steps that can't be solved by one in $n^2$ steps. Diagonalization can compare **nondeterministic with nondeterministic**. What it can't do is compare nondeterministic with deterministic.
+
+  </TabItem>
+  <TabItem value="ladner" label="Ladner's theorem">
+
+In 1975, the same year as Baker-Gill-Solovay, Richard Ladner used a clever, "lazy" version of diagonalization to prove:
+
+> If $\mathcal{P} \neq \mathcal{NP}$, then there are problems in $\mathcal{NP}$ that are neither in $\mathcal{P}$ nor NP-Complete.
+
+These are the **NP-intermediate** problems from Post 27. The construction takes SAT and punches carefully spaced holes in it: long stretches where the problem looks like SAT, alternating with long stretches where it's trivially easy. The holes are placed by diagonalizing against both fast algorithms (so it's not in $\mathcal{P}$) and against reductions from SAT (so it's not NP-Complete).
+
+Notice the "if". Ladner's theorem **assumes** $\mathcal{P} \neq \mathcal{NP}$ and then uses diagonalization to build something. It doesn't prove the assumption.
+
+  </TabItem>
+  <TabItem value="hybrid" label="Diagonalization plus something else">
+
+The most interesting modern use of diagonalization is in combination with other tools. If you can combine it with some technique that doesn't relativize, the combination doesn't relativize either, so it can sometimes slip past the barriers.
+
+Post 50 describes one result, by Ryan Williams in 2011, that did exactly this: it combined a nondeterministic time hierarchy (diagonalization) with a cleverly designed fast algorithm (which looks inside circuits), and proved a new circuit lower bound that people had been stuck on for years.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## What This Taught Me
+
+Here's how I'd summarise the last two posts, if I had to fit it on a sticky note:
+
+> Diagonalization shows a class is missing something. It can't show **which** class the missing thing lives in.
+
+To separate $\mathcal{P}$ from $\mathcal{NP}$, you need a problem that's **missing from** $\mathcal{P}$ and **present in** $\mathcal{NP}$. Diagonalization handles the first half and is silent on the second. And because it relativizes, no amount of polishing will make it handle both.
+
+My notebook attempt, by the way, made the exact mistake from Reason 1. I wrote down the diagonal problem, wrote "this is in NP because we can guess...", and then couldn't finish the sentence. At least now I know why.
+
+:::note What We Have Established
+Diagonalization easily builds problems outside $\mathcal{P}$, but the diagonal problem needs to simulate and contradict every polynomial-time program, which puts it in $\mathcal{EXP}$ with no reason to be in $\mathcal{NP}$: nondeterminism handles "there exists", not "for all programs".
+
+More fundamentally, pure diagonalization only lists and simulates machines, so it relativizes, and Baker-Gill-Solovay shows relativizing arguments can't settle P vs NP.
+
+Diagonalization still proves the nondeterministic time hierarchy and Ladner's theorem (if $\mathcal{P} \neq \mathcal{NP}$, NP-intermediate problems exist), and combined with non-relativizing tools it can still produce new results.
+:::
+
+---
+
+## Up Next
+
+Phase 4 has been about mistakes made by the best people in the field, and why they were natural mistakes to make. Post 48 is about the mistakes that show up in the **hundreds** of claimed proofs of P vs NP that appear online. Some of them are easy to spot once you know what to look for, and a few of them are mistakes I'd have made myself a year ago.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
