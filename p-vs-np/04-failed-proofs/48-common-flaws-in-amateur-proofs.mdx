@@ -1,0 +1,161 @@
+---
+sidebar_position: 14
+title: "Common Flaws in Amateur Proofs"
+description: "Every year, people announce proofs of P vs NP. Almost all of them make one of a handful of mistakes. The most common: assuming you must try every possibility just because the problem looks like it needs it."
+tags: [failed-proofs, proof-claims, mistakes, exhaustive-search, extended-formulations, sanity-checks]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Common Flaws in Amateur Proofs
+
+I want to start this post with a confession, because otherwise it would feel unfair.
+
+About a year ago, before I'd read most of what's in this series, I wrote half a page in my notebook that I was quite pleased with. The argument went roughly: "SAT has $2^n$ possible assignments. Any algorithm has to check them to be sure. So SAT takes $2^n$ time. So $\mathcal{P} \neq \mathcal{NP}$."
+
+I'm glad I never showed that page to anyone. This post is about why it's wrong, and about the other common ways that proofs of P vs NP go wrong.
+
+---
+
+## There Are a Lot of Claimed Proofs
+
+For years, the computer scientist Gerhard Woeginger maintained a web page listing papers that claimed to settle P vs NP. By the time he stopped updating it, it listed over a hundred claims, some saying $\mathcal{P} = \mathcal{NP}$, some saying $\mathcal{P} \neq \mathcal{NP}$, and a few saying it can't be decided. None of them is accepted.
+
+Occasionally a claim gets wide attention. In August 2010, a researcher named Vinay Deolalikar circulated a long manuscript claiming to prove $\mathcal{P} \neq \mathcal{NP}$. It spread quickly online, and within days, many well-known researchers were reading it together on blogs and wikis. They found serious gaps, and the proof was not accepted. It was also a remarkable example of mathematicians checking a big claim, quickly and in public.
+
+Most claims don't get that much attention. But the same few mistakes appear again and again. Here they are.
+
+---
+
+## Flaw 1: "It Looks Like You Have to Try Everything"
+
+This is the one from my notebook, and it's by far the most common.
+
+The argument: "There are exponentially many possible solutions. To be sure, an algorithm must examine them all. So the problem needs exponential time."
+
+The problem is the word "must". The argument assumes, without proof, that there's no clever shortcut. But clever shortcuts that avoid looking at all possibilities are exactly what good algorithms are. We've seen many in this series:
+
+| Problem | Possible "solutions" | But it's solvable in |
+|---|---|---|
+| Sorting $n$ items (Post 2) | $n!$ possible orders | about $n \log n$ steps |
+| Shortest path through a road network (Post 7) | exponentially many routes | polynomial time |
+| 2-SAT (Post 14) | $2^n$ assignments | linear time |
+| 2-colouring (Post 18) | $2^n$ colourings | linear time |
+| Determinant (Post 44) | $n!$ products | about $n^3$ steps |
+| Primality (Post 25) | about $\sqrt{N}$ possible factors to try | polynomial time (AKS, 2002) |
+
+Every one of those has an exponential number of candidates, and every one has an algorithm that never looks at most of them. If "it looks like you must try everything" were a valid proof, it would prove all of those problems hard too. And they aren't.
+
+:::caution The test that catches Flaw 1
+Run your argument on **2-SAT** or **2-colouring**. If your proof that SAT is hard would also "prove" that 2-SAT is hard, the proof is wrong, because 2-SAT is in $\mathcal{P}$.
+:::
+
+Here's a deeper way to put it. Saying $\mathcal{P} \neq \mathcal{NP}$ means proving that **every** possible algorithm fails. Most algorithms ever written don't "try possibilities" in any recognisable way. They do strange arithmetic, build data structures, exploit symmetry. A real lower bound has to handle all of them, including ones that look nothing like a search.
+
+---
+
+## Flaw 2: "This Approach Fails, So Every Approach Fails"
+
+A softer version of Flaw 1. The argument carefully shows that some **specific** kind of algorithm, say, ones that work through the variables in order, or ones that use a certain type of rule, can't solve SAT quickly. Then it concludes that **no** algorithm can.
+
+Results about restricted kinds of algorithm are real and valuable. Post 26 mentioned that resolution proofs need exponential length for the pigeonhole principle; Post 39 mentioned lower bounds for monotone and shallow circuits. But each one is about a restricted model. Going from "this model is weak" to "every algorithm is weak" is the entire difficulty of P vs NP.
+
+---
+
+## Flaw 3: The Giant Linear Program
+
+This one is specific but historically important, and it applies to claims that $\mathcal{P} = \mathcal{NP}$.
+
+**Linear programming** is a well-known optimisation method: maximise or minimise something subject to a list of linear inequalities. It can be solved in polynomial time. In the mid-1980s, a claimed proof tried to write the Traveling Salesman Problem as a polynomial-size linear program. If that worked, TSP would be in $\mathcal{P}$, and so would everything in $\mathcal{NP}$.
+
+Two results killed this whole line of attack:
+
+- In 1988, Mihalis Yannakakis proved that any such linear program with a natural kind of **symmetry** must have exponential size.
+- In 2012, Samuel Fiorini, Serge Massar, Sebastian Pokutta, Hans Raj Tiwary and Ronald de Wolf removed the symmetry assumption: **every** linear program describing the TSP's possible tours in this way must have exponential size.
+
+What I love about this is that it's not a barrier for P vs NP in general. It's a complete, unconditional proof that one specific approach to $\mathcal{P} = \mathcal{NP}$ can never work, however clever the details.
+
+---
+
+## Flaw 4: "My Algorithm Solved All My Test Cases"
+
+Claims of $\mathcal{P} = \mathcal{NP}$ often come with an algorithm and a table of results: it solved every instance the author tried, quickly.
+
+Post 20 already showed why that's not evidence. Real-world TSP instances with tens of thousands of cities get solved exactly by good software. Modern SAT solvers handle huge industrial formulas. **Most** instances, especially random or naturally occurring ones, are not the hard ones. NP-Completeness is about the **worst** case.
+
+A proof of $\mathcal{P} = \mathcal{NP}$ needs a guarantee: **every** input, solved in polynomial time, with a proof of why. Benchmarks can't give that.
+
+---
+
+## Flaw 5: Measuring the Input Wrong
+
+Post 21's pseudo-polynomial trap. An algorithm runs in $n \times W$ steps for Knapsack or Subset Sum, and the author calls that polynomial. But $W$ is a **number**, and the input size is the number of **digits** in $W$. So $n \times W$ is exponential in the input size.
+
+Any claimed polynomial algorithm for an NP-Complete problem should state its running time in terms of the **length** of the input, in bits.
+
+---
+
+## Flaw 6: Ignoring the Barriers
+
+This one's subtler, and I didn't appreciate it until writing Phase 4.
+
+A claimed proof of $\mathcal{P} \neq \mathcal{NP}$ should explain why it doesn't fall into one of the three barriers. If the argument only lists machines and simulates them, it relativizes, so Post 37 says it can't work. If it identifies a simple property that random functions tend to have, it's probably a natural proof, and Post 40 says it can't work either.
+
+Researchers often use the barriers as a quick filter. It's not that every proof has to discuss them by name, but if you can't say which barrier you're avoiding, and how, you probably haven't avoided any of them.
+
+---
+
+## A Sanity Checklist
+
+Here's the checklist I now run on my own ideas before getting excited:
+
+<Tabs>
+  <TabItem value="neq" label="Claims that P ≠ NP" default>
+
+1. Does the argument also "prove" that 2-SAT, 2-colouring or shortest path is hard? If so, it's wrong.
+2. Does it rule out **every** algorithm, or only some kind of algorithm?
+3. Would it still work if every machine had an oracle? Then it relativizes, and can't work.
+4. Is it based on a property that most random functions have? Then it's probably natural, and can't work if strong cryptography exists.
+
+Passing all four doesn't make a proof right. Failing any one makes it wrong.
+
+  </TabItem>
+  <TabItem value="eq" label="Claims that P = NP">
+
+1. Is there a proof that the algorithm works on **every** input, not just the tested ones?
+2. Is the running time polynomial in the number of **bits** of input, not in the size of the numbers?
+3. Does the algorithm also give polynomial-time factoring, breaking RSA? (It would have to, since factoring is in $\mathcal{NP}$.) If it doesn't, something is wrong.
+4. If it's a linear program for an NP-Hard problem, is it smaller than the Fiorini et al. lower bound allows? Then it's wrong.
+
+Again: passing doesn't make it right. Failing any one makes it wrong.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+More than a hundred claimed proofs of P vs NP have been collected (Woeginger's list). None is accepted. The most common flaws:
+
+1. Assuming every algorithm must try all possibilities. Sorting, shortest paths, 2-SAT, 2-colouring, the determinant and primality all have exponentially many candidates and polynomial algorithms.
+2. Generalising from one kind of algorithm to all algorithms.
+3. Polynomial-size linear programs for TSP, ruled out by Yannakakis (1988, symmetric case) and Fiorini et al. (2012, general case).
+4. Treating good benchmark results as a worst-case guarantee.
+5. Measuring running time in the value of numbers instead of their length.
+6. Not addressing the relativization, natural proofs and algebrization barriers.
+:::
+
+---
+
+## Up Next
+
+There's one more thing about P vs NP that the failed proofs highlight: the two possible answers are not equally hard to prove. Post 10 touched on this. Post 49 goes deeper: why showing $\mathcal{P} = \mathcal{NP}$ would need just one algorithm, why showing $\mathcal{P} \neq \mathcal{NP}$ needs to rule out infinitely many, and a surprising twist: if $\mathcal{P} = \mathcal{NP}$, we already know an algorithm that would work.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
