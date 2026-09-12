@@ -1,0 +1,168 @@
+---
+sidebar_position: 16
+title: "Summary of the Barriers"
+description: "Phase 4 in one place: every barrier, what it blocks, what slips past it, and the 2011 result that showed a way around all of them for a weaker question. Why a proof may need mathematics that doesn't exist yet."
+tags: [failed-proofs, barriers, summary, williams, acc0, relativization, natural-proofs, algebrization]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import BarrierTimeline from '@site/src/components/BarrierTimeline';
+
+# Summary of the Barriers
+
+Sixteen posts ago, I said Phase 4 was the one I was most nervous about. Now that I've written it, I think it's the phase that changed my understanding the most.
+
+At the start, I thought P vs NP was unsolved because it was a hard problem. I now think it's unsolved because it's a **different kind** of problem from almost everything mathematicians have ever proved. This post puts the whole picture in one place, and then ends on the most hopeful result I found.
+
+---
+
+## The Full Timeline
+
+Here's the timeline from Post 35 again. This time you've seen every item on it.
+
+<BarrierTimeline />
+
+---
+
+## The Three Barriers, Side by Side
+
+| | Relativization | Natural Proofs | Algebrization |
+|---|---|---|---|
+| **Year** | 1975 | 1994 | 2008 |
+| **By** | Baker, Gill, Solovay | Razborov, Rudich | Aaronson, Wigderson |
+| **Post** | 37 | 40, 41 | 43 |
+| **Blocks** | Arguments that work unchanged when every machine has an oracle | Circuit lower bounds via a property that's useful, large and easy to check | Arguments that still work when machines can query a polynomial extension of an oracle |
+| **Main victims** | Diagonalization and simulation | Essentially every circuit lower bound technique known in 1994 | Arithmetization, the method behind $\mathcal{IP} = \mathcal{PSPACE}$ |
+| **Condition** | None, it's unconditional | Assumes strong pseudorandom functions exist | None, it's unconditional |
+| **Escape route** | Look inside the machine | Use a rare or hard-to-check property | Go beyond polynomial extensions |
+
+And the more specific no-go results:
+
+- **Linear programs for TSP** must be exponentially large (Yannakakis 1988; Fiorini et al. 2012). Post 48.
+- **Occurrence obstructions** can't power GCT's approach to permanent versus determinant (Bürgisser, Ikenmeyer, Panova 2016). Post 45.
+- **Resolution proofs** of some tautologies, like the pigeonhole principle, must be exponentially long (Haken 1985). Post 26.
+
+---
+
+## What Each Barrier Teaches
+
+I think each barrier is best understood as a lesson about what a proof must contain.
+
+<Tabs>
+  <TabItem value="rel" label="Relativization" default>
+
+**A proof must use something specific about real computation.**
+
+Treating programs as black boxes that can be listed and simulated isn't enough, because that view can't tell the difference between our world and an oracle world where $\mathcal{P} = \mathcal{NP}$.
+
+  </TabItem>
+  <TabItem value="nat" label="Natural Proofs">
+
+**A proof must use something specific about the hard function.**
+
+A property that most random functions share can't work, because cryptography makes simple functions look random. The proof needs to say something about SAT, or NP-Complete problems, that isn't just "it looks complicated".
+
+  </TabItem>
+  <TabItem value="alg" label="Algebrization">
+
+**Looking inside with polynomials isn't enough either.**
+
+The algebraic tricks that beat relativization are themselves blind to the difference between worlds where $\mathcal{P} = \mathcal{NP}$ and worlds where it isn't. The proof needs something beyond extending computations into polynomials.
+
+  </TabItem>
+</Tabs>
+
+Put together: a successful proof must look inside computation, in a way that's specific to the hard problem, and goes beyond algebraic extension. Very few known techniques do all three.
+
+---
+
+## The Hopeful Part: Williams, 2011
+
+I promised a hopeful ending, and here it is.
+
+For decades, circuit lower bounds had been stuck at a frustratingly low level. One class in particular, called $\mathcal{ACC}^0$, was a famous embarrassment. It's a class of shallow circuits, like $\mathcal{AC}^0$ from Post 39, but also allowed to use gates that count modulo some number. Researchers couldn't even prove that $\mathcal{NEXP}$, the nondeterministic version of $\mathcal{EXP}$ and an absolutely enormous class, wasn't contained in it.
+
+In 2011, Ryan Williams proved:
+
+$$\mathcal{NEXP} \not\subseteq \mathcal{ACC}^0$$
+
+The result itself is far weaker than $\mathcal{P} \neq \mathcal{NP}$. What made it famous was **how** it was proved.
+
+<Tabs>
+  <TabItem value="alg" label="Step 1: a better algorithm" default>
+
+Williams found a slightly faster-than-brute-force algorithm for a satisfiability question about $\mathcal{ACC}^0$ circuits. Not polynomial, just a little better than trying all $2^n$ inputs.
+
+That's an **upper bound**: an algorithm that exists.
+
+  </TabItem>
+  <TabItem value="turn" label="Step 2: turn it into a lower bound">
+
+Then he showed that if $\mathcal{NEXP}$ **were** inside $\mathcal{ACC}^0$, his faster algorithm could be used to speed up **every** nondeterministic exponential-time computation by a little.
+
+But the nondeterministic time hierarchy theorem (Post 47, proved by diagonalization) says that can't happen: more nondeterministic time genuinely solves more problems.
+
+So $\mathcal{NEXP}$ can't be inside $\mathcal{ACC}^0$.
+
+  </TabItem>
+  <TabItem value="why" label="Why it got past the barriers">
+
+The proof combines a diagonalization (which relativizes on its own) with an algorithm that looks deep inside the structure of $\mathcal{ACC}^0$ circuits (which doesn't). The combination doesn't relativize.
+
+It also doesn't work by finding a large, easy-to-check property of hard functions, so it doesn't fit the natural proofs template. And it isn't an arithmetization argument of the kind the algebrization barrier was built around.
+
+  </TabItem>
+</Tabs>
+
+The big idea, sometimes called the **algorithmic method**, is that **faster algorithms imply lower bounds**. Finding a clever upper bound can prove an impossibility. That turned the usual relationship between algorithms and complexity upside down, and since 2011, researchers have used it to push further, including a 2018 result by Cody Murray and Ryan Williams that strengthened the theorem to a smaller class than $\mathcal{NEXP}$.
+
+It doesn't come close to P vs NP. But it's a proof that the barriers are not walls around the whole field. They're walls around specific roads, and new roads can be built.
+
+---
+
+## Does It Need New Mathematics?
+
+The spreadsheet I planned this series with had a note next to this post: "Synthesize why a completely new branch of mathematics may be required." Having written Phase 4, here's my honest version of that claim.
+
+It's not proven that new mathematics is required. But consider what we know:
+
+- The three barriers rule out the main techniques that complexity theory had developed from the 1960s to the 2000s.
+- The most ambitious program trying to escape them, GCT, needs deep results in algebraic geometry and representation theory that mathematicians don't have yet.
+- The one clean recent success, Williams' theorem, needed a genuinely new idea, and still only reached a much weaker result.
+
+Many researchers have said, in various ways, that they expect a proof of $\mathcal{P} \neq \mathcal{NP}$ to require ideas we can't currently imagine. I think that's the most reasonable reading of the evidence. Not "it's impossible", but "it needs a kind of understanding of computation that nobody has had yet".
+
+That, honestly, is what makes it exciting to me. The answer is out there. The map of where it isn't keeps getting more detailed.
+
+---
+
+## Phase 4 Is Complete
+
+- **Post 35:** why lower bounds are hard, and what a barrier is.
+- **Posts 36 to 38:** oracles, the relativization barrier, and arithmetization breaking through it.
+- **Posts 39 to 41:** circuits, natural proofs, and why cryptography blocks them.
+- **Posts 42 and 43:** interactive proofs, and the algebrization barrier.
+- **Posts 44 and 45:** Geometric Complexity Theory and its obstacles.
+- **Posts 46 and 47:** diagonalization, and why it can't finish the job alone.
+- **Posts 48 and 49:** how claimed proofs go wrong, and the asymmetry of the burden of proof.
+
+:::note What We Have Established
+Three barriers block the main known techniques for settling P vs NP: **relativization** (1975) blocks black-box simulation and diagonalization; **natural proofs** (1994) blocks circuit arguments based on large, easy-to-check properties, assuming strong cryptography; **algebrization** (2008) blocks the polynomial-extension methods that beat relativization. Specific no-go results also rule out polynomial-size LPs for TSP and occurrence obstructions in GCT.
+
+Ryan Williams' 2011 proof that $\mathcal{NEXP} \not\subseteq \mathcal{ACC}^0$ combined a faster algorithm with diagonalization to get past the known barriers for a weaker question. It shows the barriers block specific roads, not all roads. A proof of $\mathcal{P} \neq \mathcal{NP}$ seems to need ideas that don't exist yet.
+:::
+
+---
+
+## Up Next
+
+Four phases of theory. Time to come down to earth.
+
+Phase 5 is about where P vs NP actually touches the world: money, security, logistics, medicine, the apps on your phone. Post 51 starts with a question I've been asked by a friend who wants to start a company: why should someone running a business care about any of this?
+
+See you in Phase 5. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
