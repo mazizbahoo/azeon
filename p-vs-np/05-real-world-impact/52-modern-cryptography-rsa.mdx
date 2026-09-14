@@ -1,0 +1,149 @@
+---
+sidebar_position: 2
+title: "Modern Cryptography (RSA)"
+description: "How RSA locks a message with a number anyone can see, and why only the person who knows its two prime factors can unlock it. Plus an honest correction: RSA needs much more than P ≠ NP to be safe."
+tags: [real-world-impact, rsa, cryptography, factoring, public-key, encryption]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import RSAToy from '@site/src/components/RSAToy';
+
+# Modern Cryptography (RSA)
+
+Every time you see the little padlock next to a website's address, two computers that have never met before have agreed on a secret, in public, with anyone on the network able to watch. That still sounds impossible to me, even after learning how it works.
+
+For decades, the most famous tool for that kind of public-key cryptography has been **RSA**. This post explains how it works with tiny numbers, connects it to P vs NP, and corrects a claim I used to repeat that turns out to be too strong.
+
+---
+
+## The Problem RSA Solves
+
+Old-fashioned encryption uses **one** secret key to lock and unlock. That works if you can meet in person to share the key. It doesn't work when your laptop wants to talk securely to a bank's server for the first time.
+
+**Public-key cryptography** uses **two** keys:
+
+- a **public key**, which you give to everyone, and which anyone can use to **lock** a message to you,
+- a **private key**, which only you have, and which is the only thing that can **unlock** it.
+
+It's like a padlock you hand out freely. Anyone can snap it shut on a box. Only you have the key that opens it.
+
+The idea of public-key cryptography was published by Whitfield Diffie and Martin Hellman in 1976. A year later, Ron Rivest, Adi Shamir and Leonard Adleman found a practical way to do it, published in 1978: **RSA**, from their initials. (It later came out that Clifford Cocks, at the British intelligence agency GCHQ, had found essentially the same idea in 1973, but it was kept secret until 1997.)
+
+---
+
+## How RSA Works
+
+You need the clock arithmetic ($\bmod$) from Post 31.
+
+<Tabs>
+  <TabItem value="keys" label="1. Make keys" default>
+
+- Pick two different prime numbers, $p$ and $q$. Keep them secret.
+- Multiply them: $n = p \times q$. Publish $n$.
+- Compute $\varphi = (p - 1)(q - 1)$. Keep it secret.
+- Pick a small number $e$ that shares no factor with $\varphi$. Publish $e$.
+- Compute $d$, the number with $e \times d \bmod \varphi = 1$. This uses Euclid's method from Post 33 and is fast, **if you know $\varphi$**. Keep $d$ secret.
+
+Public key: $(n, e)$. Private key: $d$.
+
+  </TabItem>
+  <TabItem value="lock" label="2. Lock">
+
+To send a message $m$ (a number smaller than $n$), compute:
+
+$$c = m^e \bmod n$$
+
+and send $c$. That's the locked message.
+
+  </TabItem>
+  <TabItem value="unlock" label="3. Unlock">
+
+The owner computes:
+
+$$c^d \bmod n$$
+
+and gets $m$ back. A theorem from number theory (Euler's theorem, a generalisation of Fermat's from Post 31) guarantees this always works.
+
+  </TabItem>
+</Tabs>
+
+Here's the whole thing with small primes. Pick $p$, $q$ and a message, and watch the locked and unlocked values.
+
+<RSAToy />
+
+Look at the status line. With these tiny numbers, an attacker who sees only $n$ can split it into $p \times q$ in a few dozen divisions, then compute $d$ themselves, exactly the way the owner did. Toy RSA is completely insecure.
+
+Real RSA uses primes with **hundreds** of digits each, so $n$ has about 600 digits or more (2048 bits is the usual minimum today). Trial division would need more steps than there are atoms in the universe. Far better factoring methods exist, but the best of them still takes time that grows faster than any polynomial in the number of digits.
+
+---
+
+## Where the Security Comes From
+
+The whole scheme comes down to one asymmetry:
+
+- **Multiplying** $p \times q$ is easy, even for 300-digit numbers.
+- **Factoring** $n$ back into $p$ and $q$ seems to be extremely hard.
+
+As far as anyone knows publicly, the only practical way to find $d$ from $(n, e)$ is to factor $n$. The largest RSA challenge number factored so far, RSA-250 (829 bits), was factored in 2020 by a team of researchers using thousands of core-years of computing time. 2048-bit RSA is far beyond that.
+
+So RSA's safety rests on **factoring being hard**. Which brings us to P vs NP.
+
+---
+
+## The Correction: "RSA Depends on P ≠ NP"
+
+I've seen this sentence many times, and I wrote something like it in Post 10. It's partly true. Here's the careful version.
+
+<Tabs>
+  <TabItem value="needs" label="What's true" default>
+
+Factoring is in $\mathcal{NP}$: if someone gives you $p$ and $q$, you multiply them and check. So **if $\mathcal{P} = \mathcal{NP}$**, factoring would be solvable in polynomial time, and RSA would be broken (at least in principle, depending on how fast that polynomial algorithm actually is).
+
+So $\mathcal{P} \neq \mathcal{NP}$ is **necessary** for RSA to be secure.
+
+  </TabItem>
+  <TabItem value="notenough" label="What's not true">
+
+But $\mathcal{P} \neq \mathcal{NP}$ is **not enough**. Three separate gaps:
+
+1. **Factoring might be easy even if $\mathcal{P} \neq \mathcal{NP}$.** Post 25 showed factoring is in $\mathcal{NP} \cap co\mathcal{NP}$ and is believed **not** to be NP-Complete. So $\mathcal{P} \neq \mathcal{NP}$ only says the **hardest** problems in $\mathcal{NP}$ are hard. Factoring isn't one of them. Someone could find a fast factoring algorithm without touching P vs NP at all.
+
+2. **Worst-case versus typical.** $\mathcal{P} \neq \mathcal{NP}$ says some instances are hard. RSA needs **the specific** $n$ you generated to be hard. That's a much stronger demand, about typical cases. Remember the knapsack encryption from Post 21 that was broken for exactly this reason.
+
+3. **Quantum computers.** Shor's algorithm (Post 33) factors in polynomial time on a quantum computer. That has nothing to do with $\mathcal{P}$ vs $\mathcal{NP}$; it's about $\mathcal{BQP}$. A large quantum computer would break RSA even if $\mathcal{P} \neq \mathcal{NP}$ is proved tomorrow.
+
+  </TabItem>
+</Tabs>
+
+So the honest statement is: **RSA's security requires $\mathcal{P} \neq \mathcal{NP}$, but also requires much more, and that "more" is not proven.**
+
+This is true for all of modern public-key cryptography. It rests on specific hardness assumptions, about factoring, discrete logarithms or lattices, that are stronger than $\mathcal{P} \neq \mathcal{NP}$ and are supported by decades of failed attacks, not by proofs. Post 41 described the general version: cryptography needs one-way functions, and their existence implies $\mathcal{P} \neq \mathcal{NP}$, not the other way round.
+
+---
+
+## RSA Today
+
+A few things worth knowing about how this is actually used now:
+
+- Most secure connections today agree on their session keys using **elliptic curve** cryptography rather than RSA, because it's faster with smaller keys. RSA is still very widely used for **signatures** and certificates.
+- Both RSA and elliptic curve cryptography are broken by Shor's algorithm. That's why, as Post 33 mentioned, new **post-quantum** standards were published in 2024, and browsers and messaging apps have already started using them alongside the older methods.
+- Real RSA also adds **padding**: random bits mixed into the message before encryption. Without it, even with huge primes, "textbook RSA" like the figure above has serious weaknesses.
+
+:::note What We Have Established
+**Public-key cryptography** uses a public key to lock and a private key to unlock. **RSA** (Rivest, Shamir and Adleman, 1977) publishes $n = p \times q$ and $e$; locking is $m^e \bmod n$, unlocking is $c^d \bmod n$, and computing $d$ requires knowing $p$ and $q$. Security rests on factoring large $n$ being hard. The largest RSA challenge number factored so far has 829 bits; 2048 bits is the usual minimum.
+
+$\mathcal{P} \neq \mathcal{NP}$ is **necessary** for RSA but **not sufficient**: factoring is probably not NP-Complete, encryption needs typical-case hardness, and quantum computers break RSA regardless of P vs NP.
+:::
+
+---
+
+## Up Next
+
+RSA protects messages in transit. Post 53 is about protecting data at rest, specifically your password. It's about hash functions: what they are, why a website shouldn't know your password, and another correction to my original plan, because the protection doesn't come from NP-Hardness the way I first assumed.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
