@@ -42,7 +42,19 @@ function bruteForce(n) {
   return { best, bestLen, tried };
 }
 
-export default function TSPRoutes() {
+// Greedy: always drive to the closest city not yet visited.
+function nearestNeighbour(n) {
+  const tour = [0];
+  while (tour.length < n) {
+    const here = tour[tour.length - 1];
+    let best = -1;
+    for (let i = 0; i < n; i++) if (!tour.includes(i) && (best < 0 || dist(here, i) < dist(here, best))) best = i;
+    tour.push(best);
+  }
+  return tour;
+}
+
+export default function TSPRoutes({ heuristic = false }) {
   const [n, setN] = useState(6);
   const [tour, setTour] = useState([]);
   const [showBest, setShowBest] = useState(false);
@@ -85,6 +97,7 @@ export default function TSPRoutes() {
         <>
           <Segmented label="Cities" value={n} onChange={load}
             options={[5, 6, 7, 8, 9].map(k => ({ value: k, label: `${k}` }))} />
+          {heuristic && <Button onClick={() => { setShowBest(false); setTour(nearestNeighbour(n)); }}>Nearest neighbour</Button>}
           <Button onClick={() => setShowBest(true)} pressed={showBest}>Show shortest</Button>
           <Button onClick={() => { setTour([]); setShowBest(false); }} disabled={!tour.length && !showBest}>Clear</Button>
         </>
