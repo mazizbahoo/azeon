@@ -54,7 +54,7 @@ const PHASES: Phase[] = [
     slug: '/p-vs-np/real-world-impact',
     color: 'var(--az-phase-05)',
     desc: 'RSA encryption, supply chains, protein folding, AI, and the cost of NP-Hardness.',
-    publishedPosts: 4,
+    publishedPosts: 5,
     totalPosts: 12,
   },
   {
