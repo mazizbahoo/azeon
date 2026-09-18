@@ -1,0 +1,115 @@
+---
+sidebar_position: 6
+title: "Resource Allocation in SaaS"
+description: "Every cloud app runs on servers, and someone has to decide which job goes on which machine. Use too many machines and you waste money; pack too tightly and things crash. Underneath is bin packing, and it's NP-Hard."
+tags: [real-world-impact, cloud, saas, bin-packing, scheduling, first-fit, heuristics]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import BinPacking from '@site/src/components/BinPacking';
+
+# Resource Allocation in SaaS
+
+I run a few small side projects on rented cloud servers. The first time I looked at the monthly bill properly, I noticed I was paying for several machines that were mostly idle, because each project had been given its own server "to be safe".
+
+Consolidating them meant answering a simple-sounding question: what's the fewest servers we can fit all of these onto, without overloading any of them?
+
+It turned out that question has a name, it's NP-Hard, and every cloud company in the world is answering a gigantic version of it every second.
+
+---
+
+## The Problem: Bin Packing
+
+> **Bin Packing:** you have items of different sizes and bins of a fixed capacity. Put every item into some bin, without overfilling any bin, using as few bins as possible.
+
+In the cloud, the "bins" are servers, and the "items" are jobs: virtual machines, containers, background tasks. Each one needs some amount of CPU and memory. Each server has a fixed amount.
+
+As a yes/no question ("can these items fit in $k$ bins?"), it's NP-Complete. Here's a quick reason why: with just $k = 2$ bins, each exactly half the total size, the question becomes "can these numbers be split into two groups with equal sums?". That's **Partition**, from Post 22, which is NP-Complete. So two-bin packing is already hard, and general bin packing is at least as hard.
+
+It's actually harder than Partition in an important way. Partition has a pseudo-polynomial algorithm (Post 21's dynamic programming trick), so it's only hard when the numbers are huge. Bin packing stays NP-Hard **even when all the sizes are small numbers**, as long as there are many items. That's called being **strongly** NP-Hard, and it means the dynamic programming escape doesn't work.
+
+---
+
+## Two Simple Strategies
+
+Here are ten jobs, with sizes between 1 and 8, to be packed onto servers that each hold 10.
+
+<BinPacking />
+
+**Arrival order** uses a strategy called **First Fit**: take jobs in the order they arrive, and put each one on the first server that still has room. If none does, start a new server.
+
+**Biggest first** uses **First Fit Decreasing**: sort the jobs from biggest to smallest first, then do First Fit.
+
+The total size of all jobs is 40, so no method can possibly use fewer than 4 servers. First Fit uses 5. First Fit Decreasing uses 4, which is the best possible here.
+
+Why does sorting help? Big items are the hard ones to place. If they come last, they often can't fit in the gaps left by small items and need a new server each. If they come first, they get their own servers, and the small items fill the gaps afterwards. It's the same intuition as packing a suitcase: big things first, socks in the corners.
+
+---
+
+## How Good Are These Strategies?
+
+These are **heuristics**, so they aren't always optimal. But for bin packing, mathematicians have proved exactly how bad they can be. This is the first time in this series we've seen a guarantee like this, and Phase 6 is built around them.
+
+| Strategy | Guarantee, in the worst case |
+|---|---|
+| First Fit | never uses more than about **1.7 times** the optimal number of bins |
+| First Fit Decreasing | never uses more than about **$\frac{11}{9} \approx 1.22$ times** the optimal number, plus a small constant |
+
+The First Fit Decreasing bound was refined over decades, and György Dósa pinned down the exact constant in 2007. So if the best possible packing needs 90 servers, First Fit Decreasing will never need more than about 110.
+
+That's a powerful kind of statement. We can't find the best answer quickly, but we can prove our quick answer is never too far off.
+
+---
+
+## What Real Clouds Deal With
+
+The real problem is harder than the figure in several ways:
+
+<Tabs>
+  <TabItem value="dims" label="More than one size" default>
+
+Each job needs CPU **and** memory **and** sometimes disk and network bandwidth. A server can be full on memory while its CPU sits idle. This is **vector bin packing**, where each item is a list of sizes, and it's even harder to approximate.
+
+  </TabItem>
+  <TabItem value="online" label="Jobs arrive over time">
+
+In a real cloud, jobs arrive and leave continuously. You have to place each one **now**, without knowing what's coming next. That's called the **online** version. Sorting by size isn't possible when you don't have all the items yet, which is why First Fit-style rules matter so much.
+
+  </TabItem>
+  <TabItem value="safety" label="Packing too tightly is dangerous">
+
+Jobs don't use exactly what they asked for. Usage spikes. If a server is packed to exactly 100%, the next spike crashes something. So real systems deliberately leave headroom, and trade off cost against reliability.
+
+  </TabItem>
+</Tabs>
+
+Large cluster managers handle all of this with scoring rules: for each new job, every candidate machine gets a score based on how well the job fits, and the job goes to the best-scoring machine. Google described its internal cluster manager, Borg, in a 2015 paper, including how it scores machines when placing tasks. Kubernetes, the open-source system most companies use for containers, works on a similar principle. None of them try to find the optimal packing. They use fast heuristics, because a scheduler that took an hour to place a job would be worse than one that wastes a few percent of the machines.
+
+---
+
+## A Close Cousin: Finishing Work Fast
+
+There's a second classic problem hiding in cloud computing. Instead of using the fewest machines, you have a **fixed** number of machines and want all the work to **finish** as early as possible. That's called **makespan scheduling**, and it's NP-Hard for the same reason (with two machines, it's Partition again).
+
+In 1966, Ronald Graham showed that the simplest rule, "give each job to whichever machine is free first", always finishes within twice the optimal time. In 1969 he showed that taking the **longest jobs first** improves that to within $\frac{4}{3}$ of optimal. These were among the very first guarantees of this kind, decades before the term "approximation algorithm" was common.
+
+As for my own side projects, I went from one server per project down to two, using the "biggest first" idea by hand, with plenty of headroom. Nothing fancy. But I understood, for the first time, why the cloud company's own systems were never going to do that consolidation for me perfectly.
+
+:::note What We Have Established
+Putting jobs on servers with fixed capacity, using as few servers as possible, is **bin packing**. It's NP-Hard (two bins is already Partition), and **strongly** NP-Hard, so small numbers don't make it easy.
+
+**First Fit** places each job on the first server with room; **First Fit Decreasing** sorts biggest first. They're guaranteed to use at most about 1.7 and about $\frac{11}{9}$ times the optimal number of bins, respectively. Real clouds face multiple resources, jobs arriving over time and the need for headroom, and use fast scoring heuristics rather than optimal packing. Makespan scheduling has similar guarantees (Graham: 2, and $\frac{4}{3}$ with longest jobs first).
+:::
+
+---
+
+## Up Next
+
+Post 57 is about the hardest-working optimisation problem of the moment: training neural networks. Finding the best weights for a network is, in a precise sense, NP-Hard. Yet machine learning works astonishingly well. How?
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
