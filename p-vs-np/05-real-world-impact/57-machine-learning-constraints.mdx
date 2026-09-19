@@ -1,0 +1,131 @@
+---
+sidebar_position: 7
+title: "Machine Learning Constraints"
+description: "Training even a tiny neural network perfectly is NP-Hard. Yet machine learning works astonishingly well. The reason is the same lesson again: training never asks for the perfect answer, and real data isn't the worst case."
+tags: [real-world-impact, machine-learning, neural-networks, gradient-descent, optimization, np-hard]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import LossLandscape from '@site/src/components/LossLandscape';
+
+# Machine Learning Constraints
+
+A lot of my friends in college think of AI as the opposite of everything this series has been about. P vs NP is about limits: things computers can't do quickly. AI, in the news at least, is about computers doing things nobody thought they could.
+
+So it surprised me to learn that training a neural network, the core of modern AI, is an NP-Hard problem. Not in a loose sense. There's a theorem.
+
+This post is about how both of those things can be true at once.
+
+---
+
+## What Training Is
+
+A neural network is a big function with lots of adjustable numbers inside it, called **weights**. Different weights make the network produce different outputs.
+
+**Training** means choosing the weights so the network does well on example data: recognising the cat photos as cats, predicting the next word correctly, and so on. To measure "does well", you define a **loss**: a number that's large when the network makes mistakes and small when it's right.
+
+So training is an optimisation problem:
+
+> Find the weights that make the loss as small as possible.
+
+A modern network can have billions of weights. Every possible setting of all of them gives a different loss. You can picture all those losses as a landscape: a surface with hills and valleys, where every point is one choice of weights and the height is how bad that choice is. Training means finding a low point in that landscape.
+
+---
+
+## It's NP-Hard, Even When Tiny
+
+In 1988, Avrim Blum and Ronald Rivest proved a striking result (published in full in 1992): training a neural network with just **three** neurons is NP-Complete.
+
+More precisely: given some labelled examples, deciding whether there's a choice of weights for a particular tiny three-neuron network that classifies every example correctly is NP-Complete. Three neurons. Modern networks have billions.
+
+And it's not only neural networks. Lots of basic learning tasks are NP-Hard in the worst case:
+
+- Finding the **smallest decision tree** that fits a set of examples (Laurent Hyafil and Ronald Rivest, 1976).
+- **k-means clustering**: splitting data points into $k$ groups so each point is as close as possible to its group's centre. Finding the best grouping is NP-Hard, even for just two groups in general dimensions.
+
+So if machine learning needed **optimal** answers, it would be in serious trouble.
+
+---
+
+## What Training Actually Does: Go Downhill
+
+Machine learning doesn't look for the optimal weights. It uses **gradient descent**: start somewhere, look at which direction is downhill from where you are, take a small step that way, repeat.
+
+Here's a one-dimensional version. The curve is a landscape with several valleys. Click anywhere on it to drop a ball, then press **Play**.
+
+<LossLandscape />
+
+Try dropping the ball at different places:
+
+- Drop it near the far left, and it rolls into the first valley and stops there. That valley isn't the deepest.
+- Drop it about two-thirds of the way across, and it finds the deepest valley.
+
+The ball only ever knows the slope right under it. It can't see that a deeper valley exists on the other side of a hill. That's called getting stuck in a **local minimum**: a point that's lower than everything nearby, but not the lowest overall.
+
+This is exactly the greedy behaviour from Post 21's knapsack and Post 54's nearest-neighbour routes: always take the locally best step, and sometimes end up somewhere mediocre.
+
+---
+
+## So Why Does It Work So Well?
+
+Here's the honest answer: it's not fully understood. Researchers are still actively working out why. But there are several parts of the answer that are widely agreed on.
+
+<Tabs>
+  <TabItem value="good" label="Good enough is enough" default>
+
+Nobody needs the **global** minimum. A network that classifies 99% of images correctly is useful, even if some other setting of the weights would get 99.2%. Machine learning asks for "low enough loss", which is a much easier target than "lowest possible loss".
+
+  </TabItem>
+  <TabItem value="highdim" label="High dimensions are different">
+
+A one-dimensional landscape like the figure has real traps: hills you can't get around. In a landscape with millions of dimensions, a point is only a trap if it's a valley in **every** direction at once. Many points that look like traps turn out to be **saddle points**, downhill in at least one direction, and gradient descent can usually find a way out.
+
+There's also evidence that, for very large networks, most of the valleys gradient descent finds are about equally good. So getting "stuck" doesn't cost much.
+
+  </TabItem>
+  <TabItem value="data" label="Real data isn't the worst case">
+
+The NP-Hardness results are about the **worst case**: specially constructed examples that are hard to fit. Photos, text and sound aren't designed to be hard. They have enormous amounts of structure, and that structure seems to make the landscapes much friendlier than the worst case.
+
+This is the same lesson as TSP in Post 20 and SAT solvers that we'll meet in Phase 6: worst-case hardness says what's **guaranteed**, not what's **typical**.
+
+  </TabItem>
+  <TabItem value="noise" label="A little randomness helps">
+
+In practice, training uses **stochastic** gradient descent: each step looks at a small random batch of examples rather than all of them. That makes each step a bit noisy. The noise can actually help, because it shakes the ball enough to sometimes escape shallow valleys.
+
+That's closely related to an idea called simulated annealing, which is on the plan for Phase 6.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Where the Limits Still Bite
+
+None of this makes NP-Hardness irrelevant to machine learning. It shows up in practical ways:
+
+- **No guarantees:** training can fail, or give much worse results on a different run, and there's no general way to know you've found a near-best answer.
+- **Hyperparameters:** choosing learning rates, network sizes and architectures is itself a search problem, and teams spend enormous amounts of computing power on it.
+- **Interpretability and verification:** checking whether a trained network will **always** behave correctly, for example never misclassifying any slightly altered input, is itself NP-Hard for common network types. That's the $co\mathcal{NP}$ "for every possibility" shape from Post 25 again.
+
+So the honest picture is: machine learning works not because it escapes NP-Hardness, but because it asks easier questions than the worst case, and accepts answers that are good rather than perfect.
+
+:::note What We Have Established
+Training a neural network means minimising a **loss** over its weights. Even for a three-neuron network, finding weights that fit the data perfectly is NP-Complete (Blum and Rivest, 1988/1992). Smallest decision trees and k-means clustering are also NP-Hard.
+
+Training uses **gradient descent**, which can get stuck in local minima, but works well in practice because "good enough" is the goal, high-dimensional landscapes have fewer true traps, real data is far from the worst case, and noisy steps help escape shallow valleys. Worst-case hardness still shows up as a lack of guarantees and in hard verification questions.
+:::
+
+---
+
+## Up Next
+
+From artificial networks to real biology. Post 58 is about protein folding: predicting the 3D shape a protein chain folds into. Simplified versions of the problem are NP-Hard, and yet in 2020 an AI system called AlphaFold started predicting real protein shapes with remarkable accuracy. It's another collision between hardness and machine learning, and it won a Nobel Prize.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
