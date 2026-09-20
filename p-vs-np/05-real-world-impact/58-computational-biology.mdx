@@ -1,0 +1,117 @@
+---
+sidebar_position: 8
+title: "Computational Biology"
+description: "A protein is a chain that folds itself into a precise 3D shape, and the shape decides what it does. Simplified versions of predicting that shape are NP-Hard. Then, in 2020, AlphaFold started getting real shapes right, and won a Nobel Prize."
+tags: [real-world-impact, protein-folding, biology, hp-model, alphafold, np-hard, drug-discovery]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import HPFold from '@site/src/components/HPFold';
+
+# Computational Biology
+
+I took biology in my first year alongside computer science, mostly because I had to. The one lecture that really stuck with me was about proteins. The teacher held up a long piece of string and said: "this is a protein when it's made. A few moments later it looks like this", and scrunched it into a tight, specific knot. "And if it folds into the wrong knot, you might get a disease."
+
+I had no idea at the time that predicting that knot is one of the most famous hard problems in science. This post is about why it's hard, how complexity theory describes that hardness, and how it was finally cracked in practice by a method that doesn't contradict any of it.
+
+---
+
+## Why Shape Matters
+
+Proteins do almost everything in your body: carry oxygen, fight infections, digest food, copy DNA. Each protein starts as a chain of building blocks called **amino acids**, linked in a specific order that's written in your genes. There are 20 kinds of amino acid.
+
+Then the chain folds into a particular 3D shape, usually within a fraction of a second. That shape decides what the protein can do: which molecules it can grab, which it can't, how it fits into other proteins. A drug usually works by fitting into a particular protein's shape, like a key in a lock.
+
+So if you know a protein's shape, you understand much more about what it does and how to design a drug for it. Working out shapes experimentally can take months or years per protein. Predicting them from the chain would be enormously valuable.
+
+---
+
+## The Search Is Huge
+
+In 1969, the biologist Cyrus Levinthal pointed out something strange. A protein chain has so many possible shapes that if it tried them one at a time, even at an incredibly fast rate, it would take longer than the age of the universe to find the right one. Yet real proteins fold in milliseconds or less.
+
+This is called **Levinthal's paradox**, and it's not really a paradox. It tells you that proteins **don't** search randomly. Physics guides them downhill towards their folded shape, a bit like the ball rolling into a valley in Post 57. But it does tell you that the space of possible shapes is astronomically large, which is exactly the kind of thing that makes computing the answer hard.
+
+---
+
+## A Toy Version: The HP Model
+
+To study folding mathematically, researchers use simplified models. The most famous is the **HP model**, introduced by Ken Dill in 1985.
+
+- Every amino acid is one of two types: **H** (hydrophobic, meaning it avoids water) or **P** (polar, meaning it's happy in water).
+- The chain lives on a grid. Each bead sits on a grid point, neighbours in the chain sit on neighbouring grid points, and no two beads can share a point.
+- In water, H beads like to bunch together in the middle, away from the water. So the **score** of a fold is the number of pairs of H beads that touch on the grid without being next to each other in the chain. More contacts means a more stable fold.
+
+The problem: given a sequence of H and P, find the fold with the most H–H contacts.
+
+Here's a 14-bead chain. **Random fold** shows a random valid fold. **Search every fold** tries all of them and shows the best.
+
+<HPFold />
+
+The search checks over a hundred thousand different folds, even for this tiny 14-bead chain (after removing ones that are just rotations or reflections of each other). The number grows exponentially with length. Real proteins have hundreds of amino acids, in three dimensions, with 20 types instead of 2.
+
+And even this toy version is provably hard. In 1998, two groups showed it: Bonnie Berger and Tom Leighton proved that finding the best fold in the 3D HP model is NP-Hard, and Pierluigi Crescenzi, Deborah Goldman, Christos Papadimitriou, Antonio Piccolboni and Mihalis Yannakakis proved the same for the 2D version you see above.
+
+---
+
+## Being Careful With the Claim
+
+My original plan said "protein folding is tied to NP-Hardness". That's true in a specific sense, and I want to be precise about it.
+
+<Tabs>
+  <TabItem value="true" label="What's proved" default>
+
+Finding the optimal fold in simplified lattice models, like the HP model, is NP-Hard. So no general fast algorithm exists for those models, unless $\mathcal{P} = \mathcal{NP}$.
+
+  </TabItem>
+  <TabItem value="nottrue" label="What isn't">
+
+Real proteins aren't arbitrary sequences. They're the product of billions of years of evolution, which favoured sequences that fold quickly and reliably into one stable shape. Sequences that misfold tend to be harmful, so evolution filtered them out.
+
+So real proteins are probably very far from the worst-case instances that NP-Hardness proofs construct. The hardness result says the **general** problem is hard. It doesn't say the proteins that actually exist are hard to predict.
+
+  </TabItem>
+</Tabs>
+
+That gap, between hard in general and easier for the cases nature actually produces, is exactly what was exploited next.
+
+---
+
+## AlphaFold
+
+Since 1994, there's been a competition every two years called **CASP** (Critical Assessment of protein Structure Prediction). Teams predict the shapes of proteins whose structures have been determined experimentally but not yet published, and their predictions are scored against the real shapes.
+
+For decades, progress was slow. Then at CASP14 in 2020, DeepMind's **AlphaFold 2** produced predictions that, for most targets, were close to the accuracy of experimental methods. Many scientists described it as solving a 50-year-old grand challenge.
+
+AlphaFold doesn't search through folds like the figure does. It's a deep learning system trained on structures from the Protein Data Bank, a public archive of well over a hundred thousand protein shapes that scientists had already determined experimentally, and it also uses information from related protein sequences across different species. It learned the patterns that evolution left behind.
+
+In 2022, DeepMind and the European Bioinformatics Institute released predicted structures for over 200 million proteins, nearly every protein known to science. And in 2024, the Nobel Prize in Chemistry was awarded half to David Baker, for computational protein design, and half to Demis Hassabis and John Jumper, for AlphaFold's protein structure prediction.
+
+---
+
+## What This Says About P vs NP
+
+AlphaFold didn't prove $\mathcal{P} = \mathcal{NP}$, and it didn't solve the HP model in polynomial time. It's not guaranteed to be right; sometimes it's confidently wrong, and it struggles with some kinds of proteins.
+
+What it showed is the lesson that keeps coming back in this phase: **real-world instances have structure, and learning that structure can beat worst-case hardness in practice.** NP-Hardness is a statement about every possible input. Nature only gives us some of them.
+
+:::note What We Have Established
+A protein's 3D shape decides its function, and predicting it from the amino acid chain is hugely valuable for biology and drug design. The space of shapes is astronomically large (Levinthal, 1969).
+
+In the simplified **HP lattice model** (Dill, 1985), finding the best fold is NP-Hard in 2D and 3D (Crescenzi et al.; Berger and Leighton; both 1998). Real proteins are shaped by evolution and are probably far from worst-case instances.
+
+**AlphaFold 2** (CASP14, 2020) predicts real structures with near-experimental accuracy for many proteins by learning from known structures, not by exhaustive search. It contributed to the 2024 Nobel Prize in Chemistry. It's a practical success that doesn't contradict worst-case hardness.
+:::
+
+---
+
+## Up Next
+
+From biology to money. Post 59 is about financial markets: finding arbitrage, building portfolios, and pricing complicated financial products. Some of it turns out to be easy in a way I didn't expect, and some of it is hard in a way that has been used to argue about how the 2008 financial crisis happened.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
