@@ -1,0 +1,117 @@
+---
+sidebar_position: 9
+title: "Financial Modeling & Markets"
+description: "Spotting an arbitrage loop in currency prices turns out to be easy, which surprised me. Finding the best one isn't. And there's a serious argument that computational hardness can let sellers hide bad assets inside complex financial products."
+tags: [real-world-impact, finance, arbitrage, bellman-ford, portfolio-optimization, derivatives]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import ArbitrageCycle from '@site/src/components/ArbitrageCycle';
+
+# Financial Modeling & Markets
+
+When I planned this post, my note said: "discuss finding optimal arbitrage opportunities in complex global markets". I assumed the story would be simple: arbitrage is a search problem, search problems are hard, so finding arbitrage is NP-Hard.
+
+The first thing I found while researching it is that **detecting** arbitrage is actually easy. Polynomial time, with an algorithm from the 1950s. The hard parts of finance are somewhere else, and they're more interesting than I expected.
+
+---
+
+## What Arbitrage Is
+
+**Arbitrage** means making a guaranteed profit from price differences, with no risk.
+
+The classic example uses currency exchange. Start with dollars. Change them to euros, the euros to pounds, and the pounds back to dollars. If the exchange rates are slightly out of line with each other, you can end up with more dollars than you started with, without betting on anything.
+
+In real markets, arbitrage opportunities are tiny and disappear in a fraction of a second, because many firms with very fast computers are hunting for them. But the question of **how to find them** is a nice computational problem.
+
+Here's a market with four currencies. The rates are **made up** for this example, with a small fee built into each trade, and one deliberately mispriced rate (highlighted). Start with 1,000 and click currencies to trade through them, ending where you started.
+
+<ArbitrageCycle />
+
+Most loops lose a little money, because of the fees. But some loops make money. Can you find one before pressing **Find a profitable loop**?
+
+---
+
+## Why Detecting Arbitrage Is Easy
+
+Here's the trick, and it's one of my favourite small ideas in this whole series.
+
+A loop is profitable when the exchange rates around it **multiply** to more than 1. Multiplication is awkward for shortest-path algorithms, which **add** distances. So take logarithms, which turn multiplication into addition. Then flip the sign, so "big product" becomes "very negative sum":
+
+:::info New Symbol: $\log$
+A **logarithm** answers "what power?". $\log_{10} 1000 = 3$, because $10^3 = 1000$. The key property here: $\log(a \times b) = \log a + \log b$. It turns multiplying into adding.
+:::
+
+$$r_1 \times r_2 \times r_3 > 1 \iff (-\log r_1) + (-\log r_2) + (-\log r_3) < 0$$
+
+So a profitable trading loop is a loop whose edge weights, $-\log(\text{rate})$, add up to a **negative** number. That's called a **negative cycle**, and there's a classic algorithm that finds one: the **Bellman–Ford algorithm**, developed in the 1950s by Richard Bellman and Lester Ford (with earlier related work by others). It runs in time proportional to (number of currencies) × (number of exchange rates). Polynomial.
+
+That's exactly what **Find a profitable loop** does in the figure.
+
+---
+
+## Where It Gets Hard
+
+So detection is easy. But a few closely related questions are not.
+
+<Tabs>
+  <TabItem value="best" label="The best loop" default>
+
+Bellman–Ford finds **a** profitable loop. What if you want the **most** profitable loop that visits each currency at most once?
+
+That's a version of the **longest simple cycle** problem in disguise: you want the cycle with the biggest total weight, without repeating any currency. Longest simple path and longest simple cycle are NP-Hard, closely related to the Hamiltonian Cycle problem from Post 19. So finding the **optimal** arbitrage loop is NP-Hard in general, even though finding **some** loop is easy.
+
+In practice, opportunities are so small and short-lived that speed matters far more than optimality, so this hardness rarely limits anyone. But it's a nice example of the same easy/hard pairs from Post 19.
+
+  </TabItem>
+  <TabItem value="portfolio" label="Portfolios with rules">
+
+In 1952, Harry Markowitz described how to choose a portfolio of investments that balances expected return against risk. His basic version is a **convex** optimisation problem: its landscape has just one valley, with no traps like Post 57's figure. It can be solved efficiently.
+
+But real investors add rules. "Hold **at most 20** different stocks." "Buy in whole lots of 100 shares." "If you hold a stock at all, hold at least 2% of it." Each of those adds yes/no decisions, and with them, the problem becomes NP-Hard. It turns into a close relative of the knapsack problem from Post 21.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Hardness as a Hiding Place
+
+This is the part that surprised me most, and it connects finance back to the ideas in Phase 4.
+
+In 2011, Sanjeev Arora, Boaz Barak, Markus Brunnermeier and Rong Ge published a paper called *Computational Complexity and Information Asymmetry in Financial Products*. Their question was about financial derivatives like the ones at the centre of the 2008 financial crisis: products built by bundling together large numbers of loans or other assets.
+
+Their argument, roughly:
+
+1. A seller bundles many assets into many products. The seller knows which assets are bad ("lemons").
+2. A dishonest seller could put more of the lemons into particular products, in a pattern.
+3. For a buyer to **detect** that pattern, they'd have to solve a problem related to finding a **dense subgraph**: a group of nodes in a large graph with unusually many connections between them. Finding densest subgraphs of this kind is believed to be computationally hard.
+
+So even if the buyer is given **all** the information about which assets went into which product, they might not be able to compute whether they've been cheated. The hardness itself becomes a place to hide.
+
+I want to be careful about what this does and doesn't say. It's a theoretical model, based on an unproven (though widely believed) hardness assumption. It doesn't say this is **what happened** in 2008. It says that complexity can create a kind of information gap between seller and buyer that isn't about who knows what, but about who can **compute** what. That idea has stuck with me.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+**Detecting** currency arbitrage is easy: take $-\log$ of the rates and look for a **negative cycle** with Bellman–Ford, in polynomial time. **Finding the most profitable** simple loop is NP-Hard, related to longest simple cycle and Hamiltonian cycle.
+
+Markowitz's basic portfolio optimisation (1952) is efficiently solvable, but realistic rules like a maximum number of holdings or whole-lot trading make it NP-Hard.
+
+Arora, Barak, Brunnermeier and Ge (2011) argued that computational hardness can let a seller hide bad assets inside complex derivatives, because detecting the manipulation relates to finding dense subgraphs, which is believed to be hard. It's a model, not a description of history.
+:::
+
+---
+
+## Up Next
+
+Post 60 shrinks things down to the size of a fingernail. A modern chip has billions of transistors, connected by wires that all have to fit, without crossing where they shouldn't, as short as possible. Designing them is packed with NP-Hard problems, and the software that does it is one of the hidden foundations of the whole computer industry.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
