@@ -1,0 +1,105 @@
+---
+sidebar_position: 10
+title: "Circuit Board Design"
+description: "A modern chip has billions of transistors connected by wires that must all fit, avoid each other and stay short. Splitting, placing and wiring them are NP-Hard problems, solved every day by software most people have never heard of."
+tags: [real-world-impact, chip-design, vlsi, steiner-tree, placement, routing, eda]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import SteinerWires from '@site/src/components/SteinerWires';
+
+# Circuit Board Design
+
+There's a nice circularity in this post that I didn't notice until I started writing it.
+
+Every problem in this series runs on a computer chip. And designing that chip is itself full of NP-Hard problems. The machines we use to attack hard problems are only possible because we got good at attacking a particular family of hard problems: the ones involved in building those machines.
+
+Post 13 said every chip is built from AND, OR and NOT gates. A modern processor has billions of transistors forming those gates. This post is about how anyone decides where they all go and how they're connected.
+
+---
+
+## From Logic to Layout
+
+Chip design goes through many stages, but the part with the most NP-Hard problems is called **physical design**: turning a logical circuit (a description of which gates connect to which) into an actual physical layout of shapes on silicon.
+
+<Tabs>
+  <TabItem value="partition" label="1. Partitioning" default>
+
+Split the circuit into big blocks that will sit in different areas of the chip, so that as few wires as possible have to run between blocks. Long wires are slow and use power.
+
+This is **graph partitioning**: cut a graph into roughly equal pieces while cutting as few edges as possible. Even splitting into two equal halves with the fewest cut edges is NP-Hard.
+
+  </TabItem>
+  <TabItem value="place" label="2. Placement">
+
+Decide exactly where every gate goes, so that connected gates are close together, nothing overlaps, and there's room left for the wires. With billions of gates, this is an enormous optimisation problem, and finding the best placement is NP-Hard.
+
+  </TabItem>
+  <TabItem value="route" label="3. Routing">
+
+Draw the actual wires. Each wire runs along horizontal and vertical tracks in several stacked metal layers, can't touch wires it isn't supposed to connect to, and should be as short as possible. Routing many wires at once while avoiding conflicts is NP-Hard. Even routing a **single** net optimally is NP-Hard, and that's the part you can play with below.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Connecting Pins: The Steiner Tree Problem
+
+Here's one small piece of routing. Five pins (the squares) need to be connected by wire, all to each other, using as little wire as possible. On a chip, wires run only horizontally and vertically, so the length of a wire between two points is the horizontal distance plus the vertical distance.
+
+<SteinerWires />
+
+Without adding anything, the figure connects the pins with a **minimum spanning tree**: the shortest set of direct pin-to-pin connections that links them all. That's 21 units of wire.
+
+Now click some empty grid points to add **junctions**, extra points where wires can meet and branch. With the right junctions, the total gets shorter. Press **Best junctions** to see the best possible: 18 units, a saving of about 14%.
+
+These two problems look almost the same, but they're on opposite sides of the line:
+
+| Problem | Allowed | Difficulty |
+|---|---|---|
+| **Minimum spanning tree** | connect pins directly to each other | **Easy.** Simple greedy methods like Kruskal's (1956) and Prim's (1957) find the best answer quickly. |
+| **Steiner tree** | add extra junction points anywhere | **NP-Hard.** In graphs it was on Karp's 1972 list; with horizontal and vertical wires, Michael Garey and David Johnson proved it NP-Complete in 1977. |
+
+Allowing extra junctions creates a huge new space of choices: where to put them and how many to use. That's where the hardness comes from. The figure can find the best answer only because there are just five pins: in 1966, Maurice Hanan proved that the best junctions for this kind of wiring always lie on the grid lines through the pins, which leaves only a few possibilities to try. With thousands of pins, that trick doesn't save you.
+
+The easy answer is also guaranteed to be not too bad: for this kind of wiring, Frank Hwang proved in 1976 that the minimum spanning tree is never more than **1.5 times** as long as the best Steiner tree. That's another approximation guarantee, the kind Phase 6 is built around.
+
+---
+
+## Why This Matters
+
+Chips are designed with highly specialised software tools, an industry called **Electronic Design Automation**, or EDA. A small number of companies build these tools, and every chip designer in the world depends on them.
+
+The quality of their heuristics matters directly:
+
+- **Shorter wires** mean signals travel faster, so the chip can run at a higher speed.
+- **Shorter wires** also use less power, which matters for battery life and heat.
+- **Tighter placement** means a smaller chip, so more chips per silicon wafer, and lower cost.
+
+None of these tools find optimal layouts. They use combinations of the methods in Phase 6: greedy rules, local improvement, simulated annealing (which was popularised in the 1980s partly **for** chip placement), and heavy use of solvers. Then they check the result extremely carefully, because a mistake in a chip can't be patched after it's manufactured.
+
+That checking is another place NP-Hardness appears. Confirming that the optimised layout still computes exactly the same function as the original design is often done with SAT solvers: "is there **any** input where these two circuits disagree?" is a satisfiability question. When the answer is "no, the formula is unsatisfiable", the design is verified. That's the $co\mathcal{NP}$ shape from Post 25, solved in practice on circuits with millions of gates.
+
+And the TSP from Post 20 shows up too: the 85,900-point instance that was solved exactly in 2006 came from a chip-design application.
+
+:::note What We Have Established
+**Physical chip design** turns a logical circuit into a layout through **partitioning**, **placement** and **routing**, all of which involve NP-Hard problems.
+
+Connecting a set of pins with the least wire is the **Steiner tree** problem, NP-Hard in graphs (Karp, 1972) and with horizontal/vertical wires (Garey and Johnson, 1977). Without extra junctions it becomes the **minimum spanning tree**, which is easy (Kruskal, Prim). The minimum spanning tree is never more than 1.5 times the best rectilinear Steiner tree (Hwang, 1976).
+
+EDA tools use heuristics and solvers, not exact optimisation, and verify results with SAT-based equivalence checking.
+:::
+
+---
+
+## Up Next
+
+Post 61 is about social networks: billions of users, trillions of connections, and the question "which groups of people are communities?". It's the Clique problem from Post 15 at a scale I can barely imagine, and the way platforms handle it is a perfect example of choosing an easier question on purpose.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
