@@ -1,0 +1,118 @@
+---
+sidebar_position: 11
+title: "Social Media Graph Algorithms"
+description: "A social network is a graph with billions of nodes. Finding the largest group where everyone knows everyone is the Clique problem from Post 15, NP-Hard and even hard to approximate. So platforms quietly ask easier questions instead."
+tags: [real-world-impact, social-networks, clique, community-detection, k-core, modularity, graphs]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import FriendGraph from '@site/src/components/FriendGraph';
+
+# Social Media Graph Algorithms
+
+Every social app I use has a "people you may know" section. Sometimes it's eerily accurate: it suggests someone from my old school who I haven't spoken to in years, but who is friends with five of my current friends. Sometimes it suggests a random stranger.
+
+When I started thinking of that feature as an algorithm, I realised a social network is exactly the kind of object this whole series has been about: a **graph**. People are nodes. Friendships are edges. And the questions platforms want to ask about that graph range from very easy to NP-Hard.
+
+---
+
+## The Graph Is Enormous
+
+The biggest social platforms have billions of users, and each user can have hundreds or thousands of connections. The friendship graph has trillions of possible pairs to think about.
+
+At that size, the difference between polynomial and exponential isn't academic. Even some **polynomial** algorithms are too slow: something that takes $n^2$ steps, with $n$ in the billions, is already around $10^{18}$ steps. Platforms need algorithms that are close to **linear**, touching each edge only a few times.
+
+So it's not just "is this problem in $\mathcal{P}$?". It's "can this be done in roughly one pass over the data?".
+
+---
+
+## Easy Questions
+
+Many useful questions are easy, and they're the ones platforms actually rely on.
+
+<Tabs>
+  <TabItem value="bfs" label="How far apart?" default>
+
+"How many friendship steps separate me from this person?" is a shortest-path question, solvable by **breadth-first search**: look at all your friends, then all their friends, and so on. Linear time.
+
+In 2016, Facebook's researchers estimated that the average distance between two of its users was about **3.5** steps. So "six degrees of separation" is an overestimate, at least on one large platform.
+
+  </TabItem>
+  <TabItem value="pymk" label="People you may know">
+
+A simple version of friend suggestions counts **common friends**: if someone isn't your friend but shares many friends with you, suggest them. That's just looking at the friends of your friends and counting. No search needed.
+
+Real systems combine many more signals, but they're built from fast, local computations like this.
+
+  </TabItem>
+  <TabItem value="triangles" label="Triangles">
+
+A **triangle** is three people who all know each other. Counting triangles tells you how tightly knit a network is: in real friendship networks, two of your friends are much more likely to know each other than two random people. Counting triangles is polynomial, and with clever methods it's fast enough for huge graphs.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## The Hard Question: The Largest Clique
+
+Now the question from Post 15: what's the largest group of people where **everyone** knows **everyone**?
+
+That's the **maximum clique** problem. It's NP-Hard. And it's worse than that: it's even hard to **approximate**. Results building on the PCP theorem from Post 42, by Johan Håstad in 1999 and David Zuckerman in 2007, show that unless $\mathcal{P} = \mathcal{NP}$, no polynomial-time algorithm can even estimate the size of the largest clique to within a factor of nearly $n$. You can't even get roughly close, in the worst case.
+
+Here's a small friendship network. In **Cliques** mode, click people to form a group, and the figure tells you whether everyone in it knows everyone else. **Largest clique** searches every possible group (with 11 people, that's 2,048 groups) and shows the biggest.
+
+<FriendGraph />
+
+There are several cliques of four people, and none of five. With 11 people, checking every group is instant. With a billion, checking every group is unimaginable.
+
+---
+
+## The Easier Question Platforms Ask Instead: Cores
+
+Here's the move I find really clever.
+
+A clique demands that **every** pair in the group is connected. That's a very strict rule, and it's what makes the problem hard. Real communities aren't like that anyway. In a real friend group, most people know most of the others, but not every single pair.
+
+So relax the rule:
+
+> A **$k$-core** is a group where **everyone knows at least $k$ others inside the group**.
+
+Finding it is easy. Repeatedly delete anyone with fewer than $k$ friends left in the network. Deleting them might drop some of their friends below $k$, so keep going until nobody else needs deleting. Whatever is left is the $k$-core. Vladimir Batagelj and Matjaž Zaversnik described a way to compute every $k$-core of a graph in linear time in 2003.
+
+Switch the figure to **Cores** mode and try $k = 2$, $3$ and $4$. The 3-core is a big, well-connected group. The 4-core is empty, even though there are cliques of four people. Peeling works on everyone's friend counts at once and never searches through groups.
+
+This is the same easy-hard pattern from Post 19. Insisting on **every pair** creates choices that interact across the whole graph. Asking for **enough connections each** turns into a simple local rule you can apply over and over.
+
+---
+
+## Communities: Hard, but Approached Smartly
+
+Platforms also want to split the whole network into **communities**: groups that are densely connected inside and loosely connected to each other. Think of your school friends, your family, your neighbourhood cricket team.
+
+A popular way to score a split is called **modularity**, introduced by Mark Newman and Michelle Girvan in 2004. It measures how many more connections fall inside the communities than you'd expect by chance.
+
+Finding the split with the highest modularity is NP-Hard: Ulrik Brandes and colleagues proved that in 2008. So in practice, people use heuristics. The most famous is the **Louvain method**, published by Vincent Blondel and colleagues in 2008. It starts with every person in their own community, repeatedly moves people into whichever neighbouring community improves the score most, then merges communities into single nodes and repeats. It's fast enough for networks with hundreds of millions of nodes, and it usually finds good splits, with no guarantee of the best one.
+
+That's the whole of Phase 5 in miniature: the exact problem is NP-Hard, so you either change the question to an easy one (cores), or keep the question and use a good heuristic (Louvain).
+
+:::note What We Have Established
+A social network is a graph with billions of nodes, so even quadratic algorithms are too slow; platforms need near-linear methods. Distances (breadth-first search), common-friend counts and triangle counts are easy.
+
+The **maximum clique** is NP-Hard, and by results of Håstad (1999) and Zuckerman (2007) it can't even be approximated well unless $\mathcal{P} = \mathcal{NP}$. Relaxing it to a **$k$-core** (everyone has at least $k$ friends inside) makes it solvable in linear time by peeling (Batagelj and Zaversnik, 2003).
+
+Maximising **modularity** (Newman and Girvan, 2004) to find communities is NP-Hard (Brandes et al., 2008), so platforms use heuristics like the **Louvain method** (Blondel et al., 2008).
+:::
+
+---
+
+## Up Next
+
+Phase 5 has one more post. My original plan for it was to "quantify the billions of dollars lost because we can't perfectly solve NP problems". When I tried to find that number, I discovered something I should have expected: nobody can honestly calculate it, and the reason why is itself a lesson about NP-Hardness.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
