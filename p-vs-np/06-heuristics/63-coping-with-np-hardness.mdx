@@ -1,0 +1,147 @@
+---
+sidebar_position: 1
+title: "Coping with NP-Hardness"
+description: "So your problem is NP-Hard. Now what? Engineers don't give up; they choose what to give up. Exactness, speed on every input, or generality: pick which one to sacrifice, and a whole toolbox opens."
+tags: [heuristics, coping, approximation, fixed-parameter-tractable, special-cases, branch-and-bound]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Coping with NP-Hardness
+
+There's a famous cartoon in the opening chapter of Michael Garey and David Johnson's 1979 book *Computers and Intractability*, which is still one of the standard references on NP-Completeness. An employee stands in front of the boss, with a line of people behind him, and explains: "I can't find an efficient algorithm, but neither can all these famous people."
+
+I love that cartoon because it captures exactly where the last five phases leave us. Proving your problem is NP-Hard is a kind of permission. It says: don't feel bad that you haven't found a perfect fast algorithm, because nobody has, and probably nobody can.
+
+But the boss still needs the warehouse scheduled on Monday.
+
+Phase 6 is about what happens next. It's the most practical phase in this series, and it's where the theory finally turns into engineering.
+
+---
+
+## The Three Things You'd Like
+
+For any hard optimisation problem, you'd ideally want an algorithm that is:
+
+1. **Exact:** always finds the truly best answer.
+2. **Fast:** runs in polynomial time on every input.
+3. **General:** works for every possible instance of the problem.
+
+If $\mathcal{P} \neq \mathcal{NP}$, then for an NP-Hard problem, **you can't have all three**. That's essentially what NP-Hardness means.
+
+But you can usually have **two**. And each choice of which one to give up leads to a different family of techniques. That one idea organises almost all of Phase 6.
+
+---
+
+## Give Up Exactness: Approximation and Heuristics
+
+Keep it fast and general, but accept an answer that's **close** to the best rather than the best.
+
+<Tabs>
+  <TabItem value="approx" label="Approximation algorithms" default>
+
+An **approximation algorithm** comes with a **proof** of how close it gets. For example: "this always finds a vertex cover at most twice the size of the smallest one." You don't know the optimum, but you know you're within a factor of 2 of it, always.
+
+We've already met a few guarantees: First Fit Decreasing for bin packing (Post 56) and minimum spanning trees for Steiner trees (Post 60). Posts 64 to 67 build this idea properly.
+
+  </TabItem>
+  <TabItem value="heur" label="Heuristics">
+
+A **heuristic** is a method that works well in practice, without a proof. Nearest neighbour for routes (Post 54), gradient descent for neural networks (Post 57), the Louvain method for communities (Post 61).
+
+Most of the software that solves NP-Hard problems in industry is heuristic. The guarantee comes from testing, not from theorems. Posts 68 and 71 cover the most important ones.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Give Up Speed on Every Input: Smarter Exact Methods
+
+Keep it exact and general, but accept that **some** inputs will take exponential time, while making that exponential as small as possible and making typical inputs fast.
+
+<Tabs>
+  <TabItem value="bnb" label="Branch and bound" default>
+
+Search through possibilities, but **prune**. Keep the best solution found so far. Before exploring a branch of the search, compute a quick **bound** on the best this branch could possibly achieve (like the relaxations in Post 62). If even the bound is worse than what you already have, skip the whole branch.
+
+This is how the TSP instances in Post 20 and the airline problems in Post 55 get solved. In the worst case it's still exponential. On real instances, it can skip almost everything.
+
+  </TabItem>
+  <TabItem value="dp" label="Dynamic programming">
+
+Store answers to sub-problems so you never solve the same one twice. Held and Karp's TSP algorithm (Post 20) cut $n!$ down to about $n^2 2^n$ this way. For knapsack, it gives the pseudo-polynomial algorithm from Post 21. Post 70 is about when this works and when it doesn't.
+
+  </TabItem>
+  <TabItem value="sat" label="SAT and integer solvers">
+
+Turn the problem into SAT or an integer program, and hand it to a solver that has had decades of engineering. On many industrial instances with millions of variables, these finish in seconds, despite the worst case being exponential.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Give Up Generality: Special Cases and Parameters
+
+Keep it exact and fast, but only for **some** inputs: the ones with extra structure.
+
+<Tabs>
+  <TabItem value="special" label="Special structure" default>
+
+Many NP-Hard problems become easy on special kinds of input. We've seen several:
+
+- Colouring a graph with 2 colours (Post 18).
+- Independent Set on trees (graphs with no loops), which simple dynamic programming solves in linear time.
+- Vertex Cover in **bipartite** graphs (where nodes split into two sides with edges only between sides), which becomes a matching problem solvable in polynomial time.
+
+If your real-world inputs always have one of these structures, the NP-Hardness of the general problem doesn't apply to you.
+
+  </TabItem>
+  <TabItem value="fpt" label="Small parameters">
+
+Sometimes the input is huge but some **number** describing the answer is small. Then you can try to make the running time exponential only in that small number.
+
+Example: does a graph have a vertex cover of size $k$? Here's a simple method. Pick any edge $(u, v)$ that isn't covered yet. Some camera must be on $u$ or on $v$ (Post 16's rule). So **branch**: try putting it on $u$, and separately try putting it on $v$. Each branch uses up one of your $k$ cameras. After $k$ levels you've used them all, so the search tree has at most $2^k$ leaves.
+
+Total time: about $2^k \times n$. Exponential in $k$, but **linear** in the size of the graph. If you need a cover of size 20 in a graph with a million nodes, $2^{20}$ is about a million, and that's very doable. (Cleverer branching rules bring it down a lot further; the best known is around $1.27^k$.)
+
+Problems that can be solved like this are called **fixed-parameter tractable**. It's a whole area of research, started largely by Rodney Downey and Michael Fellows in the 1990s.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Choosing in Practice
+
+When I tried to summarise all this for myself, I ended up with a short list of questions to ask about any hard problem:
+
+1. **How big are my real inputs?** If they're small, exact methods might simply be fine.
+2. **Do my inputs have special structure?** Trees, small parameters, geometry, few constraints.
+3. **How close to optimal do I need to be?** Within 1%? Within a factor of 2? Just "better than now"?
+4. **Do I need a guarantee, or just good results most of the time?**
+5. **How much time do I have per decision?** Seconds, minutes or overnight?
+
+The answers point to the right tool. And the rest of this phase is about the tools.
+
+:::note What We Have Established
+For an NP-Hard problem, if $\mathcal{P} \neq \mathcal{NP}$, you can't have an algorithm that is **exact**, **fast on every input** and **general** all at once. Each way of giving one up opens a family of techniques:
+
+- Give up **exactness**: approximation algorithms (with proven guarantees) and heuristics (without).
+- Give up **speed on every input**: branch and bound, dynamic programming, SAT and integer programming solvers.
+- Give up **generality**: special cases like trees and bipartite graphs, and **fixed-parameter tractable** algorithms such as the $2^k \times n$ search for a vertex cover of size $k$.
+:::
+
+---
+
+## Up Next
+
+Post 64 is about the most mathematically satisfying of these tools: **approximation algorithms**. What it means to guarantee an answer within a factor of the optimum, without ever knowing the optimum, and why some problems can be approximated very well while others can't be approximated at all.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

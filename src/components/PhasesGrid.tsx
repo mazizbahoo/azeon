@@ -63,7 +63,7 @@ const PHASES: Phase[] = [
     slug: '/p-vs-np/heuristics',
     color: 'var(--az-phase-06)',
     desc: 'Approximation algorithms, greedy strategies, simulated annealing, and genetic algorithms.',
-    publishedPosts: 0,
+    publishedPosts: 1,
     totalPosts: 12,
   },
   {
