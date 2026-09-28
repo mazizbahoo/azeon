@@ -1,0 +1,127 @@
+---
+sidebar_position: 4
+title: "TSP and the Triangle Inequality"
+description: "General TSP can't be approximated at all. Add one sensible rule, that going direct is never longer than taking a detour, and a spanning tree gives a tour within twice the best. Christofides' 1976 trick gets that to 1.5."
+tags: [heuristics, approximation-algorithms, tsp, metric-tsp, spanning-tree, christofides, triangle-inequality]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import TreeTour from '@site/src/components/TreeTour';
+
+# TSP and the Triangle Inequality
+
+Post 64 ended with a bleak result: general TSP can't be approximated within **any** factor unless $\mathcal{P} = \mathcal{NP}$. The proof worked by making some distances absurdly large, so that one bad edge ruined everything.
+
+But real distances aren't like that. If it's about 50 km from Lahore to Kasur, and 60 km from Kasur to some village, it can't be 500 km from Lahore to that village. Going direct is never longer than going via Kasur.
+
+That one sensible rule changes TSP from "can't be approximated at all" to "can be approximated within 1.5". This post shows how, with the 2-approximation in full and the 1.5 idea explained.
+
+---
+
+## The Triangle Inequality
+
+:::info The Triangle Inequality
+For any three places $A$, $B$, $C$:
+
+$$d(A, C) \leq d(A, B) + d(B, C)$$
+
+Going straight from $A$ to $C$ is never longer than going from $A$ to $B$ and then from $B$ to $C$.
+:::
+
+It's called the triangle inequality because in any triangle, one side is never longer than the other two put together. Straight-line distances obey it. Road distances usually do too, since if the detour through $B$ were shorter, the "direct" route would just be that detour.
+
+TSP where the distances obey this rule is called **metric TSP**. It's still NP-Hard (the Hamiltonian cycle reduction from Post 20 used distances of 1 and 2, and $2 \leq 1 + 1$, so those obey it too). But it's approximable.
+
+---
+
+## The Bound: A Spanning Tree
+
+Every approximation proof needs a bound: something computable that the optimum can't beat. Here it's a **minimum spanning tree**: the cheapest way to connect all the cities with no loops. We met it in Post 60, and it's easy to compute (Prim's or Kruskal's algorithm).
+
+Why is it a lower bound? Take the best tour. Delete any one edge from it. What's left is a path through every city, which connects them all with no loops: a spanning tree. So the best tour costs **more** than **some** spanning tree, and therefore more than the **minimum** spanning tree.
+
+$$\text{MST} \leq \text{OPT}$$
+
+---
+
+## The Double-Tree Algorithm
+
+<Tabs>
+  <TabItem value="s1" label="1. Build the tree" default>
+
+Compute the minimum spanning tree. Its total length is at most $\text{OPT}$.
+
+  </TabItem>
+  <TabItem value="s2" label="2. Walk around it">
+
+Start at a city and walk around the tree, like tracing the outline of a tree drawing with your finger: go down each branch and come back up. You use every edge exactly **twice**, once in each direction, and you visit every city.
+
+Length of the walk: exactly $2 \times \text{MST} \leq 2 \times \text{OPT}$.
+
+But it's not a tour yet, because it visits some cities more than once.
+
+  </TabItem>
+  <TabItem value="s3" label="3. Take shortcuts">
+
+Follow the walk, but whenever the next city is one you've already visited, skip it and go straight to the next new one.
+
+Here's where the triangle inequality comes in. Each shortcut replaces a stretch like $A \to B \to C$ with $A \to C$, and the triangle inequality says that's never longer. So shortcutting never increases the length.
+
+The result is a real tour, visiting each city once, of length at most the walk's: at most $2 \times \text{OPT}$.
+
+  </TabItem>
+</Tabs>
+
+Go through the three stages here, then compare with the optimum:
+
+<TreeTour />
+
+On these eight cities, the tree has length 90.6, the double walk 181.2, and the shortcut tour 124.2. The best tour is 107.8. So the tour is about 15% longer than optimal, much better than the guarantee of 100% longer. That's typical. The guarantee is about the worst case; on ordinary inputs, these methods usually do much better.
+
+---
+
+## Christofides: Getting to 1.5
+
+The double-tree walk is wasteful: it uses **every** tree edge twice, just to make sure you can get around. In 1976, Nicos Christofides found a smarter way to make the tree walkable. The same idea was found independently by Anatoliy Serdyukov in the Soviet Union around the same time, so it's increasingly called the Christofides–Serdyukov algorithm.
+
+The intuition, without the full proof:
+
+- You can walk every edge of a graph exactly once and come home only if every city has an **even** number of edges (that's Euler's rule from Post 19).
+- In the spanning tree, some cities have an **odd** number of edges. It turns out there's always an even number of such cities.
+- Instead of doubling every edge, just pair up the odd cities and add one extra edge for each pair, choosing the pairing as cheaply as possible. That's a **minimum-weight perfect matching**, which can be found in polynomial time.
+- Now every city has an even number of edges, so there's a walk using each edge once. Shortcut it as before.
+
+The extra matching edges cost at most half of $\text{OPT}$ (that's the clever part of the proof). So the total is at most $\text{MST} + \frac{1}{2}\text{OPT} \leq 1.5 \times \text{OPT}$.
+
+---
+
+## Forty-Four Years at 1.5
+
+For more than forty years, nobody could beat 1.5 for metric TSP. It became one of the most famous open questions in approximation.
+
+In 2020, Anna Karlin, Nathan Klein and Shayan Oveis Gharan finally did it. Their algorithm is guaranteed to be within $1.5 - 10^{-36}$ of optimal.
+
+That's not a typo. The improvement is $10^{-36}$, a decimal point followed by 35 zeros and then a 1. It's completely irrelevant in practice. It was celebrated anyway, because it proved that 1.5 **wasn't** a natural limit, after decades of people wondering if it might be.
+
+And on the other side: it's known that getting within about $\frac{123}{122}$ of optimal (roughly 1.008) is NP-Hard (Marek Karpinski, Michael Lampis and Richard Schmied, 2015). So the truth for metric TSP is somewhere between 1.008 and just under 1.5. That's a big gap, and nobody knows where in it the answer lies.
+
+:::note What We Have Established
+With the **triangle inequality** ($d(A,C) \leq d(A,B) + d(B,C)$), TSP becomes approximable. The **minimum spanning tree** is a lower bound on the optimal tour.
+
+**Double-tree algorithm:** walk around the tree (each edge twice, $2 \times \text{MST}$), then skip repeated cities. Shortcuts never add length because of the triangle inequality, so the tour is at most $2 \times \text{OPT}$.
+
+**Christofides–Serdyukov (1976):** fix only the odd-degree cities with a minimum-weight perfect matching, for a guarantee of $1.5 \times \text{OPT}$. Karlin, Klein and Oveis Gharan (2020) beat 1.5 by $10^{-36}$. Getting within about $\frac{123}{122}$ is NP-Hard.
+:::
+
+---
+
+## Up Next
+
+Vertex cover within 2, TSP within 1.5. What about getting within 1%? Or 0.1%? For some problems you can choose: name any accuracy you want, and there's a polynomial-time algorithm for it. Post 67 is about these **approximation schemes**, and the knapsack problem is the classic example.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
