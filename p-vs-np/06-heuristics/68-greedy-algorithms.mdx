@@ -1,0 +1,171 @@
+---
+sidebar_position: 6
+title: "Greedy Algorithms"
+description: "Take the best-looking option right now, never look back. It's the simplest strategy there is. Sometimes it's provably perfect, sometimes it's badly wrong, and learning to tell which is one of the most useful skills in algorithm design."
+tags: [heuristics, greedy, coin-change, interval-scheduling, exchange-argument, matroids]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import CoinGreedy from '@site/src/components/CoinGreedy';
+
+# Greedy Algorithms
+
+I've been sneaking greedy algorithms into this series for a while. The knapsack packer in Post 21 that grabbed the best value per kilogram. The nearest-neighbour route in Post 54. First Fit Decreasing in Post 56. The "most roads first" camera rule in Post 65.
+
+This post finally names the pattern, writes some code, and asks the question that matters: **when can you trust it?**
+
+---
+
+## The Pattern
+
+A **greedy algorithm** builds a solution one piece at a time, and at each step:
+
+1. looks at the options available **right now**,
+2. picks the one that looks **best right now**, by some simple rule,
+3. **never** undoes that choice.
+
+No looking ahead. No backtracking. No search. That's why greedy algorithms are fast: usually about as fast as sorting the input once.
+
+The whole difficulty is that "best right now" might not be "best overall".
+
+---
+
+## Example 1: Making Change
+
+You're a shopkeeper. A customer is owed some change. You want to hand it over using as few coins as possible.
+
+The greedy rule: **always give the biggest coin that doesn't overshoot**, and repeat.
+
+```python
+def greedy_change(amount, coins):
+    """Hand over the biggest coin that fits, again and again."""
+    result = []
+    for coin in sorted(coins, reverse=True):
+        while amount >= coin:
+            result.append(coin)
+            amount -= coin
+    return result
+
+print(greedy_change(68, [1, 2, 5, 10, 20, 50]))
+# [50, 10, 5, 2, 1]  ->  5 coins
+```
+
+With the coin values most countries use, this always gives the fewest coins. But try a different set of coins:
+
+<CoinGreedy />
+
+With coins of 1, 3 and 4, and an amount of 6, greedy takes a 4 first (the biggest that fits), and then has to use 1 + 1. That's **three** coins. But 3 + 3 is only **two**.
+
+Move the slider and try the "1, 10, 25" system too. Greedy fails at 30: it takes 25, then five 1s (six coins), while three 10s would do.
+
+The figure's "Fewest possible" column uses dynamic programming, which tries every amount from 1 up to the target, and always finds the minimum. Post 70 is about that technique. For coins, it's fast because the amount is a small number. (Change-making with arbitrary coin values is actually NP-Hard in general, when the amount can have many digits, for the same pseudo-polynomial reason as knapsack.)
+
+Coin systems where greedy always works are called **canonical**. Real currencies are designed to be canonical, partly so that shopkeepers can make change without thinking.
+
+---
+
+## Example 2: Booking a Room
+
+You have one meeting room and a list of requested meetings, each with a start and end time. You want to accept as many meetings as possible, with no two overlapping.
+
+There are several "obvious" greedy rules. Only one of them works.
+
+<Tabs>
+  <TabItem value="short" label="Shortest first?" default>
+
+Accept the **shortest** meetings first. Sounds sensible: short meetings take up less of the day.
+
+It fails. A short meeting from 11:00 to 13:00 can block both a 9:00–12:00 meeting and a 12:00–15:00 one. Taking the short one gives you 1 meeting. Skipping it gives you 2.
+
+  </TabItem>
+  <TabItem value="early" label="Earliest start first?">
+
+Accept the meeting that **starts** earliest first.
+
+It fails too. A meeting from 8:00 to 18:00 starts earliest, and blocks every other meeting of the day.
+
+  </TabItem>
+  <TabItem value="finish" label="Earliest finish first">
+
+Accept the meeting that **finishes** earliest, among those that don't clash with what you've already accepted.
+
+This one is **always optimal**.
+
+  </TabItem>
+</Tabs>
+
+```python
+def max_meetings(meetings):
+    """meetings: list of (start, end). Returns the most non-overlapping ones."""
+    accepted = []
+    last_end = float("-inf")
+    for start, end in sorted(meetings, key=lambda m: m[1]):  # by finish time
+        if start >= last_end:
+            accepted.append((start, end))
+            last_end = end
+    return accepted
+
+print(max_meetings([(9, 12), (11, 13), (12, 15), (8, 18), (15, 16)]))
+# [(9, 12), (12, 15), (15, 16)]  ->  3 meetings
+```
+
+### Why "earliest finish" is optimal
+
+The proof uses an idea called an **exchange argument**, and it's worth seeing once.
+
+Take any best schedule. Look at its first meeting. The greedy algorithm's first meeting finishes **at least as early** (that's how greedy chose it). So swap the best schedule's first meeting for greedy's. Nothing clashes, because greedy's meeting ends no later. The schedule is still valid, and still has the same number of meetings.
+
+Repeat for the second meeting, the third, and so on. At the end, you've transformed the best schedule into greedy's schedule without ever losing a meeting. So greedy's schedule is as large as the best one.
+
+That's the general shape of a proof that a greedy algorithm is correct: show you can always swap the optimal solution's choice for the greedy choice without making things worse.
+
+---
+
+## Where Greedy Is Perfect
+
+Some of the most famous algorithms in computer science are greedy and provably optimal:
+
+| Problem | Greedy rule |
+|---|---|
+| Minimum spanning tree (Post 60) | Kruskal: add the cheapest edge that doesn't make a loop |
+| Shortest paths from one city | Dijkstra: always settle the nearest unsettled city next |
+| Compressing files | Huffman (1952): repeatedly merge the two rarest symbols |
+| Meeting room | Earliest finish first |
+| Fractional knapsack | Best value per kilogram first (Post 69) |
+
+There's a deep theory explaining exactly when greedy works, built on a structure called a **matroid** (studied by Richard Rado in 1957 and Jack Edmonds in 1971). Roughly: greedy is guaranteed optimal for a problem exactly when its "allowed sets" have a particular exchange property. Spanning trees have it; 0/1 knapsack doesn't.
+
+---
+
+## Where Greedy Fails
+
+And from this series, the greedy rules that fail on NP-Hard problems:
+
+- **0/1 knapsack** by value per kilogram (Post 21): lost 38 to 48.
+- **Nearest-neighbour TSP** (Post 54): about 17–18% too long on our examples, and much worse in bad cases.
+- **"Most roads first" vertex cover** (Post 65): can be off by a factor of about $\ln n$.
+
+But even failing greedy algorithms are useful. They're fast, they give a reasonable starting point, and they're often the first step of the local search methods in Post 71, which take a greedy solution and improve it.
+
+And some greedy algorithms come with real guarantees even on NP-Hard problems: First Fit Decreasing for bin packing (Post 56), and greedy set cover, which is within about $\ln n$ of optimal and essentially the best possible (Post 64).
+
+:::note What We Have Established
+A **greedy algorithm** makes the locally best choice at each step and never undoes it. It's fast, but the locally best choice may not be globally best.
+
+Change-making by biggest-coin-first is optimal for **canonical** coin systems like 1, 2, 5, 10, 20, 50, and fails for systems like 1, 3, 4. Scheduling meetings by **earliest finish** is always optimal, provable by an **exchange argument**; "shortest first" and "earliest start" fail.
+
+Greedy is optimal for minimum spanning trees, Dijkstra's shortest paths, Huffman coding and fractional knapsack (the theory of **matroids** explains when). On NP-Hard problems it can fail badly, but it's a fast starting point and sometimes comes with approximation guarantees.
+:::
+
+---
+
+## Up Next
+
+Post 21 showed greedy failing on knapsack. Post 69 changes one rule: you're allowed to take **part** of an item, like pouring out half a bag of rice. With that change, the exact same greedy rule becomes perfect, and the reason connects back to the "relax the problem" idea from Post 62.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
