@@ -94,7 +94,7 @@ function Inner() {
   return (
     <div className="az-viz">
       <div className="az-viz__head">
-        <span className="az-viz__label">3-SAT <ArrowRight className="az-inline-icon" size={12} strokeWidth={2} aria-hidden="true" /> clique reduction</span>
+        <span className="az-viz__label">3-SAT <ArrowRight className="az-inline-icon" size={12} strokeWidth={2.25} aria-hidden="true" /> clique reduction</span>
         <div className="az-viz__tools">
           <button
             type="button"

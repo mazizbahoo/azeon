@@ -133,7 +133,7 @@ export default function TuringMachine() {
             <div className="az-tape__slot" key={idx} style={{ width: cellWidth }}>
               <div className="az-tape__head" data-on={String(active)}>
                 <span className="az-tape__head-tag">Head</span>
-                <ArrowDown size={14} strokeWidth={2} aria-hidden="true" />
+                <ArrowDown size={14} strokeWidth={2.25} aria-hidden="true" />
               </div>
               <div
                 className="az-tape__cell"

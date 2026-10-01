@@ -290,8 +290,8 @@ samp {
 .menu__caret::before,
 .menu__link--sublist-caret::after {
   background: currentColor !important;
-  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>') center / 16px 16px no-repeat;
-  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>') center / 16px 16px no-repeat;
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>') center / 16px 16px no-repeat;
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>') center / 16px 16px no-repeat;
   filter: none !important;
   opacity: 0.55;
 }
@@ -331,6 +331,7 @@ samp {
 .theme-doc-sidebar-container button[class*='collapseSidebarButton'] {
   border: none !important;
   border-top: 1px solid var(--az-border-subtle) !important;
+  border-right: 1px solid var(--az-border-subtle) !important;
   background: var(--az-bg) !important;
   color: var(--az-muted);
   display: flex !important;
@@ -465,6 +466,9 @@ samp {
 }
 
 .navbar-sidebar__back {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.78rem;
+  font-weight: 400;
   color: var(--az-text) !important;
   background: transparent !important;
   border-bottom: 1px solid var(--az-sidebar-border) !important;
@@ -1583,10 +1587,6 @@ samp {
     border-radius: 6px;
   }
 
-  .navbar-sidebar .menu__caret::before {
-    border-color: var(--az-text) !important;
-  }
-
   .navbar__items--right {
     display: flex;
     align-items: center;
@@ -1657,6 +1657,34 @@ samp {
 
 .pagination-nav__label {
   color: var(--az-text) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Lucide chevrons in place of Infima's « » text glyphs */
+.pagination-nav__link--prev .pagination-nav__label::before,
+.pagination-nav__link--next .pagination-nav__label::after {
+  content: '';
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.pagination-nav__link--prev .pagination-nav__label::before {
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>') center / 16px 16px no-repeat;
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>') center / 16px 16px no-repeat;
+}
+
+.pagination-nav__link--next .pagination-nav__label {
+  justify-content: flex-end;
+}
+
+.pagination-nav__link--next .pagination-nav__label::after {
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>') center / 16px 16px no-repeat;
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>') center / 16px 16px no-repeat;
 }
 
 .card h2,

@@ -7,7 +7,7 @@ export default function IconExternalLink({ width = 14, height = 14 }: { width?: 
     <ArrowUpRight
       width={width}
       height={height}
-      strokeWidth={1.75}
+      strokeWidth={2}
       className="az-icon-external"
       aria-label={translate({
         id: 'theme.IconExternalLink.ariaLabel',

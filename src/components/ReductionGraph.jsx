@@ -171,7 +171,7 @@ function Inner() {
   return (
     <div className="az-viz">
       <div className="az-viz__head">
-        <span className="az-viz__label">Independent set <ArrowLeftRight className="az-inline-icon" size={12} strokeWidth={2} aria-hidden="true" /> vertex cover</span>
+        <span className="az-viz__label">Independent set <ArrowLeftRight className="az-inline-icon" size={12} strokeWidth={2.25} aria-hidden="true" /> vertex cover</span>
         <button type="button" className="az-viz-btn" onClick={() => setSelected(new Set())} disabled={k === 0}>
           Clear selection
         </button>

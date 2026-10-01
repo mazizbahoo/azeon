@@ -95,7 +95,7 @@ function Tooltip({ active, payload, label }) {
             <span style={{ color }}>{dataKey}</span>
             <span style={{ color: capped ? color : 'var(--az-text)', fontWeight: capped ? 600 : 400 }}>
               {capped
-                ? <>{Number(tv).toLocaleString()} <ArrowUp size={12} strokeWidth={2} aria-hidden="true" style={{ verticalAlign: '-1px' }} /></>
+                ? <>{Number(tv).toLocaleString()} <ArrowUp size={12} strokeWidth={2.25} aria-hidden="true" style={{ verticalAlign: '-1px' }} /></>
                 : Number(tv)}
             </span>
           </div>

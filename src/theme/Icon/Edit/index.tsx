@@ -6,7 +6,7 @@ export default function IconEdit({ className, ...props }: ComponentProps<'svg'>)
   return (
     <SquarePen
       size={16}
-      strokeWidth={1.75}
+      strokeWidth={2}
       aria-hidden="true"
       className={clsx('az-icon-edit', className)}
       {...(props as object)}

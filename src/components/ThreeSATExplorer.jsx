@@ -97,7 +97,7 @@ function Inner() {
   return (
     <div className="az-viz">
       <div className="az-viz__head">
-        <span className="az-viz__label">SAT <ArrowRight className="az-inline-icon" size={12} strokeWidth={2} aria-hidden="true" /> 3-SAT clause converter</span>
+        <span className="az-viz__label">SAT <ArrowRight className="az-inline-icon" size={12} strokeWidth={2.25} aria-hidden="true" /> 3-SAT clause converter</span>
         <div className="az-viz__tools">
           {CASES.map(c => (
             <button
