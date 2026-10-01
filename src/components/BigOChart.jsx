@@ -1,5 +1,6 @@
 import React from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
+import { ArrowUp } from 'lucide-react';
 
 /* ── data ────────────────────────────────────────────────── */
 
@@ -93,7 +94,9 @@ function Tooltip({ active, payload, label }) {
           >
             <span style={{ color }}>{dataKey}</span>
             <span style={{ color: capped ? color : 'var(--az-text)', fontWeight: capped ? 600 : 400 }}>
-              {capped ? `${Number(tv).toLocaleString()} ↑` : Number(tv)}
+              {capped
+                ? <>{Number(tv).toLocaleString()} <ArrowUp size={12} strokeWidth={2} aria-hidden="true" style={{ verticalAlign: '-1px' }} /></>
+                : Number(tv)}
             </span>
           </div>
         );

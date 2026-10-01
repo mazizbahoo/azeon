@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { ArrowRight } from 'lucide-react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 
 /* ── Formula ─────────────────────────────────────────────── */
@@ -93,7 +94,7 @@ function Inner() {
   return (
     <div className="az-viz">
       <div className="az-viz__head">
-        <span className="az-viz__label">3-SAT → clique reduction</span>
+        <span className="az-viz__label">3-SAT <ArrowRight className="az-inline-icon" size={12} strokeWidth={2} aria-hidden="true" /> clique reduction</span>
         <div className="az-viz__tools">
           <button
             type="button"

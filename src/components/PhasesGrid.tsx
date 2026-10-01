@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
+import { ArrowRight } from 'lucide-react';
 
 interface Phase {
   num: string;
@@ -110,7 +111,7 @@ function PhaseCard({ phase }: { phase: Phase }) {
       <h3 className="az-phase-card__title">{phase.title}</h3>
       <p className="az-phase-card__desc">{phase.desc}</p>
       {isLive
-        ? <span className="az-phase-card__link" style={{ color: hovered ? phase.color : undefined }}>Read phase →</span>
+        ? <span className="az-phase-card__link" style={{ color: hovered ? phase.color : undefined }}>Read phase <ArrowRight size={13} strokeWidth={1.75} aria-hidden="true" /></span>
         : <span className="az-phase-card__link az-phase-card__link--soon">In progress</span>
       }
     </Link>

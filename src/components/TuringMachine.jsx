@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { ArrowDown } from 'lucide-react';
 
 const RULES = [
   { mode: 'Checking', read: '1', write: '1', next: 'Checking', dir: 'Right' },
@@ -132,7 +133,7 @@ export default function TuringMachine() {
             <div className="az-tape__slot" key={idx} style={{ width: cellWidth }}>
               <div className="az-tape__head" data-on={String(active)}>
                 <span className="az-tape__head-tag">Head</span>
-                <span aria-hidden="true">↓</span>
+                <ArrowDown size={14} strokeWidth={2} aria-hidden="true" />
               </div>
               <div
                 className="az-tape__cell"

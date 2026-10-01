@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import katex from 'katex';
+import {
+  ArrowRight, BookOpen, Check, Code, FileText, Microscope, PenLine, Puzzle, Trophy, Zap,
+  type LucideIcon,
+} from 'lucide-react';
 
 /* ─── KaTeX helper ──────────────────────────────────────── */
 
@@ -49,11 +53,11 @@ const STATS = [
   { value: '∞', label: 'More Coming' },
 ];
 
-const ACHIEVEMENTS = [
-  { icon: '🏆', text: 'Perfect CS score in Matriculation' },
-  { icon: '🧩', text: 'Rubik\'s Cube solver under 45 seconds' },
-  { icon: '💻', text: 'Web development & graphic designing since age 14' },
-  { icon: '📖', text: 'Founder of Azeon' },
+const ACHIEVEMENTS: { icon: LucideIcon; text: string }[] = [
+  { icon: Trophy, text: 'Perfect CS score in Matriculation' },
+  { icon: Puzzle, text: 'Rubik\'s Cube solver under 45 seconds' },
+  { icon: Code, text: 'Web development & graphic designing since age 14' },
+  { icon: BookOpen, text: 'Founder of Azeon' },
 ];
 
 const SAFE_ITEMS = [
@@ -234,7 +238,7 @@ function PhaseCard({ phase }: { phase: Phase }) {
       <h3 className="az-phase-card__title">{phase.title}</h3>
       <p className="az-phase-card__desc">{phase.desc}</p>
       {isLive
-        ? <span className="az-phase-card__link" style={{ color: hovered ? phase.color : undefined }}>Read phase →</span>
+        ? <span className="az-phase-card__link" style={{ color: hovered ? phase.color : undefined }}>Read phase <ArrowRight size={13} strokeWidth={1.75} aria-hidden="true" /></span>
         : <span className="az-phase-card__link az-phase-card__link--soon">In progress</span>
       }
     </Link>
@@ -302,7 +306,7 @@ function StakesSection() {
             <span className="az-stakes__label">The Protected World</span>
             {SAFE_ITEMS.map(item => (
               <div key={item} className="az-stakes__item">
-                <span className="az-stakes__icon">✓</span>
+                <Check className="az-stakes__icon" size={18} strokeWidth={2} aria-hidden="true" />
                 <span className="az-stakes__item-text">{item}</span>
               </div>
             ))}
@@ -312,7 +316,7 @@ function StakesSection() {
             <span className="az-stakes__label">The Shattered World</span>
             {DANGER_ITEMS.map(item => (
               <div key={item} className="az-stakes__item">
-                <span className="az-stakes__icon">⚡</span>
+                <Zap className="az-stakes__icon" size={18} strokeWidth={2} aria-hidden="true" />
                 <span className="az-stakes__item-text">{item}</span>
               </div>
             ))}
@@ -339,7 +343,7 @@ function ComingSoon() {
         </div>
         <div className="az-coming__grid">
           <div className="az-coming-card">
-            <div className="az-coming-card__icon">📄</div>
+            <div className="az-coming-card__icon"><FileText size={22} strokeWidth={1.5} aria-hidden="true" /></div>
             <div className="az-coming-card__type">Documentation</div>
             <div className="az-coming-card__title">Next Project</div>
             <div className="az-coming-card__desc">
@@ -348,16 +352,16 @@ function ComingSoon() {
             <div className="az-coming-card__status">Coming soon</div>
           </div>
           <div className="az-coming-card">
-            <div className="az-coming-card__icon">✍️</div>
+            <div className="az-coming-card__icon"><PenLine size={22} strokeWidth={1.5} aria-hidden="true" /></div>
             <div className="az-coming-card__type">Blog</div>
             <div className="az-coming-card__title">Essays & Thoughts</div>
             <div className="az-coming-card__desc">
               Short-form posts on ideas, problems, and things worth thinking about.
             </div>
-            <Link to="/blog" className="az-coming-card__link">Visit the blog</Link>
+            <Link to="/blog" className="az-coming-card__link">Visit the blog <ArrowRight size={13} strokeWidth={1.75} aria-hidden="true" /></Link>
           </div>
           <div className="az-coming-card">
-            <div className="az-coming-card__icon">🔬</div>
+            <div className="az-coming-card__icon"><Microscope size={22} strokeWidth={1.5} aria-hidden="true" /></div>
             <div className="az-coming-card__type">Research</div>
             <div className="az-coming-card__title">Open Questions</div>
             <div className="az-coming-card__desc">
@@ -387,9 +391,9 @@ function AboutSection() {
             <h3 className="az-id-card__name">Aziz</h3>
             <span className="az-id-card__role">Founder of Azeon</span>
             <div className="az-id-card__facts">
-              {ACHIEVEMENTS.map(({ icon, text }) => (
+              {ACHIEVEMENTS.map(({ icon: Icon, text }) => (
                 <div key={text} className="az-id-card__fact">
-                  <span className="az-id-card__fact-icon">{icon}</span>
+                  <Icon className="az-id-card__fact-icon" size={16} strokeWidth={1.75} aria-hidden="true" />
                   <span className="az-id-card__fact-text">{text}</span>
                 </div>
               ))}
