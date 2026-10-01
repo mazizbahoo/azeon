@@ -1,0 +1,129 @@
+---
+sidebar_position: 7
+title: "The Fractional Knapsack"
+description: "Same bag, same items, one rule changed: you may take part of an item. The greedy strategy that failed in Post 21 becomes perfect, and the reason explains why relaxing a hard problem gives you a bound on its answer."
+tags: [heuristics, greedy, fractional-knapsack, relaxation, linear-programming, branch-and-bound]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import KnapsackPacker from '@site/src/components/KnapsackPacker';
+
+# The Fractional Knapsack
+
+In Post 21, I packed a hiking bag and greedy lost. "Best value per kilogram first" took the tent, ran out of room, and ended up with 38 when 48 was possible.
+
+This post changes one rule. Instead of hiking gear, imagine you're filling a sack at a market where things are sold by weight: rice, lentils, flour, dried fruit. You can scoop out **as much or as little** of each as you like. Then the same greedy rule becomes not just good, but perfect.
+
+I find this pair, 0/1 knapsack and fractional knapsack, the clearest example in the whole series of how one small rule change moves a problem from NP-Hard to easy.
+
+---
+
+## The Fractional Version
+
+> **Fractional Knapsack:** items have weights and values. You can take any fraction of an item, between 0 and all of it, getting that fraction of its value. Maximise total value with total weight at most $W$.
+
+Here's the same bag and items as Post 21, but now you're allowed to take part of an item. Press **Greedy by value per kg**.
+
+<KnapsackPacker fractional />
+
+Greedy takes the whole tent (the best ratio, 5 per kg), leaving 4 kg of space. The next best ratio is the sleeping bag at 4.8 per kg, but it weighs 5 kg. In Post 21, greedy had to skip it. Now it takes **four-fifths** of it, exactly filling the bag.
+
+Value: $30 + \frac{4}{5} \times 24 = 30 + 19.2 = 49.2$.
+
+That's the best possible with fractions allowed. And notice it's **more** than 48, the best possible with whole items only. Keep that in mind; it matters later.
+
+---
+
+## The Algorithm
+
+```python
+def fractional_knapsack(items, capacity):
+    """items: list of (weight, value). Returns the best total value."""
+    total = 0.0
+    # best value per kilogram first
+    for weight, value in sorted(items, key=lambda it: it[1] / it[0], reverse=True):
+        if capacity <= 0:
+            break
+        take = min(weight, capacity)          # all of it, or whatever fits
+        total += value * (take / weight)
+        capacity -= take
+    return total
+
+bag = [(6, 30), (5, 24), (5, 24), (1, 3), (2, 5)]
+print(fractional_knapsack(bag, 10))   # 49.2
+```
+
+Sort once, then a single pass. That's about $n \log n$ steps, which is fast for any size.
+
+---
+
+## Why Greedy Is Perfect Here
+
+The proof is another exchange argument, like the meeting room in Post 68.
+
+Suppose some packing is better than greedy's. Then it must be using some weight on an item with a **lower** value per kilogram, while leaving some of a **higher** value-per-kilogram item behind (otherwise it would be the greedy packing).
+
+Take a small amount of weight away from the low-ratio item, and put exactly the same amount of weight of the high-ratio item in. The total weight doesn't change. The total value goes **up**, because each kilogram moved is now worth more.
+
+So that "better" packing wasn't the best after all: it could be improved. The only packing that can't be improved this way is the one where every kilogram is filled in ratio order, which is exactly what greedy does.
+
+### And why it fails for 0/1
+
+That proof only works because you can move a **small** amount of weight. With whole items, you can't take "a bit" of the tent out and put "a bit" of the sleeping bag in. Swapping whole items changes the weight by large, uneven amounts, and the neat argument falls apart. The tent's 6 kg left an awkward 4 kg gap that no remaining whole item filled well.
+
+All of the difficulty of 0/1 knapsack lives in that indivisibility.
+
+---
+
+## The Real Point: Relaxation Gives a Bound
+
+Here's why this little problem matters far beyond markets.
+
+The fractional problem is a **relaxation** of the 0/1 problem: it allows everything the 0/1 problem allows (whole items are just fractions of 0 or 1), plus more. So its best answer is at least as good as the 0/1 best answer:
+
+$$\text{best with whole items} \leq \text{best with fractions}$$
+
+On our bag: $48 \leq 49.2$. We can compute 49.2 instantly with greedy. So without solving the 0/1 problem at all, we know: **nobody can pack whole items worth more than 49.2**.
+
+That's exactly the "bound" idea from Post 62. It's what lets a solver say "my answer is within 2% of optimal" without knowing the optimum. And it's the engine of **branch and bound** from Post 63:
+
+<Tabs>
+  <TabItem value="branch" label="Branch" default>
+
+To solve 0/1 knapsack exactly, search through decisions: is the tent in or out? Is the sleeping bag in or out? That's a tree with $2^n$ leaves.
+
+  </TabItem>
+  <TabItem value="bound" label="Bound">
+
+At each point in the search, some items are decided and the rest aren't. Solve the **fractional** knapsack on the undecided items, with the remaining space. That's fast, and it gives the best value this branch could **possibly** reach.
+
+  </TabItem>
+  <TabItem value="prune" label="Prune">
+
+If that bound is no better than a whole-item packing you've already found, skip the entire branch. Nothing inside it can beat what you have.
+
+On real instances, this skips almost all of the $2^n$ leaves. The worst case is still exponential, but typical cases become fast.
+
+  </TabItem>
+</Tabs>
+
+The same idea, with fractional versions of much bigger problems solved by **linear programming**, is how the airline crew problems in Post 55 and the huge TSP instances in Post 20 get solved. Fractions are meaningless as answers (you can't fly 70% of a crew pairing), but they're extremely useful as **bounds**.
+
+:::note What We Have Established
+In **fractional knapsack**, you can take any fraction of an item. Greedy by value per kilogram is **optimal**: on our bag it takes the tent and 80% of the sleeping bag for 49.2. The proof is an exchange argument: moving a little weight from a lower-ratio item to a higher-ratio one always increases value. It fails for 0/1 knapsack because whole items can't be split.
+
+The fractional version is a **relaxation**, so its answer (49.2) bounds the 0/1 answer (48). Fast relaxations giving bounds are the engine of **branch and bound** and of the linear programming methods behind real-world exact solvers.
+:::
+
+---
+
+## Up Next
+
+Post 70 goes back to the other exact method for knapsack: **dynamic programming**, the table that seemed polynomial in Post 21 but wasn't. I'm going to fill one in step by step, then show exactly what happens to it when the numbers get bigger, one digit at a time.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
