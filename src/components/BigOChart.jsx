@@ -1,220 +1,117 @@
 import React, { useState } from 'react';
-import BrowserOnly from '@docusaurus/BrowserOnly';
-import { ArrowUp, ChartSpline } from 'lucide-react';
-import { Figure, FigureLoading } from './figure';
+import { Figure } from './figure';
 
-/* ── data ────────────────────────────────────────────────── */
+/* ── Big-O growth curves, n = 1 … 10, capped at 60 steps ─── */
 
-const CAP = 60;
-
-function fact(n) {
-  let r = 1;
-  for (let i = 2; i <= n; i++) r *= i;
-  return r;
-}
-
-function trueVal(key, n) {
-  switch (key) {
-    case 'O(1)': return 1;
-    case 'O(log n)': return parseFloat(Math.log2(n).toFixed(2));
-    case 'O(n)': return n;
-    case 'O(n log n)': return parseFloat((n * Math.log2(n)).toFixed(2));
-    case 'O(n²)': return n * n;
-    case 'O(2ⁿ)': return Math.pow(2, n);
-    case 'O(n!)': return fact(n);
-    default: return 0;
-  }
+// Lanczos approximation of Γ(z), so n! can be drawn as a smooth curve.
+function gamma(z) {
+  const g = 7;
+  const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (z < 0.5) return Math.PI / (Math.sin(Math.PI * z) * gamma(1 - z));
+  z -= 1;
+  let x = c[0];
+  for (let i = 1; i < g + 2; i++) x += c[i] / (z + i);
+  const t = z + g + 0.5;
+  return Math.sqrt(2 * Math.PI) * t ** (z + 0.5) * Math.exp(-t) * x;
 }
 
 const CURVES = [
-  { key: 'O(1)', color: 'var(--az-c1)', dash: '', name: 'Constant' },
-  { key: 'O(log n)', color: 'var(--az-c2)', dash: '', name: 'Logarithmic' },
-  { key: 'O(n)', color: 'var(--az-c3)', dash: '', name: 'Linear' },
-  { key: 'O(n log n)', color: 'var(--az-c4)', dash: '', name: 'Linearithmic' },
-  { key: 'O(n²)', color: 'var(--az-c5)', dash: '', name: 'Quadratic' },
-  { key: 'O(2ⁿ)', color: 'var(--az-c6)', dash: '6 3', name: 'Exponential' },
-  { key: 'O(n!)', color: 'var(--az-c7)', dash: '3 3', name: 'Factorial' },
+  { key: '1', label: 'O(1)', f: () => 1 },
+  { key: 'log', label: 'O(log n)', f: n => Math.log2(n) },
+  { key: 'n', label: 'O(n)', f: n => n },
+  { key: 'nlog', label: 'O(n log n)', f: n => n * Math.log2(n) },
+  { key: 'n2', label: 'O(n²)', f: n => n * n },
+  { key: '2n', label: 'O(2ⁿ)', f: n => 2 ** n },
+  { key: 'fact', label: 'O(n!)', f: n => gamma(n + 1) },
 ];
 
-const DATA = Array.from({ length: 10 }, (_, i) => {
-  const n = i + 1;
-  const row = { n };
-  CURVES.forEach(({ key }) => {
-    const v = trueVal(key, n);
-    row[key] = v > CAP ? CAP : parseFloat(v.toFixed(2));
-    row[`${key}_true`] = v;
-    row[`${key}_capped`] = v > CAP;
-  });
-  return row;
-});
+const CAP = 60;
+const W = 640;
+const H = 320;
+const PAD = { l: 44, r: 92, t: 22, b: 40 };
+const X = n => PAD.l + ((n - 1) / 9) * (W - PAD.l - PAD.r);
+const Y = v => PAD.t + (1 - Math.min(v, CAP) / CAP) * (H - PAD.t - PAD.b);
 
-/* ── chart ───────────────────────────────────────────────── */
-
-function Tooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null;
-  const row = DATA.find(d => d.n === label);
-  const seen = new Set();
-  const items = payload.filter(p => {
-    if (p.dataKey.includes('_')) return false;
-    if (seen.has(p.dataKey)) return false;
-    seen.add(p.dataKey);
-    return true;
-  });
-
-  return (
-    <div
-      style={{
-        background: 'var(--az-elevated)',
-        border: '1px solid var(--az-border)',
-        borderRadius: 12,
-        padding: '10px 13px',
-        fontFamily: 'var(--ifm-font-family-monospace)',
-        fontSize: 12,
-        boxShadow: 'var(--az-card-shadow)',
-        minWidth: 190,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 9.5,
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-          color: 'var(--az-muted)',
-          marginBottom: 7,
-        }}
-      >
-        n = {label}
-      </div>
-      {items.map(({ dataKey, color }) => {
-        const tv = row ? row[`${dataKey}_true`] : 0;
-        const capped = row ? row[`${dataKey}_capped`] : false;
-        return (
-          <div
-            key={dataKey}
-            style={{ display: 'flex', justifyContent: 'space-between', gap: 20, lineHeight: 1.8 }}
-          >
-            <span style={{ color }}>{dataKey}</span>
-            <span style={{ color: capped ? color : 'var(--az-text)', fontWeight: capped ? 600 : 400 }}>
-              {capped
-                ? <>{Number(tv).toLocaleString()} <ArrowUp size={12} strokeWidth={2.25} aria-hidden="true" style={{ verticalAlign: '-1px' }} /></>
-                : Number(tv)}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
+function path(f) {
+  const pts = [];
+  for (let n = 1; n <= 10.0001; n += 0.05) {
+    const v = f(n);
+    pts.push(`${X(n).toFixed(1)},${Y(v).toFixed(1)}`);
+    if (v >= CAP) break;
+  }
+  return `M${pts.join('L')}`;
 }
 
-function Inner() {
-  const [hidden, setHidden] = useState(() => new Set());
-  const toggle = key => setHidden(prev => {
-    const next = new Set(prev);
-    if (next.has(key)) next.delete(key); else next.add(key);
-    return next;
-  });
-  const {
-    LineChart, Line, XAxis, YAxis, CartesianGrid,
-    Tooltip: RTooltip, ReferenceLine, ResponsiveContainer,
-  } = require('recharts');
-
-  const axisTick = {
-    fill: 'var(--az-muted)',
-    fontFamily: 'var(--ifm-font-family-monospace)',
-    fontSize: 11,
-  };
-  const axisLabel = { ...axisTick, fontSize: 10, letterSpacing: '0.1em' };
-  const grid = 'var(--az-viz-grid)';
-
-  return (
-    <Figure
-      icon={ChartSpline}
-      kicker="Chart"
-      title="How Big-O classes grow, n = 1 to 10"
-      caption={`The y-axis stops at ${CAP} steps so the slower curves stay readable. Hover any point for the true value; click a legend entry to hide or show its curve.`}
-    >
-        <ResponsiveContainer width="100%" height={340}>
-          <LineChart data={DATA} margin={{ top: 8, right: 20, left: 0, bottom: 22 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={grid} />
-
-            <XAxis
-              dataKey="n"
-              type="number"
-              domain={[1, 10]}
-              ticks={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
-              label={{ value: 'INPUT SIZE (n)', position: 'insideBottom', offset: -14, ...axisLabel }}
-              tick={axisTick}
-              tickLine={false}
-              axisLine={{ stroke: grid }}
-            />
-
-            <YAxis
-              domain={[0, CAP]}
-              ticks={[0, 10, 20, 30, 40, 50, 60]}
-              label={{ value: 'STEPS', angle: -90, position: 'insideLeft', offset: 16, ...axisLabel }}
-              tick={axisTick}
-              tickLine={false}
-              axisLine={{ stroke: grid }}
-              tickFormatter={v => (v >= CAP ? `${CAP}+` : v)}
-              width={56}
-            />
-
-            <RTooltip content={<Tooltip />} cursor={{ stroke: grid }} />
-
-            <ReferenceLine
-              y={CAP}
-              stroke="var(--az-accent)"
-              strokeDasharray="6 4"
-              strokeWidth={1}
-              label={{
-                value: 'CEILING — CURVES CONTINUE OFF-CHART',
-                position: 'insideTopRight',
-                fill: 'var(--az-accent)',
-                fontFamily: 'var(--ifm-font-family-monospace)',
-                fontSize: 9,
-                letterSpacing: '0.1em',
-              }}
-            />
-
-            {CURVES.filter(({ key }) => !hidden.has(key)).map(({ key, color, dash }) => (
-              <Line
-                key={key}
-                type="monotone"
-                dataKey={key}
-                stroke={color}
-                strokeWidth={2}
-                strokeDasharray={dash}
-                dot={false}
-                activeDot={{ r: 4, strokeWidth: 0, fill: color }}
-                isAnimationActive={false}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-
-        <div className="az-viz-legend" role="group" aria-label="Show or hide curves">
-          {CURVES.map(({ key, color, name }) => (
-            <button
-              type="button"
-              key={key}
-              className="az-viz-legend__item az-viz-legend__toggle"
-              aria-pressed={!hidden.has(key)}
-              onClick={() => toggle(key)}
-              style={{ '--dot': color }}
-            >
-              <span className="az-viz-legend__rule" />
-              {key} {name}
-            </button>
-          ))}
-        </div>
-    </Figure>
-  );
+// Where each curve ends: at n = 10, or where it leaves the top of the chart.
+function end(f) {
+  if (f(10) < CAP) return { x: X(10), y: Y(f(10)), side: 'right' };
+  let n = 1;
+  while (f(n) < CAP) n += 0.01;
+  return { x: X(n), y: Y(CAP), side: 'top' };
 }
+
+const fmt = v => (v >= 1e6 ? v.toExponential(1) : Number.isInteger(v) ? v.toLocaleString('en-US') : v.toFixed(1));
 
 export default function BigOChart() {
+  const [focus, setFocus] = useState(null);
+  const [hoverN, setHoverN] = useState(null);
+
+  const onMove = e => {
+    const svg = e.currentTarget;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    const { x } = pt.matrixTransform(svg.getScreenCTM().inverse());
+    const n = Math.round(1 + ((x - PAD.l) / (W - PAD.l - PAD.r)) * 9);
+    setHoverN(n >= 1 && n <= 10 ? n : null);
+  };
+
+  const exact = (c, n) => (c.key === 'fact' ? [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800][n] : c.f(n));
+  const status = hoverN
+    ? <>n = <b>{hoverN}</b> · {CURVES.slice(2).map(c => `${c.label.slice(2, -1)} = ${fmt(exact(c, hoverN))}`).join(' · ')}</>
+    : <>Hover the chart to read exact values</>;
+
   return (
-    <BrowserOnly fallback={<FigureLoading label="Loading chart" />}>
-      {() => <Inner />}
-    </BrowserOnly>
+    <Figure title="Big-O growth, n = 1 to 10" status={status}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="az-fig-svg" role="img"
+        aria-label="Growth of seven Big-O classes for n from 1 to 10, capped at 60 steps"
+        onMouseMove={onMove} onMouseLeave={() => setHoverN(null)}>
+        {[0, 20, 40, 60].map(v => (
+          <g key={v}>
+            <line x1={PAD.l} x2={W - PAD.r} y1={Y(v)} y2={Y(v)} stroke="var(--fig-line)" strokeDasharray={v === CAP ? '4 4' : undefined} />
+            <text x={PAD.l - 10} y={Y(v)} textAnchor="end" dominantBaseline="middle" fontSize="11" fill="var(--fig-faint)">
+              {v === CAP ? '60+' : v}
+            </text>
+          </g>
+        ))}
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+          <text key={n} x={X(n)} y={H - PAD.b + 18} textAnchor="middle" fontSize="11" fill="var(--fig-faint)">{n}</text>
+        ))}
+        <text x={(PAD.l + W - PAD.r) / 2} y={H - 4} textAnchor="middle" fontSize="11" fill="var(--fig-faint)">input size n</text>
+
+        {hoverN && <line x1={X(hoverN)} x2={X(hoverN)} y1={PAD.t} y2={H - PAD.b} stroke="var(--fig-line-strong)" />}
+
+        {CURVES.map(c => {
+          const on = focus === c.key;
+          const e = end(c.f);
+          return (
+            <g key={c.key} onMouseEnter={() => setFocus(c.key)} onMouseLeave={() => setFocus(null)} style={{ cursor: 'default' }}>
+              <path d={path(c.f)} fill="none" stroke="transparent" strokeWidth="12" />
+              <path d={path(c.f)} fill="none"
+                stroke={on ? 'var(--fig-accent)' : focus ? 'var(--fig-line-strong)' : 'var(--fig-muted)'}
+                strokeWidth={on ? 2.5 : 1.5} style={{ transition: 'stroke 0.15s' }} />
+              <text
+                x={e.side === 'right' ? e.x + 8 : e.x}
+                y={e.side === 'right' ? e.y + (c.key === '1' ? 5 : c.key === 'log' ? -3 : 0) : e.y - 9}
+                textAnchor={e.side === 'right' ? 'start' : 'middle'}
+                dominantBaseline="middle" fontSize="11.5" fontWeight={on ? 600 : 400}
+                fill={on ? 'var(--fig-accent)' : 'var(--fig-muted)'}>
+                {c.label}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </Figure>
   );
 }

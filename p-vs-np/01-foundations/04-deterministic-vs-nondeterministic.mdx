@@ -72,6 +72,8 @@ The time this machine takes is equal to the *length of the correct path*, not th
   </TabItem>
 </Tabs>
 
+Here is a small maze drawn as a tree of junctions. Every junction splits two ways, there are 16 dead ends, and the circled one is the exit. Each press of **Step** moves the deterministic machine down one more corridor, while the nondeterministic machine splits into a copy for every corridor at once. Watch how long each one takes to reach the exit.
+
 <MazeSearch />
 
 The maze isn't just an analogy. The problem of finding a path through a graph is a real computational problem, and the contrast between how a deterministic and nondeterministic machine handles it captures exactly the kind of difference P vs NP is asking about.

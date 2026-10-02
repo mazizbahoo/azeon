@@ -2,109 +2,86 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Pause, Play, RotateCcw, StepBack, StepForward } from 'lucide-react';
 
 /* ════════════════════════════════════════════════════════════
-   Figure kit — the building blocks every interactive figure in
-   src/components is assembled from. Styling lives in
-   src/css/components.css; nothing here sets colours or spacing.
+   Figure kit. Every interactive figure is built from these.
+
+   Design rules (keep them when adding a figure):
+   - Neutral greys plus one accent. Accent means "active" or
+     "selected". Red is reserved for "this is invalid".
+   - A figure holds the visual, its controls and at most one
+     short status line. Explanations belong in the post.
+   Styling lives in src/css/components.css.
    ════════════════════════════════════════════════════════════ */
 
-const ICON = { size: 15, strokeWidth: 2, 'aria-hidden': true };
-
-/* ── Shell ────────────────────────────────────────────────── */
-
-export function Figure({ icon: Icon, kicker = 'Interactive', title, tools, caption, accent, children }) {
+export function Figure({ title, tools, status, tone, children }) {
   return (
-    <figure className="az-viz" style={accent ? { '--viz-accent': accent } : undefined}>
-      <header className="az-viz__head">
-        <div className="az-viz__title">
-          {Icon && (
-            <span className="az-viz__icon">
-              <Icon size={16} strokeWidth={2} aria-hidden="true" />
-            </span>
-          )}
-          <div className="az-viz__titles">
-            <span className="az-viz__kicker">{kicker}</span>
-            <span className="az-viz__name">{title}</span>
-          </div>
-        </div>
-        {tools && <div className="az-viz__tools">{tools}</div>}
+    <figure className="az-fig">
+      <header className="az-fig__head">
+        <span className="az-fig__title">{title}</span>
+        {tools && <div className="az-fig__tools">{tools}</div>}
       </header>
-      <div className="az-viz__body">{children}</div>
-      {caption && <figcaption className="az-viz__foot">{caption}</figcaption>}
+      <div className="az-fig__body">{children}</div>
+      {status != null && (
+        <div className="az-fig__status" data-tone={tone} aria-live="polite">{status}</div>
+      )}
     </figure>
   );
 }
 
-export function FigureLoading({ label = 'Loading figure' }) {
-  return <div className="az-viz__loading">{label}</div>;
+export function FigureLoading() {
+  return <div className="az-fig az-fig--loading" aria-hidden="true" />;
 }
 
-/* ── Controls ─────────────────────────────────────────────── */
-
-export function Button({ icon: Icon, children, variant, pressed, className = '', style, ...props }) {
-  const cls = ['az-viz-btn'];
-  if (variant === 'solid') cls.push('az-viz-btn--solid');
-  if (pressed) cls.push('az-viz-btn--on');
-  if (Icon && !children) cls.push('az-viz-btn--icon');
-  if (className) cls.push(className);
+export function Button({ icon: Icon, children, primary, pressed, label, ...props }) {
   return (
     <button
       type="button"
-      className={cls.join(' ')}
-      aria-pressed={pressed === undefined ? undefined : pressed}
-      style={style}
+      className={'az-fig-btn' + (primary ? ' az-fig-btn--primary' : '') + (!children ? ' az-fig-btn--icon' : '')}
+      aria-pressed={pressed}
+      aria-label={label}
+      title={label}
       {...props}
     >
-      {Icon && <Icon {...ICON} />}
+      {Icon && <Icon size={14} strokeWidth={2} aria-hidden="true" />}
       {children}
     </button>
   );
 }
 
-/** A row of mutually exclusive options (radio-group semantics). */
-export function Segmented({ label, options, value, onChange, grow }) {
+/** Mutually exclusive options in one pill track. */
+export function Segmented({ label, options, value, onChange }) {
   return (
-    <div className={'az-viz-segmented' + (grow ? ' az-viz-segmented--grow' : '')} role="radiogroup" aria-label={label}>
-      {options.map(opt => {
-        const on = opt.value === value;
-        const Icon = opt.icon;
-        return (
-          <button
-            key={String(opt.value)}
-            type="button"
-            role="radio"
-            aria-checked={on}
-            className={'az-viz-segmented__item' + (on ? ' az-viz-segmented__item--on' : '')}
-            style={opt.accent ? { '--btn-accent': opt.accent } : undefined}
-            onClick={() => onChange(opt.value)}
-          >
-            {Icon && <Icon size={14} strokeWidth={2} aria-hidden="true" />}
-            {opt.label}
-          </button>
-        );
-      })}
+    <div className="az-fig-seg" role="radiogroup" aria-label={label}>
+      {options.map(opt => (
+        <button
+          key={String(opt.value)}
+          type="button"
+          role="radio"
+          aria-checked={opt.value === value}
+          className="az-fig-seg__item"
+          onClick={() => onChange(opt.value)}
+        >
+          {opt.label}
+        </button>
+      ))}
     </div>
   );
 }
 
-/** Reset / back / step / play — the standard transport for step-through figures. */
-export function Playback({ onReset, onBack, onStep, playing, onTogglePlay, canBack, done, extra }) {
+/** Reset / back / step / play transport. */
+export function Playback({ onReset, onBack, canBack, onStep, playing, onTogglePlay, done }) {
   return (
-    <div className="az-viz-controls">
-      <Button icon={RotateCcw} onClick={onReset} aria-label="Reset">Reset</Button>
-      {onBack && <Button icon={StepBack} onClick={onBack} disabled={!canBack} aria-label="Step back">Back</Button>}
-      <Button icon={StepForward} variant="solid" onClick={onStep} disabled={done}>Step</Button>
-      <Button icon={playing ? Pause : Play} onClick={onTogglePlay} disabled={done && !playing}>
-        {playing ? 'Pause' : 'Play'}
-      </Button>
-      {extra}
+    <div className="az-fig-transport">
+      <Button icon={RotateCcw} label="Reset" onClick={onReset} />
+      {onBack && <Button icon={StepBack} label="Step back" onClick={onBack} disabled={!canBack} />}
+      <Button icon={StepForward} primary onClick={onStep} disabled={done}>Step</Button>
+      <Button icon={playing ? Pause : Play} label={playing ? 'Pause' : 'Play'} onClick={onTogglePlay} disabled={done && !playing} />
     </div>
   );
 }
 
 /**
- * Drives `step` on an interval until `isDone(state)`.
+ * Runs `step` on an interval until `isDone(state)`.
  * `step` and `isDone` must be stable (module-level functions).
- * Returns [playing, toggle, stop].
  */
 export function usePlayback(state, setState, step, isDone, interval = 650) {
   const [playing, setPlaying] = useState(false);
@@ -121,67 +98,20 @@ export function usePlayback(state, setState, step, isDone, interval = 650) {
 
   const toggle = useCallback(() => setPlaying(p => !p), []);
   const stop = useCallback(() => setPlaying(false), []);
-
   return [playing, toggle, stop];
 }
 
-/* ── Readouts ─────────────────────────────────────────────── */
-
-export function Stat({ value, label, tone }) {
-  return (
-    <div className={'az-viz-stat' + (tone ? ` az-viz-stat--${tone}` : '')}>
-      <div className="az-viz-stat__value">{value}</div>
-      <div className="az-viz-stat__label">{label}</div>
-    </div>
-  );
-}
-
-export function Stats({ children, cols }) {
-  return (
-    <div className="az-viz-stats" style={cols ? { '--cols': cols } : undefined}>
-      {children}
-    </div>
-  );
-}
-
-/** Live-region commentary under a figure. tone: 'ok' | 'no' | undefined. */
-export function Note({ tone, accent, children }) {
-  return (
-    <div
-      className={'az-viz-note' + (tone ? ` az-viz-note--${tone}` : '')}
-      style={accent ? { '--note-accent': accent } : undefined}
-      aria-live="polite"
-    >
-      {children}
-    </div>
-  );
-}
-
-export function Legend({ items }) {
-  return (
-    <div className="az-viz-legend">
-      {items.map(({ color, label, shape = 'dot', icon: Icon }) => (
-        <span className="az-viz-legend__item" key={label} style={{ '--dot': color }}>
-          {Icon
-            ? <Icon size={13} strokeWidth={2} color={color} aria-hidden="true" />
-            : <span className={`az-viz-legend__${shape}`} />}
-          {label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-export function Stage({ label, children, aside }) {
-  return (
-    <div className="az-viz__stage">
-      {label && (
-        <div className="az-viz__stage-label">
-          <span>{label}</span>
-          {aside && <span className="az-viz__stage-aside">{aside}</span>}
-        </div>
-      )}
-      {children}
-    </div>
-  );
+/** Keyboard + click handler props for an SVG <g> that acts as a button. */
+export function svgButton(onActivate, label, pressed) {
+  return {
+    role: 'button',
+    tabIndex: 0,
+    'aria-label': label,
+    'aria-pressed': pressed,
+    className: 'az-fig-hit',
+    onClick: onActivate,
+    onKeyDown: e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onActivate(); }
+    },
+  };
 }

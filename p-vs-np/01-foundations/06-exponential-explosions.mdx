@@ -70,6 +70,8 @@ $$\sum_{k=0}^{63} 2^k = 2^{64} - 1 \approx 1.8 \times 10^{19}$$
 
 That is roughly **18 quintillion grains of wheat**: about 700 billion tonnes, or around a thousand years of the entire world's wheat harvest at today's rate. From one grain. Doubled 63 times.
 
+Hover over any square to see how many grains sit on it, the running total so far, and how much the whole pile weighs (assuming roughly 40 mg per grain).
+
 <WheatChessboard />
 
 :::caution Notice what happened
@@ -129,6 +131,8 @@ Let's see this side by side for a cleaner picture.
 At $n = 10$, $O(2^n)$ and $O(n^2)$ are actually close: $1{,}024$ versus $100$. Barely a factor of 10. This is the trap. Small inputs make everything look similar.
 
 By $n = 300$, $O(n^2)$ gives us $90{,}000$ steps. Trivial. $O(2^n)$ gives us a number with 90 digits. The gap between them isn't a gap anymore. It's a different mathematical universe.
+
+To feel this properly, drag the slider below. It shows how long each growth rate takes at your chosen $n$, on a computer doing a billion steps per second. The bars are on a logarithmic scale, so every gridline to the right is many times longer than the last. Then switch to a supercomputer a billion times faster and notice how little the exponential rows care.
 
 <RuntimeCalculator />
 

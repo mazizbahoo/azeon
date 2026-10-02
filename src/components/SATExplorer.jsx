@@ -1,173 +1,84 @@
 import React, { useState } from 'react';
-import { Binary, Check, CircuitBoard, Sigma, X } from 'lucide-react';
-import { Button, Figure, Note, Segmented } from './figure';
+import { Check, X } from 'lucide-react';
+import { Button, Figure, Segmented } from './figure';
 
 /* ── Gates ───────────────────────────────────────────────── */
 
-function evalGate(type, a, b) {
-  switch (type) {
-    case 'AND': return a && b;
-    case 'OR': return a || b;
-    case 'NOT': return !a;
-    default: return false;
-  }
-}
-
-const GATES = [
-  {
-    type: 'AND',
-    symbol: '∧',
-    color: 'var(--az-c1)',
-    desc: 'True only when both inputs are true.',
-    table: [
-      { a: false, b: false, out: false },
-      { a: false, b: true, out: false },
-      { a: true, b: false, out: false },
-      { a: true, b: true, out: true },
-    ],
-  },
-  {
-    type: 'OR',
-    symbol: '∨',
-    color: 'var(--az-c2)',
-    desc: 'True when at least one input is true.',
-    table: [
-      { a: false, b: false, out: false },
-      { a: false, b: true, out: true },
-      { a: true, b: false, out: true },
-      { a: true, b: true, out: true },
-    ],
-  },
-  {
-    type: 'NOT',
-    symbol: '¬',
-    color: 'var(--az-c5)',
-    desc: 'Flips the input. True becomes false, false becomes true.',
-    table: [
-      { a: false, out: true },
-      { a: true, out: false },
-    ],
-    single: true,
-  },
-];
-
-const IDLE = 'var(--az-muted-dim)';
-const LIVE = 'var(--viz-accent)';
+const GATES = {
+  AND: { fn: (a, b) => a && b, body: 'M110 25 L110 115 L150 115 Q195 115 195 70 Q195 25 150 25 Z' },
+  OR: { fn: (a, b) => a || b, body: 'M105 25 Q155 25 195 70 Q155 115 105 115 Q128 70 105 25 Z' },
+  NOT: { fn: a => !a, body: 'M110 30 L110 110 L182 70 Z', single: true },
+};
+const tf = v => (v ? 'T' : 'F');
 
 function Wire({ d, on }) {
-  return <path d={d} fill="none" stroke={on ? LIVE : IDLE} strokeWidth={on ? 3 : 2} strokeLinecap="round"
-    style={{ transition: 'stroke 0.18s ease' }} />;
+  return <path d={d} fill="none" stroke={on ? 'var(--fig-accent)' : 'var(--fig-line-strong)'} strokeWidth={on ? 2.5 : 1.75}
+    strokeLinecap="round" style={{ transition: 'stroke 0.15s' }} />;
 }
 
-function Badge({ x, y, on, label }) {
+function Value({ x, y, on }) {
   return (
-    <g>
-      <rect x={x - 20} y={y - 13} width={40} height={26} rx={7}
-        fill={on ? LIVE : 'var(--az-bg)'} fillOpacity={on ? 0.16 : 1}
-        stroke={on ? LIVE : 'var(--az-border-subtle)'} strokeWidth={1.25} />
-      <text x={x} y={y + 1} textAnchor="middle" dominantBaseline="middle" fontSize="12" fontWeight="600"
-        fill={on ? LIVE : 'var(--az-muted)'}>{label}</text>
-    </g>
+    <text x={x} y={y} textAnchor="middle" dominantBaseline="middle" fontSize="13" fontWeight="500"
+      fill={on ? 'var(--fig-accent)' : 'var(--fig-faint)'}>{tf(on)}</text>
   );
 }
 
-function GateSVG({ type, a, b }) {
-  const out = evalGate(type, a, b);
-  const tf = v => (v ? 'T' : 'F');
-  const single = type === 'NOT';
-  const bodyOn = single ? a : type === 'AND' ? a && b : a || b;
-  const body = {
-    AND: 'M120 30 L120 130 L165 130 Q215 130 215 80 Q215 30 165 30 Z',
-    OR: 'M115 30 Q170 30 215 80 Q170 130 115 130 Q140 80 115 30 Z',
-    NOT: 'M120 35 L120 125 L200 80 Z',
-  }[type];
-
+function GateDiagram({ type, a, b }) {
+  const g = GATES[type];
+  const out = g.fn(a, b);
   return (
-    <svg viewBox="0 0 340 160" className="az-viz-svg" style={{ maxWidth: 420 }} role="img"
-      aria-label={`${type} gate: ${single ? `input ${tf(a)}` : `inputs ${tf(a)} and ${tf(b)}`}, output ${tf(out)}`}>
-      {single
-        ? <Wire d="M52 80 L120 80" on={a} />
-        : <>
-          <Wire d="M52 50 L124 50" on={a} />
-          <Wire d="M52 110 L124 110" on={b} />
-        </>}
-      <path d={body} fill="var(--az-surface)" stroke={bodyOn ? LIVE : IDLE} strokeWidth={2} strokeLinejoin="round"
-        style={{ transition: 'stroke 0.18s ease' }} />
-      {single && <circle cx={208} cy={80} r={7} fill="var(--az-surface)" stroke={out ? LIVE : IDLE} strokeWidth={2} />}
-      <Wire d={`M${single ? 215 : 215} 80 L288 80`} on={out} />
-      <text x={single ? 150 : 162} y={81} textAnchor="middle" dominantBaseline="middle" fontSize="12" fontWeight="500"
-        fill="var(--az-text)">{type}</text>
-      {single
-        ? <Badge x={32} y={80} on={a} label={tf(a)} />
-        : <>
-          <Badge x={32} y={50} on={a} label={tf(a)} />
-          <Badge x={32} y={110} on={b} label={tf(b)} />
-        </>}
-      <Badge x={310} y={80} on={out} label={tf(out)} />
+    <svg viewBox="0 0 300 140" className="az-fig-svg" style={{ maxWidth: 380, margin: '0 auto' }} role="img"
+      aria-label={`${type} gate: ${g.single ? tf(a) : `${tf(a)}, ${tf(b)}`} gives ${tf(out)}`}>
+      {g.single
+        ? <Wire d="M40 70 L110 70" on={a} />
+        : <><Wire d="M40 45 L114 45" on={a} /><Wire d="M40 95 L114 95" on={b} /></>}
+      <path d={g.body} fill="var(--fig-bg)" stroke="var(--fig-line-strong)" strokeWidth="1.5" strokeLinejoin="round" />
+      {g.single && <circle cx="189" cy="70" r="6" fill="var(--fig-bg)" stroke="var(--fig-line-strong)" strokeWidth="1.5" />}
+      <Wire d={`M${g.single ? 195 : 195} 70 L262 70`} on={out} />
+      <text x={g.single ? 138 : 148} y="71" textAnchor="middle" dominantBaseline="middle" fontSize="11.5" fill="var(--fig-muted)">{type}</text>
+      {g.single ? <Value x={24} y={70} on={a} /> : <><Value x={24} y={45} on={a} /><Value x={24} y={95} on={b} /></>}
+      <Value x={278} y={70} on={out} />
     </svg>
   );
 }
 
-function InputToggle({ label, value, onToggle }) {
-  return (
-    <Button pressed={value} onClick={onToggle} className="az-viz-btn--wide">
-      {label} = {value ? 'T' : 'F'}
-    </Button>
-  );
-}
-
-function GatePanel() {
-  const [gateIdx, setGateIdx] = useState(0);
+function GatesPanel() {
+  const [type, setType] = useState('AND');
   const [a, setA] = useState(false);
   const [b, setB] = useState(false);
-
-  const gate = GATES[gateIdx];
+  const g = GATES[type];
+  const rows = g.single ? [[false], [true]] : [[false, false], [false, true], [true, false], [true, true]];
 
   return (
-    <div className="az-gate" style={{ '--viz-accent': gate.color }}>
-      <Segmented
-        label="Gate"
-        grow
-        value={gateIdx}
-        onChange={setGateIdx}
-        options={GATES.map((g, i) => ({ value: i, label: `${g.symbol} ${g.type}`, accent: g.color }))}
-      />
-
-      <Note>{gate.desc}</Note>
-
-      <div className="az-gate__diagram">
-        <GateSVG type={gate.type} a={a} b={b} />
+    <>
+      <div className="az-sat__row">
+        <Segmented label="Gate" value={type} onChange={setType} options={Object.keys(GATES).map(k => ({ value: k, label: k }))} />
+        <div className="az-sat__inputs">
+          <Button pressed={a} onClick={() => setA(v => !v)}>{g.single ? 'Input' : 'A'} = {tf(a)}</Button>
+          {!g.single && <Button pressed={b} onClick={() => setB(v => !v)}>B = {tf(b)}</Button>}
+        </div>
       </div>
 
-      <div className="az-viz-controls">
-        <InputToggle label={gate.single ? 'Input' : 'A'} value={a} onToggle={() => setA(v => !v)} />
-        {!gate.single && <InputToggle label="B" value={b} onToggle={() => setB(v => !v)} />}
+      <div className="az-fig-well" style={{ padding: '12px 8px' }}>
+        <GateDiagram type={type} a={a} b={b} />
       </div>
 
-      <div className="az-viz__stage" style={{ overflowX: 'auto' }}>
-        <table className="az-viz-table">
+      <div className="az-fig-well">
+        <table className="az-fig-table">
           <thead>
-            <tr>
-              {!gate.single && <th>A</th>}
-              <th>{gate.single ? 'Input' : 'B'}</th>
-              <th>Output</th>
-            </tr>
+            <tr>{g.single ? <th>Input</th> : <><th>A</th><th>B</th></>}<th>Output</th></tr>
           </thead>
           <tbody>
-            {gate.table.map((row, i) => {
-              const isActive = gate.single ? row.a === a : row.a === a && row.b === b;
-              return (
-                <tr key={i} data-active={String(isActive)}>
-                  {!gate.single && <td>{row.a ? 'T' : 'F'}</td>}
-                  <td>{gate.single ? (row.a ? 'T' : 'F') : (row.b ? 'T' : 'F')}</td>
-                  <td>{row.out ? 'T' : 'F'}</td>
-                </tr>
-              );
-            })}
+            {rows.map(r => (
+              <tr key={r.join()} data-on={String(r[0] === a && (g.single || r[1] === b))}>
+                {r.map((v, i) => <td key={i}>{tf(v)}</td>)}
+                <td>{tf(g.fn(r[0], r[1]))}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -175,63 +86,42 @@ function GatePanel() {
 
 // φ = (x₁ ∨ ¬x₂) ∧ (¬x₁ ∨ x₃) ∧ (x₂ ∨ ¬x₃)
 const CLAUSES = [
-  { vars: [0, 1], negated: [false, true], label: '(x₁ ∨ ¬x₂)' },
-  { vars: [0, 2], negated: [true, false], label: '(¬x₁ ∨ x₃)' },
-  { vars: [1, 2], negated: [false, true], label: '(x₂ ∨ ¬x₃)' },
+  { lits: [[0, false], [1, true]], label: 'x₁ ∨ ¬x₂' },
+  { lits: [[0, true], [2, false]], label: '¬x₁ ∨ x₃' },
+  { lits: [[1, false], [2, true]], label: 'x₂ ∨ ¬x₃' },
 ];
+const VARS = ['x₁', 'x₂', 'x₃'];
 
-function evalClause(clause, vals) {
-  return clause.vars.some((vi, i) => (clause.negated[i] ? !vals[vi] : vals[vi]));
-}
-
-function SATPanel() {
-  const [vals, setVals] = useState([true, true, true]);
-  const results = CLAUSES.map(c => evalClause(c, vals));
-  const allSat = results.every(Boolean);
-
+function FormulaPanel({ vals, setVals }) {
+  const results = CLAUSES.map(c => c.lits.some(([v, neg]) => (neg ? !vals[v] : vals[v])));
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div className="az-viz-formula az-viz-formula--plain">
-        φ = (x₁ ∨ ¬x₂) ∧ (¬x₁ ∨ x₃) ∧ (x₂ ∨ ¬x₃)
-      </div>
-
-      <div className="az-viz-segment" style={{ justifyContent: 'center' }}>
-        {['x₁', 'x₂', 'x₃'].map((label, i) => (
-          <button
-            key={label}
-            type="button"
-            aria-pressed={vals[i]}
-            onClick={() => setVals(v => v.map((x, j) => (j === i ? !x : x)))}
-            className={'az-viz-btn az-viz-btn--wide' + (vals[i] ? ' az-viz-btn--on' : '')}
-          >
-            {label} = {vals[i] ? 'T' : 'F'}
-          </button>
+    <>
+      <div className="az-fig-formula">φ = {CLAUSES.map(c => `(${c.label})`).join(' ∧ ')}</div>
+      <div className="az-sat__inputs" style={{ justifyContent: 'center' }}>
+        {VARS.map((name, i) => (
+          <Button key={name} pressed={vals[i]} onClick={() => setVals(v => v.map((x, j) => (j === i ? !x : x)))}>
+            {name} = {tf(vals[i])}
+          </Button>
         ))}
       </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {CLAUSES.map((clause, i) => (
-          <div key={clause.label} className={'az-viz-row ' + (results[i] ? 'az-viz-row--ok' : 'az-viz-row--no')}>
-            <span>{clause.label}</span>
-            <span className="az-viz-row__status">
-              {results[i]
-                ? <><Check size={13} strokeWidth={2.5} aria-hidden="true" />satisfied</>
-                : <><X size={13} strokeWidth={2.5} aria-hidden="true" />violated</>}
-            </span>
-          </div>
-        ))}
+      <div className="az-fig-well">
+        <table className="az-fig-table">
+          <thead><tr><th>Clause</th><th style={{ textAlign: 'right' }}>Value</th></tr></thead>
+          <tbody>
+            {CLAUSES.map((c, i) => (
+              <tr key={c.label}>
+                <td>({c.label})</td>
+                <td style={{ textAlign: 'right' }}>
+                  {results[i]
+                    ? <Check size={15} strokeWidth={2.5} color="var(--fig-accent)" aria-label="true" />
+                    : <X size={15} strokeWidth={2.5} color="var(--fig-bad)" aria-label="false" />}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      <div className={'az-viz-verdict ' + (allSat ? 'az-viz-verdict--ok' : 'az-viz-verdict--no')}>
-        <div className="az-viz-verdict__label">Formula status</div>
-        <div className="az-viz-verdict__value">{allSat ? 'Satisfiable' : 'Not satisfied'}</div>
-        <div className="az-viz-verdict__sub">
-          {allSat
-            ? 'This assignment is a valid certificate.'
-            : 'At least one clause is still false.'}
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
 
@@ -239,28 +129,17 @@ function SATPanel() {
 
 export default function SATExplorer() {
   const [tab, setTab] = useState('gates');
+  const [vals, setVals] = useState([true, true, true]);
+  const sat = CLAUSES.every(c => c.lits.some(([v, neg]) => (neg ? !vals[v] : vals[v])));
 
   return (
     <Figure
-      icon={Binary}
-      kicker="Boolean logic"
-      title={tab === 'gates' ? 'Logic gates' : 'Is this formula satisfiable?'}
-      tools={
-        <Segmented
-          label="View"
-          value={tab}
-          onChange={setTab}
-          options={[
-            { value: 'gates', label: 'Gates', icon: CircuitBoard },
-            { value: 'sat', label: 'SAT formula', icon: Sigma },
-          ]}
-        />
-      }
-      caption={tab === 'gates'
-        ? 'Flip the inputs to watch the wires and the matching truth-table row light up.'
-        : 'Toggle each variable to search for a satisfying assignment. Checking one assignment is fast; finding one is the hard part.'}
+      title="Boolean logic"
+      tools={<Segmented label="View" value={tab} onChange={setTab} options={[{ value: 'gates', label: 'Gates' }, { value: 'sat', label: 'SAT formula' }]} />}
+      status={tab === 'sat' ? (sat ? <><b>Satisfied</b>: every clause is true</> : <><b>Not satisfied</b>: a clause is false</>) : undefined}
+      tone={tab === 'sat' ? (sat ? 'good' : 'bad') : undefined}
     >
-      {tab === 'gates' ? <GatePanel /> : <SATPanel />}
+      {tab === 'gates' ? <GatesPanel /> : <FormulaPanel vals={vals} setVals={setVals} />}
     </Figure>
   );
 }
