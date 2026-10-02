@@ -1581,6 +1581,14 @@ samp {
     background: var(--az-bg) !important;
   }
 
+  /* Drawer items run flush to the right edge, so square off that side */
+  .navbar-sidebar .menu__link,
+  .navbar-sidebar .menu__list-item-collapsible,
+  .navbar-sidebar .menu__caret {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+
   .navbar-sidebar .menu__link {
     color: var(--az-text) !important;
     padding: 0.65rem 1rem;
