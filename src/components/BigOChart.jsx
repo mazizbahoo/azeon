@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Figure } from './figure';
 
 /* ── Big-O growth curves, n = 1 … 10, capped at 60 steps ─── */
@@ -51,11 +51,16 @@ function end(f) {
   return { x: X(n), y: Y(CAP), side: 'top' };
 }
 
+const FACT = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800];
+const exactValue = (c, n) => (c.key === 'fact' ? FACT[n] : c.f(n));
+
 const fmt = v => (v >= 1e6 ? v.toExponential(1) : Number.isInteger(v) ? v.toLocaleString('en-US') : v.toFixed(1));
 
 export default function BigOChart() {
   const [focus, setFocus] = useState(null);
-  const [hoverN, setHoverN] = useState(null);
+  const [hover, setHover] = useState(null); // { n, x, y, flip } in wrapper pixels
+  const wrap = useRef(null);
+  const hoverN = hover?.n ?? null;
 
   const onMove = e => {
     const svg = e.currentTarget;
@@ -63,19 +68,18 @@ export default function BigOChart() {
     pt.x = e.clientX; pt.y = e.clientY;
     const { x } = pt.matrixTransform(svg.getScreenCTM().inverse());
     const n = Math.round(1 + ((x - PAD.l) / (W - PAD.l - PAD.r)) * 9);
-    setHoverN(n >= 1 && n <= 10 ? n : null);
+    if (n < 1 || n > 10) { setHover(null); return; }
+    const box = wrap.current.getBoundingClientRect();
+    const px = e.clientX - box.left;
+    setHover({ n, x: px, y: e.clientY - box.top, flip: px > box.width - 190 });
   };
 
-  const exact = (c, n) => (c.key === 'fact' ? [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800][n] : c.f(n));
-  const status = hoverN
-    ? <>n = <b>{hoverN}</b> · {CURVES.slice(2).map(c => `${c.label.slice(2, -1)} = ${fmt(exact(c, hoverN))}`).join(' · ')}</>
-    : <>Hover the chart to read exact values</>;
-
   return (
-    <Figure title="Big-O growth, n = 1 to 10" status={status}>
+    <Figure title="Big-O growth, n = 1 to 10">
+      <div className="az-bigo" ref={wrap}>
       <svg viewBox={`0 0 ${W} ${H}`} className="az-fig-svg" role="img"
         aria-label="Growth of seven Big-O classes for n from 1 to 10, capped at 60 steps"
-        onMouseMove={onMove} onMouseLeave={() => setHoverN(null)}>
+        onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
         {[0, 20, 40, 60].map(v => (
           <g key={v}>
             <line x1={PAD.l} x2={W - PAD.r} y1={Y(v)} y2={Y(v)} stroke="var(--fig-line)" strokeDasharray={v === CAP ? '4 4' : undefined} />
@@ -111,7 +115,28 @@ export default function BigOChart() {
             </g>
           );
         })}
+
+        {hoverN && CURVES.map(c => {
+          const v = c.f(hoverN);
+          return v <= CAP && (
+            <circle key={c.key} cx={X(hoverN)} cy={Y(v)} r={3.5} fill="var(--fig-bg)"
+              stroke={focus === c.key ? 'var(--fig-accent)' : 'var(--fig-ink)'} strokeWidth="1.5" />
+          );
+        })}
       </svg>
+
+      {hover && (
+        <div className="az-bigo__tip" style={{ left: hover.x, top: hover.y, '--dx': hover.flip ? 'calc(-100% - 14px)' : '14px' }}>
+          <div className="az-bigo__tip-head">n = {hover.n}</div>
+          {[...CURVES].reverse().map(c => (
+            <div key={c.key} className="az-bigo__tip-row" data-on={String(focus === c.key)}>
+              <span>{c.label}</span>
+              <span>{fmt(exactValue(c, hover.n))}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      </div>
     </Figure>
   );
 }

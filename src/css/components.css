@@ -598,8 +598,9 @@
   border-bottom: 1px solid var(--fig-line);
   padding: 0;
   font-family: inherit;
-  font-size: 10px;
-  color: var(--fig-faint);
+  font-size: 11px;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--fig-ink) 72%, transparent);
   background:
     linear-gradient(color-mix(in srgb, var(--fig-accent) calc(var(--fill) * 100%), transparent),
       color-mix(in srgb, var(--fig-accent) calc(var(--fill) * 100%), transparent)),
@@ -855,4 +856,49 @@
 
 .az-fig a.az-chain__post:hover {
   text-decoration: underline;
+}
+
+/* ── Big-O chart ──────────────────────────────────────────── */
+
+.az-bigo {
+  position: relative;
+}
+
+.az-bigo__tip {
+  position: absolute;
+  z-index: 2;
+  min-width: 168px;
+  padding: 10px 12px;
+  transform: translate(var(--dx), -50%);
+  background: var(--az-elevated);
+  border: 1px solid var(--fig-line-strong);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+  font-size: 12px;
+}
+
+.az-bigo__tip-head {
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--fig-line);
+  font-weight: 600;
+  color: var(--fig-ink);
+}
+
+.az-bigo__tip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 2px 0;
+  color: var(--fig-muted);
+}
+
+.az-bigo__tip-row span:last-child {
+  color: var(--fig-ink);
+}
+
+.az-bigo__tip-row[data-on='true'] span {
+  color: var(--fig-accent);
+  font-weight: 600;
 }
