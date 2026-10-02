@@ -10,7 +10,7 @@
 .az-fig {
   --fig-ink: var(--az-text);
   --fig-muted: var(--az-muted);
-  --fig-faint: var(--az-muted-dim);
+  --fig-body: var(--az-body);
   --fig-line: var(--az-border);
   --fig-line-strong: var(--az-border-subtle);
   --fig-bg: var(--az-surface);
@@ -150,8 +150,15 @@
 }
 
 .az-fig-btn:disabled {
-  opacity: 0.35;
+  color: var(--fig-muted);
+  border-color: var(--fig-line);
   cursor: default;
+}
+
+.az-fig-btn--primary:disabled {
+  color: var(--fig-muted);
+  background: transparent;
+  border-color: var(--fig-line);
 }
 
 .az-fig-btn--icon {
@@ -242,7 +249,7 @@
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--fig-faint);
+  color: var(--fig-muted);
 }
 
 /* A recessed area that holds a diagram */
@@ -299,7 +306,7 @@
 }
 
 .az-fig-token[data-dim='true'] {
-  color: var(--fig-faint);
+  color: var(--fig-muted);
 }
 
 .az-fig-token[data-bad='true'] {
@@ -330,7 +337,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-align: left;
-  color: var(--fig-faint);
+  color: var(--fig-muted);
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--fig-line);
@@ -487,12 +494,12 @@
 }
 
 .az-3sat__or {
-  color: var(--fig-faint);
+  color: var(--fig-muted);
   font-size: 12px;
 }
 
 .az-3sat__arrow {
-  color: var(--fig-faint);
+  color: var(--fig-muted);
   margin: 4px 0;
 }
 
@@ -531,7 +538,7 @@
 
 .az-trace__index {
   font-size: 11px;
-  color: var(--fig-faint);
+  color: var(--fig-muted);
 }
 
 .az-trace__code {
@@ -560,7 +567,7 @@
 
 .az-trace__ln {
   width: 10px;
-  color: var(--fig-faint);
+  color: var(--fig-muted);
   text-align: right;
 }
 
@@ -600,7 +607,7 @@
   font-family: inherit;
   font-size: 11px;
   font-weight: 500;
-  color: color-mix(in srgb, var(--fig-ink) 72%, transparent);
+  color: var(--fig-muted);
   background:
     linear-gradient(color-mix(in srgb, var(--fig-accent) calc(var(--fill) * 100%), transparent),
       color-mix(in srgb, var(--fig-accent) calc(var(--fill) * 100%), transparent)),
@@ -614,6 +621,10 @@
 
 .az-wheat__sq:nth-child(n + 57) {
   border-bottom: none;
+}
+
+.az-wheat__sq[data-filled='true'] {
+  color: var(--fig-body);
 }
 
 .az-wheat__sq[data-current='true'] {
@@ -647,7 +658,7 @@
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--fig-faint);
+  color: var(--fig-muted);
   margin: 0 0 4px;
 }
 
@@ -697,7 +708,7 @@
   top: -22px;
   transform: translateX(-50%);
   font-size: 11px;
-  color: var(--fig-faint);
+  color: var(--fig-muted);
   white-space: nowrap;
 }
 
@@ -843,7 +854,7 @@
   gap: 8px;
   padding: 7px 0 7px 16px;
   font-size: 12px;
-  color: var(--fig-faint);
+  color: var(--fig-muted);
 }
 
 .az-fig a.az-chain__post {

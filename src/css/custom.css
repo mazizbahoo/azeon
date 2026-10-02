@@ -1440,11 +1440,11 @@ samp {
   font-weight: 500;
   text-decoration: none;
   margin-top: 0.5rem;
-  transition: opacity 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .az-coming-card__link:hover {
-  opacity: 0.72;
+  color: var(--az-text);
   text-decoration: none;
 }
 
@@ -1811,7 +1811,7 @@ div:has(> b):has(> ul.margin-left--sm)>ul>li {
   bottom: 1.5rem !important;
   width: 44px !important;
   height: 44px !important;
-  border-radius: 12px !important;
+  border-radius: 50% !important;
   background: var(--az-surface) !important;
   border: 1px solid var(--az-border) !important;
   box-shadow: var(--az-card-shadow) !important;
@@ -1827,12 +1827,12 @@ div:has(> b):has(> ul.margin-left--sm)>ul>li {
 }
 
 .theme-back-to-top-button:hover {
-  color: var(--az-accent);
+  color: var(--az-text);
   background: var(--az-elevated) !important;
-  border-color: var(--az-accent-border) !important;
+  border-color: var(--az-border-subtle) !important;
 }
 
 .theme-back-to-top-button:focus-visible {
-  outline: 2px solid var(--az-accent);
+  outline: 2px solid var(--az-text);
   outline-offset: 2px;
 }

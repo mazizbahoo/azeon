@@ -105,7 +105,7 @@ export default function ReductionGraph() {
                       stroke={cam ? 'var(--fig-accent)' : 'var(--fig-line-strong)'} strokeWidth={cam ? 1.75 : 1.25} />
                     {cam
                       ? <Cctv x={p.x - 8} y={p.y - 8} width={16} height={16} color="var(--fig-accent)" strokeWidth={2} aria-hidden="true" />
-                      : <text x={p.x} y={p.y + 1} textAnchor="middle" dominantBaseline="middle" fontSize="13" fill="var(--fig-faint)">{name(i)}</text>}
+                      : <text x={p.x} y={p.y + 1} textAnchor="middle" dominantBaseline="middle" fontSize="13" fill="var(--fig-muted)">{name(i)}</text>}
                   </g>
                 );
               }}

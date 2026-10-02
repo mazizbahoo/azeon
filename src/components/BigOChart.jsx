@@ -83,15 +83,15 @@ export default function BigOChart() {
         {[0, 20, 40, 60].map(v => (
           <g key={v}>
             <line x1={PAD.l} x2={W - PAD.r} y1={Y(v)} y2={Y(v)} stroke="var(--fig-line)" strokeDasharray={v === CAP ? '4 4' : undefined} />
-            <text x={PAD.l - 10} y={Y(v)} textAnchor="end" dominantBaseline="middle" fontSize="11" fill="var(--fig-faint)">
+            <text x={PAD.l - 10} y={Y(v)} textAnchor="end" dominantBaseline="middle" fontSize="11" fill="var(--fig-muted)">
               {v === CAP ? '60+' : v}
             </text>
           </g>
         ))}
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
-          <text key={n} x={X(n)} y={H - PAD.b + 18} textAnchor="middle" fontSize="11" fill="var(--fig-faint)">{n}</text>
+          <text key={n} x={X(n)} y={H - PAD.b + 18} textAnchor="middle" fontSize="11" fill="var(--fig-muted)">{n}</text>
         ))}
-        <text x={(PAD.l + W - PAD.r) / 2} y={H - 4} textAnchor="middle" fontSize="11" fill="var(--fig-faint)">input size n</text>
+        <text x={(PAD.l + W - PAD.r) / 2} y={H - 4} textAnchor="middle" fontSize="11" fill="var(--fig-muted)">input size n</text>
 
         {hoverN && <line x1={X(hoverN)} x2={X(hoverN)} y1={PAD.t} y2={H - PAD.b} stroke="var(--fig-line-strong)" />}
 

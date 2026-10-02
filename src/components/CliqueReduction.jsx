@@ -101,7 +101,7 @@ export default function CliqueReduction() {
               {...edgeProps(a, b)} style={{ transition: 'all 0.15s ease' }} />
           ))}
           {LABELS.map((p, c) => (
-            <text key={c} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize="10" letterSpacing="0.12em" fill="var(--fig-faint)">
+            <text key={c} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize="10" letterSpacing="0.12em" fill="var(--fig-muted)">
               CLAUSE {c + 1}
             </text>
           ))}
@@ -111,15 +111,14 @@ export default function CliqueReduction() {
             const faded = hover !== null && hover !== n.id && !near.includes(n.id) && !on;
             return (
               <g key={n.id} {...svgButton(() => toggle(n.id), `${lit(n.lit)}, clause ${n.clause + 1}`, on)}
-                opacity={faded ? 0.35 : 1}
                 onMouseEnter={() => setHover(n.id)} onMouseLeave={() => setHover(null)}
                 onFocus={() => setHover(n.id)} onBlur={() => setHover(null)}>
                 <circle cx={n.x} cy={n.y} r={R} fill="var(--fig-bg)" />
                 <circle className="az-fig-node" cx={n.x} cy={n.y} r={R}
                   fill={c ?? 'var(--fig-bg)'} fillOpacity={c ? 0.16 : 1}
-                  stroke={c ?? 'var(--fig-line-strong)'} strokeWidth={on ? 2 : 1.25} />
+                  stroke={c ?? (faded ? 'var(--fig-line)' : 'var(--fig-line-strong)')} strokeWidth={on ? 2 : 1.25} />
                 <text x={n.x} y={n.y + 1} textAnchor="middle" dominantBaseline="middle" fontSize="13"
-                  fill={c ?? 'var(--fig-ink)'}>{lit(n.lit)}</text>
+                  fill={c ?? (faded ? 'var(--fig-muted)' : 'var(--fig-ink)')}>{lit(n.lit)}</text>
               </g>
             );
           })}

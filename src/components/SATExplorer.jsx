@@ -19,7 +19,7 @@ function Wire({ d, on }) {
 function Value({ x, y, on }) {
   return (
     <text x={x} y={y} textAnchor="middle" dominantBaseline="middle" fontSize="13" fontWeight="500"
-      fill={on ? 'var(--fig-accent)' : 'var(--fig-faint)'}>{tf(on)}</text>
+      fill={on ? 'var(--fig-accent)' : 'var(--fig-muted)'}>{tf(on)}</text>
   );
 }
 

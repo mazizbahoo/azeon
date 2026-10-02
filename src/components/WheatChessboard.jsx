@@ -44,6 +44,7 @@ export default function WheatChessboard() {
                 aria-label={`Square ${n}`}
                 aria-pressed={n === k}
                 data-current={String(n === sq)}
+                data-filled={String(n <= sq)}
                 style={{ '--fill': n <= sq ? 0.08 + 0.72 * (n / 64) : 0 }}
                 onMouseEnter={() => setHover(n)}
                 onFocus={() => setHover(n)}

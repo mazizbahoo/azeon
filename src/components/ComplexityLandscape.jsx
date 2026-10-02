@@ -65,18 +65,20 @@ export default function ComplexityLandscape({ mode = 'worlds' }) {
           {equal ? 'P = NP' : 'NP'}
         </text>
 
-        <g style={{ opacity: equal ? 0 : 1, transition: 'opacity 0.3s ease' }}>
+        {!equal && <g>
           <ellipse {...RIGHT} fill="none" stroke="var(--fig-line-strong)" strokeWidth="1.25" strokeDasharray="5 5" />
           <text x={RIGHT.cx} y={labelY(RIGHT)} textAnchor="middle" dominantBaseline="middle" fontSize="11"
-            letterSpacing="0.06em" fill="var(--fig-faint)">
+            letterSpacing="0.06em" fill="var(--fig-muted)">
             {mode === 'known' ? 'NOT KNOWN IN P' : 'NP-COMPLETE'}
           </text>
-        </g>
+        </g>}
 
         <ellipse className="az-land__p" style={equal ? P_FULL : LEFT}
           fill="var(--fig-accent)" fillOpacity="0.06" stroke="var(--fig-accent)" strokeWidth="1.5" />
-        <text x={LEFT.cx} y={labelY(LEFT)} textAnchor="middle" dominantBaseline="middle" fontSize="13" fontWeight="600"
-          fill="var(--fig-accent)" style={{ opacity: equal ? 0 : 1, transition: 'opacity 0.3s ease' }}>P</text>
+        {!equal && (
+          <text x={LEFT.cx} y={labelY(LEFT)} textAnchor="middle" dominantBaseline="middle" fontSize="13" fontWeight="600"
+            fill="var(--fig-accent)">P</text>
+        )}
 
         {ALL.map(name => {
           const [x, y] = equal ? EQ[name] : NEQ[name];
