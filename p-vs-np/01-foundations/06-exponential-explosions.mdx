@@ -7,6 +7,8 @@ tags: [foundations, p-vs-np, beginners, big-o, complexity]
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import WheatChessboard from '@site/src/components/WheatChessboard';
+import RuntimeCalculator from '@site/src/components/RuntimeCalculator';
 
 # Exponential Explosions
 
@@ -68,6 +70,8 @@ $$\sum_{k=0}^{63} 2^k = 2^{64} - 1 \approx 1.8 \times 10^{19}$$
 
 That is roughly **18 quintillion grains of wheat**: about 1,000 times the total wheat production of every country on Earth for the past millennium, combined. From one grain. Doubled 63 times.
 
+<WheatChessboard />
+
 :::caution Notice what happened
 For the first 20 squares, the numbers are almost comfortable. One million feels manageable. The explosion doesn't feel like an explosion. It feels like ordinary growth. Then somewhere in the middle, something shifts, and by the end the numbers are so large they stop feeling like numbers at all.
 
@@ -125,6 +129,8 @@ Let's see this side by side for a cleaner picture.
 At $n = 10$, $O(2^n)$ and $O(n^2)$ are actually close: $1{,}024$ versus $100$. Barely a factor of 10. This is the trap. Small inputs make everything look similar.
 
 By $n = 300$, $O(n^2)$ gives us $90{,}000$ steps. Trivial. $O(2^n)$ gives us a number with 90 digits. The gap between them isn't a gap anymore. It's a different mathematical universe.
+
+<RuntimeCalculator />
 
 :::info An important clarification
 When I say $O(2^n)$ is "practically impossible," I mean that for large enough inputs, no advancement in hardware will save you. Moore's Law doubling processor speed every two years only adds about one to the effective input size you can handle per year. If you can solve $n = 60$ today, in a year you might solve $n = 61$. In 10 years, maybe $n = 70$. The problem has you outpaced forever.

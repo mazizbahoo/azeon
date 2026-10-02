@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, ChartSpline } from 'lucide-react';
+import { Figure, FigureLoading } from './figure';
 
 /* ── data ────────────────────────────────────────────────── */
 
@@ -106,6 +107,12 @@ function Tooltip({ active, payload, label }) {
 }
 
 function Inner() {
+  const [hidden, setHidden] = useState(() => new Set());
+  const toggle = key => setHidden(prev => {
+    const next = new Set(prev);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    return next;
+  });
   const {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
     Tooltip: RTooltip, ReferenceLine, ResponsiveContainer,
@@ -120,13 +127,12 @@ function Inner() {
   const grid = 'var(--az-viz-grid)';
 
   return (
-    <div className="az-viz">
-      <div className="az-viz__head">
-        <span className="az-viz__label">Big-O growth curves</span>
-        <span className="az-viz-hint">n = 1 … 10</span>
-      </div>
-
-      <div className="az-viz__body">
+    <Figure
+      icon={ChartSpline}
+      kicker="Chart"
+      title="How Big-O classes grow, n = 1 to 10"
+      caption={`The y-axis stops at ${CAP} steps so the slower curves stay readable. Hover any point for the true value; click a legend entry to hide or show its curve.`}
+    >
         <ResponsiveContainer width="100%" height={340}>
           <LineChart data={DATA} margin={{ top: 8, right: 20, left: 0, bottom: 22 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={grid} />
@@ -170,7 +176,7 @@ function Inner() {
               }}
             />
 
-            {CURVES.map(({ key, color, dash }) => (
+            {CURVES.filter(({ key }) => !hidden.has(key)).map(({ key, color, dash }) => (
               <Line
                 key={key}
                 type="monotone"
@@ -186,26 +192,28 @@ function Inner() {
           </LineChart>
         </ResponsiveContainer>
 
-        <div className="az-viz-legend">
+        <div className="az-viz-legend" role="group" aria-label="Show or hide curves">
           {CURVES.map(({ key, color, name }) => (
-            <span className="az-viz-legend__item" key={key} style={{ '--dot': color }}>
+            <button
+              type="button"
+              key={key}
+              className="az-viz-legend__item az-viz-legend__toggle"
+              aria-pressed={!hidden.has(key)}
+              onClick={() => toggle(key)}
+              style={{ '--dot': color }}
+            >
               <span className="az-viz-legend__rule" />
-              {key} — {name}
-            </span>
+              {key} {name}
+            </button>
           ))}
         </div>
-      </div>
-
-      <p className="az-viz__foot">
-        The y-axis stops at {CAP} steps so the slower curves stay readable. Hover any point for the true value.
-      </p>
-    </div>
+    </Figure>
   );
 }
 
 export default function BigOChart() {
   return (
-    <BrowserOnly fallback={<div className="az-viz__loading">Loading chart</div>}>
+    <BrowserOnly fallback={<FigureLoading label="Loading chart" />}>
       {() => <Inner />}
     </BrowserOnly>
   );

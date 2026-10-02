@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowRight } from 'lucide-react';
-import BrowserOnly from '@docusaurus/BrowserOnly';
+import { ArrowDown, Check, Combine } from 'lucide-react';
+import { Figure, Note, Segmented } from './figure';
 
 /* ── Clause size cases ───────────────────────────────────── */
 
@@ -90,95 +90,79 @@ function Clause({ literals, helperVars }) {
 
 /* ── Main ────────────────────────────────────────────────── */
 
-function Inner() {
+export default function ThreeSATExplorer() {
   const [activeCase, setActiveCase] = useState('four');
   const current = CASES.find(c => c.id === activeCase);
+  const n = current.originalLiterals.length;
 
   return (
-    <div className="az-viz">
-      <div className="az-viz__head">
-        <span className="az-viz__label">SAT <ArrowRight className="az-inline-icon" size={12} strokeWidth={2.25} aria-hidden="true" /> 3-SAT clause converter</span>
-        <div className="az-viz__tools">
-          {CASES.map(c => (
-            <button
-              key={c.id}
-              type="button"
-              aria-pressed={c.id === activeCase}
-              onClick={() => setActiveCase(c.id)}
-              className={'az-viz-btn' + (c.id === activeCase ? ' az-viz-btn--on' : '')}
-            >
-              {c.label}
-            </button>
-          ))}
+    <Figure
+      icon={Combine}
+      kicker="Reduction"
+      title="SAT to 3-SAT clause converter"
+      tools={
+        <Segmented
+          label="Literals in the original clause"
+          value={activeCase}
+          onChange={setActiveCase}
+          options={CASES.map((c, i) => ({ value: c.id, label: `${i + 1} literal${i ? 's' : ''}` }))}
+        />
+      }
+      caption="Pick a clause size to see how it is rewritten. The rewritten clauses are satisfiable exactly when the original one is."
+    >
+      <div className="az-viz-field">
+        <div className="az-viz-field__label">Original clause · {n} literal{n === 1 ? '' : 's'}</div>
+        <div className="az-viz-field__line">
+          <Clause literals={current.originalLiterals} helperVars={[]} />
         </div>
-      </div>
 
-      <div className="az-viz__body">
-        <div className="az-viz-field">
-          <div className="az-viz-field__label">Original clause</div>
-          <div className="az-viz-field__line">
-            <Clause literals={current.originalLiterals} helperVars={[]} />
-            <span className="az-viz-field__aside">
-              {current.originalLiterals.length} literal{current.originalLiterals.length === 1 ? '' : 's'}
+        <div className="az-viz-field__divider">
+          <ArrowDown size={13} strokeWidth={2.25} aria-hidden="true" />
+          converts to
+        </div>
+
+        <div className="az-viz-field__label">
+          {current.resultClauses.length} clause{current.resultClauses.length === 1 ? '' : 's'}
+          {current.helperCount > 0 ? (
+            <span style={{ color: HELPER }}>
+              {' '}· {current.helperCount} helper variable{current.helperCount === 1 ? '' : 's'}
             </span>
-          </div>
-
-          <div className="az-viz-field__divider">converts to</div>
-
-          <div className="az-viz-field__label">
-            {current.resultClauses.length} clause{current.resultClauses.length === 1 ? '' : 's'}
-            {current.helperCount > 0 ? (
-              <span style={{ color: HELPER }}>
-                {' '}+ {current.helperCount} helper variable{current.helperCount === 1 ? '' : 's'}
-              </span>
-            ) : (
-              <span style={{ color: 'var(--az-ok)' }}> — no change needed</span>
-            )}
-          </div>
-
-          {current.resultClauses.map((clause, i) => (
-            <div className="az-viz-field__line" key={i}>
-              <Clause literals={clause} helperVars={current.helperVars} />
-              <span className="az-viz-field__aside" style={{ color: 'var(--az-ok)' }}>3 literals</span>
-            </div>
-          ))}
-
-          {current.helperVars.length > 0 && (
-            <div className="az-viz-field__line" style={{ borderTop: '1px solid var(--az-border)', paddingTop: 9 }}>
-              <span className="az-viz-field__label">Fresh variables</span>
-              {current.helperVars.map(h => (
-                <span className="az-viz-chip" key={h} style={{ '--tok': HELPER }}>
-                  {h} — not in the original formula
-                </span>
-              ))}
-            </div>
+          ) : (
+            <span style={{ color: 'var(--az-ok)' }}> · already 3-SAT</span>
           )}
         </div>
 
-        <div className={'az-viz-note' + (current.helperCount === 0 ? ' az-viz-note--ok' : '')}>
-          {current.explanation}
-        </div>
+        {current.resultClauses.map((clause, i) => (
+          <div className="az-viz-field__line" key={i}>
+            <Clause literals={clause} helperVars={current.helperVars} />
+            <span className="az-viz-field__aside az-viz-field__aside--ok">
+              <Check size={12} strokeWidth={2.5} aria-hidden="true" /> 3 literals
+            </span>
+          </div>
+        ))}
 
-        <div className="az-viz-rule">
-          <div className="az-viz-rule__label">General rule for k literals (k &gt; 3)</div>
-          <p className="az-viz-rule__text" style={{ margin: 0 }}>
-            A clause with <em style={{ fontStyle: 'normal', color: 'var(--az-accent)', fontWeight: 500 }}>k</em> literals
-            splits into <em style={{ fontStyle: 'normal', color: 'var(--az-accent)', fontWeight: 500 }}>k − 2</em> clauses
-            using <em style={{ fontStyle: 'normal', color: HELPER, fontWeight: 500 }}>k − 3</em> helper variables. Each
-            helper chains two clauses together: the positive form closes one clause, the negated form opens the next.
-          </p>
-        </div>
+        {current.helperVars.length > 0 && (
+          <div className="az-viz-field__line az-viz-field__line--rule">
+            <span className="az-viz-field__label">Fresh variables</span>
+            {current.helperVars.map(h => (
+              <span className="az-viz-chip" key={h} style={{ '--tok': HELPER }}>
+                {h} appears nowhere else
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
-      <p className="az-viz__foot">Pick a clause size to see how it is rewritten.</p>
-    </div>
-  );
-}
+      <Note tone={current.helperCount === 0 ? 'ok' : undefined}>{current.explanation}</Note>
 
-export default function ThreeSATExplorer() {
-  return (
-    <BrowserOnly fallback={<div className="az-viz__loading">Loading explorer</div>}>
-      {() => <Inner />}
-    </BrowserOnly>
+      <div className="az-viz-rule">
+        <div className="az-viz-rule__label">General rule for k literals (k &gt; 3)</div>
+        <p className="az-viz-rule__text">
+          A clause with <em>k</em> literals splits into <em>k − 2</em> clauses using{' '}
+          <em className="az-viz-rule__helper">k − 3</em> helper variables. Each helper chains two clauses together:
+          the positive form closes one clause, the negated form opens the next.
+        </p>
+      </div>
+    </Figure>
   );
 }

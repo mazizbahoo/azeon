@@ -7,6 +7,7 @@ tags: [np-completeness, cook-levin, sat, np-complete, reductions, complexity]
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import ReductionChain from '@site/src/components/ReductionChain';
 
 # The Cook-Levin Theorem
 
@@ -156,6 +157,8 @@ Before Cook's result, researchers suspected many problems were hard. They could 
 Cook-Levin connected all of them. Once SAT is NP-Complete, there is a benchmark problem at the top of the class. Showing that SAT reduces to your problem immediately proves your problem is NP-Complete too. You do not need to re-prove that everything in $\mathcal{NP}$ reduces to your new problem. You just show that SAT reduces to it, and the chain of reductions does the rest.
 
 Every NP-Completeness proof in Phase 2 follows exactly this pattern. Cook-Levin is the root. Every other result grows from it.
+
+<ReductionChain />
 
 ---
 

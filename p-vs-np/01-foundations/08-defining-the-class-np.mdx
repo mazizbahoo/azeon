@@ -7,6 +7,7 @@ tags: [foundations, complexity-classes, polynomial-time, np, class-np, beginners
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import ComplexityLandscape from '@site/src/components/ComplexityLandscape';
 
 # Defining the Class $\mathcal{NP}$
 
@@ -172,6 +173,8 @@ $\mathcal{P}$ sits inside $\mathcal{NP}$. This is proven. Every problem solvable
 What we do not know is whether $\mathcal{P}$ and $\mathcal{NP}$ are actually the same set. The question mark in $\mathcal{P} \stackrel{?}{=} \mathcal{NP}$ is asking whether the containment is proper (they are truly different sets, with problems in $\mathcal{NP}$ that are not in $\mathcal{P}$) or whether the two sets are identical.
 
 Almost every researcher in the field believes $\mathcal{P} \neq \mathcal{NP}$. Sudoku, TSP, graph coloring, and hundreds of other problems feel fundamentally harder to solve than to verify. The intuition is strong. But intuition is not a proof, and no proof exists in either direction.
+
+<ComplexityLandscape mode="known" />
 
 :::note What We Have Established
 $\mathcal{NP}$ is the set of decision problems where every yes instance has a short certificate that can be verified in polynomial time. This is equivalent to the set of problems solvable by a nondeterministic Turing machine in polynomial time. $\mathcal{P}$ sits inside $\mathcal{NP}$, because anything solvable fast is also verifiable fast. The central question is whether anything else does too.
