@@ -54,7 +54,35 @@ function nearestNeighbour(n) {
   return tour;
 }
 
-export default function TSPRoutes({ heuristic = false }) {
+// 2-opt: find the best pair of legs to swap (reversing the stretch between them).
+function twoOptStep(t) {
+  const n = t.length;
+  let best = null;
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = i + 2; j < n; j++) {
+      const a = t[i];
+      const b = t[i + 1];
+      const c = t[j];
+      const e = t[(j + 1) % n];
+      if (e === a) continue;
+      const delta = dist(a, c) + dist(b, e) - dist(a, b) - dist(c, e);
+      if (delta < -1e-9 && (!best || delta < best.delta)) best = { i, j, delta };
+    }
+  }
+  if (!best) return null;
+  return [...t.slice(0, best.i + 1), ...t.slice(best.i + 1, best.j + 1).reverse(), ...t.slice(best.j + 1)];
+}
+
+function randomTour(n) {
+  const rest = Array.from({ length: n - 1 }, (_, i) => i + 1);
+  for (let i = rest.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [rest[i], rest[j]] = [rest[j], rest[i]];
+  }
+  return [0, ...rest];
+}
+
+export default function TSPRoutes({ heuristic = false, localSearch = false }) {
   const [n, setN] = useState(6);
   const [tour, setTour] = useState([]);
   const [showBest, setShowBest] = useState(false);
@@ -71,6 +99,7 @@ export default function TSPRoutes({ heuristic = false }) {
   const shown = showBest ? opt.best : tour;
   const closed = showBest || done;
   const mine = done ? tourLength(tour) : null;
+  const improvable = localSearch && done && twoOptStep(tour) !== null;
 
   let status = <>Click the cities in the order you want to visit them. Distinct round trips: <b>{fmt(fact(n - 1) / 2)}</b></>;
   let tone;
@@ -82,7 +111,7 @@ export default function TSPRoutes({ heuristic = false }) {
     tone = gap < 0.05 ? 'good' : undefined;
     status = gap < 0.05
       ? <>Your tour: <b>{mine.toFixed(1)}</b>. That is the shortest possible.</>
-      : <>Your tour: <b>{mine.toFixed(1)}</b> · shortest: {opt.bestLen.toFixed(1)} · <b>{gap.toFixed(1)}%</b> longer</>;
+      : <>Your tour: <b>{mine.toFixed(1)}</b> · shortest: {opt.bestLen.toFixed(1)} · <b>{gap.toFixed(1)}%</b> longer{localSearch && !improvable ? ' · no 2-opt swap helps: a local optimum' : ''}</>;
   } else if (tour.length) {
     status = <>{tour.length} of {n} cities · click the last city to undo</>;
   }
@@ -98,6 +127,11 @@ export default function TSPRoutes({ heuristic = false }) {
           <Segmented label="Cities" value={n} onChange={load}
             options={[5, 6, 7, 8, 9].map(k => ({ value: k, label: `${k}` }))} />
           {heuristic && <Button onClick={() => { setShowBest(false); setTour(nearestNeighbour(n)); }}>Nearest neighbour</Button>}
+          {localSearch && <Button onClick={() => { setShowBest(false); setTour(randomTour(n)); }}>Random tour</Button>}
+          {localSearch && (
+            <Button onClick={() => { const next = twoOptStep(tour); if (next) { setShowBest(false); setTour(next); } }}
+              disabled={!improvable}>2-opt step</Button>
+          )}
           <Button onClick={() => setShowBest(true)} pressed={showBest}>Show shortest</Button>
           <Button onClick={() => { setTour([]); setShowBest(false); }} disabled={!tour.length && !showBest}>Clear</Button>
         </>

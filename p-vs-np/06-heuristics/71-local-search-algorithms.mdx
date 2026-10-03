@@ -1,0 +1,132 @@
+---
+sidebar_position: 9
+title: "Local Search Algorithms"
+description: "Start with any solution, even a terrible random one. Make a small change. Keep it if it helps. Repeat until nothing helps. That's local search, it powers a huge amount of real-world optimisation, and its one big weakness is getting stuck."
+tags: [heuristics, local-search, hill-climbing, 2-opt, tsp, walksat, local-optimum, random-restarts]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import TSPRoutes from '@site/src/components/TSPRoutes';
+import LossLandscape from '@site/src/components/LossLandscape';
+
+# Local Search Algorithms
+
+When I solve a Rubik's cube, I don't plan the whole solution from the start. Nobody does. I make a move that improves things, look at the result, and make another move. Each step only needs to look at what's right in front of me.
+
+That's roughly the idea of this post. Every method in Phase 6 so far has either built a solution from nothing (greedy), searched through possibilities in an organised way (branch and bound), or filled in a table (dynamic programming). **Local search** does something different. It starts with a complete solution, any solution at all, and keeps making it a little better.
+
+It's simple, it's general, and an enormous amount of real optimisation software is built on it.
+
+---
+
+## The Recipe
+
+Local search needs two ingredients:
+
+1. A way to **score** a solution: the length of a tour, the number of satisfied clauses, the cost of a schedule.
+2. A **neighbourhood**: a set of small changes you can make to a solution. Swap two stops in a route. Flip one variable. Move one job to another server.
+
+Then:
+
+```text
+start with some solution
+repeat:
+    look at the neighbours of the current solution
+    if one of them scores better, move to it
+    if none does, stop
+```
+
+When it stops, you're at a **local optimum**: a solution that no single small change can improve. If the scores were heights and you were minimising, you'd be at the bottom of a valley, like the ball in Post 57. The simplest version of this, always moving to a better neighbour, is often called **hill climbing** (or valley descending, if you're minimising).
+
+---
+
+## Local Search for TSP: 2-opt
+
+The classic local search move for the Traveling Salesman is called **2-opt**, described by Georges Croes in 1958.
+
+Take two legs of the tour, say $A \to B$ and $C \to D$. Remove them, and reconnect as $A \to C$ and $B \to D$, which means driving the stretch between $B$ and $C$ in reverse. If the new tour is shorter, keep it.
+
+Visually, 2-opt is very satisfying: it **uncrosses** routes. Whenever two legs of a tour cross each other on a flat map, swapping them always makes the tour shorter. So a 2-opt local optimum on a map never has any crossings.
+
+Try it. Pick 8 or 9 cities, press **Random tour** to start from a messy route, then keep pressing **2-opt step**. Each step makes the best available swap.
+
+<TSPRoutes heuristic localSearch />
+
+A random tour of 9 cities is usually bad: on this map, about 50% longer than the best on average. 2-opt fixes most of that in just a few steps. Sometimes it reaches the shortest tour. Sometimes the status line says "local optimum": no single swap helps, but the tour still isn't the best.
+
+I got curious about how often that happens, so I ran 2-opt from random starting tours a couple of thousand times on the 9-city map. About **a third** of the runs got stuck at a tour that wasn't the shortest, and it took about four steps on average to get there. So 2-opt is fast and usually good, but it can't promise the best.
+
+You can also start from **Nearest neighbour** and then apply 2-opt. Starting from a decent greedy solution and improving it is how most real routing software works: construction first, then local search.
+
+---
+
+## Escaping Local Optima
+
+Getting stuck is the central weakness. Here's the landscape from Post 57 again, with one new button.
+
+<LossLandscape restarts />
+
+Drop the ball on the left and it gets stuck in the first valley. Now press **12 random restarts**: the figure drops the ball at 12 random places, lets each one roll down, and keeps the lowest valley found. The grey dots show where each attempt ended. With a dozen tries, it almost always finds the deepest valley.
+
+**Random restarts** are the simplest escape strategy: just run local search many times from different starting points and keep the best. There are cleverer ones too:
+
+<Tabs>
+  <TabItem value="bigger" label="Bigger neighbourhoods" default>
+
+Allow bigger changes. 3-opt swaps three legs at a time instead of two. In 1973, Shen Lin and Brian Kernighan designed a method that adapts how many legs to swap as it goes. Versions of the **Lin–Kernighan** heuristic, especially Keld Helsgaun's implementation known as LKH, have found the best known tours for some of the largest TSP instances ever studied.
+
+Bigger neighbourhoods mean fewer local optima, but each step costs more.
+
+  </TabItem>
+  <TabItem value="tabu" label="Remember where you've been">
+
+**Tabu search**, proposed by Fred Glover in 1986, allows moves that make things temporarily **worse**, to climb out of a valley. To stop it immediately falling back in, it keeps a short list of recent moves that are temporarily forbidden ("tabu").
+
+  </TabItem>
+  <TabItem value="anneal" label="Accept some bad moves">
+
+Allow worse moves **at random**, often at first and less often as time goes on. That way the search wanders freely early on and settles down later. This is **simulated annealing**, inspired by how metals cool, and it's the subject of Post 72.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Local Search for SAT
+
+Local search works for satisfiability too, and this surprised me most, because SAT feels like a yes-or-no puzzle, not a "score" problem.
+
+The trick is to score an assignment by **how many clauses it satisfies**, and use "flip one variable" as the neighbourhood. In 1992, Bart Selman, Hector Levesque and David Mitchell introduced **GSAT**, which repeatedly flips whichever variable increases the number of satisfied clauses the most. Two years later, Selman, Henry Kautz and Bram Cohen introduced **WalkSAT**, which picks an unsatisfied clause and flips one of its variables, sometimes the best one and sometimes a random one.
+
+On many large satisfiable formulas, these methods found satisfying assignments far faster than the systematic solvers of the time. Their weakness is the one from Post 26: local search can find a solution if one exists, but it can never **prove** that none exists. For "unsatisfiable", you still need systematic methods.
+
+---
+
+## The Theory of Getting Stuck
+
+There's even a complexity class for this. In 1988, David Johnson, Christos Papadimitriou and Mihalis Yannakakis defined **PLS** (Polynomial Local Search): problems where you want to find **a local optimum**, not the best answer, just one that no small change can improve.
+
+That sounds easy. Just keep improving until you stop. But each improvement might be tiny, and there might be an enormous number of them in a row. It's known that 2-opt for TSP, for example, can take exponentially many steps on some carefully constructed inputs before it stops. In practice it almost always stops quickly, which is the same gap between worst case and typical case that we've seen all through Phase 6.
+
+:::note What We Have Established
+**Local search** starts with a complete solution and repeatedly moves to a better **neighbour** (a solution one small change away), stopping at a **local optimum** that no single change can improve.
+
+For TSP, **2-opt** (Croes, 1958) swaps two legs and reverses the stretch between them, removing crossings. On the 9-city example, about a third of random starts got stuck at a tour that wasn't the shortest. Escapes include **random restarts**, **bigger neighbourhoods** (Lin–Kernighan, 1973), **tabu search** (Glover, 1986) and **simulated annealing**.
+
+For SAT, **GSAT** (1992) and **WalkSAT** (1994) flip variables to satisfy more clauses; they can find solutions but can't prove unsatisfiability. Finding even a local optimum can take exponentially many steps in the worst case (the class **PLS**, 1988), though it's usually fast in practice.
+:::
+
+---
+
+## Up Next
+
+The best escape from a local optimum, as far as many engineers are concerned, comes from metalworking. When a blacksmith heats a metal and cools it slowly, the atoms settle into a strong, low-energy arrangement. Cool it too fast, and they freeze in a messy one.
+
+Post 72 is **simulated annealing**: an algorithm that deliberately accepts some bad moves, with a "temperature" that slowly drops, so it can wander out of shallow valleys before it settles down. It's how chips were placed in the 1980s, and it's still used today.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
