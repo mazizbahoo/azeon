@@ -38,7 +38,7 @@ The problem is the word "must". The argument assumes, without proof, that there'
 
 | Problem | Possible "solutions" | But it's solvable in |
 |---|---|---|
-| Sorting $n$ items (Post 2) | $n!$ possible orders | about $n \log n$ steps |
+| Sorting $n$ items (Post 7) | $n!$ possible orders | about $n \log n$ steps |
 | Shortest path through a road network (Post 7) | exponentially many routes | polynomial time |
 | 2-SAT (Post 14) | $2^n$ assignments | linear time |
 | 2-colouring (Post 18) | $2^n$ colourings | linear time |
@@ -118,7 +118,7 @@ Here's the checklist I now run on my own ideas before getting excited:
 3. Would it still work if every machine had an oracle? Then it relativizes, and can't work.
 4. Is it based on a property that most random functions have? Then it's probably natural, and can't work if strong cryptography exists.
 
-Passing all four doesn't make a proof right. Failing any one makes it wrong.
+Passing all four doesn't make a proof right. Failing any one is a very strong sign that it's wrong.
 
   </TabItem>
   <TabItem value="eq" label="Claims that P = NP">
@@ -126,9 +126,9 @@ Passing all four doesn't make a proof right. Failing any one makes it wrong.
 1. Is there a proof that the algorithm works on **every** input, not just the tested ones?
 2. Is the running time polynomial in the number of **bits** of input, not in the size of the numbers?
 3. Does the algorithm also give polynomial-time factoring, breaking RSA? (It would have to, since factoring is in $\mathcal{NP}$.) If it doesn't, something is wrong.
-4. If it's a linear program for an NP-Hard problem, is it smaller than the Fiorini et al. lower bound allows? Then it's wrong.
+4. If it's a linear program describing the TSP tours (or one of the other problems the Fiorini et al. results cover), is it smaller than their lower bound allows? Then it's wrong.
 
-Again: passing doesn't make it right. Failing any one makes it wrong.
+Again: passing doesn't make it right. Failing any one is a very strong sign that it's wrong.
 
   </TabItem>
 </Tabs>

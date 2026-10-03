@@ -68,7 +68,7 @@ The same gap shows up in every problem we have talked about in this series.
   </TabItem>
   <TabItem value="subset" label="Subset Sum">
 
-**Solving:** Given a set of integers, find a subset that adds up to exactly zero. The number of possible subsets is $2^n$. Post 6 showed what $2^n$ looks like for large $n$. At $n = 100$, you are looking at more subsets than there are atoms in the observable universe. No polynomial-time algorithm is known.
+**Solving:** Given a set of integers, find a subset that adds up to exactly zero. The number of possible subsets is $2^n$. Post 6 showed what $2^n$ looks like for large $n$. At $n = 100$, you are looking at about $10^{30}$ subsets: checking a billion per second would take thousands of times the age of the universe. No polynomial-time algorithm is known.
 
 **Verifying:** Someone hands you a specific subset and claims it adds to zero. You add the numbers in that subset. This takes $O(n)$ time. Done.
 
@@ -112,7 +112,7 @@ This is the part that surprised me.
 
 The asymmetry between solving and verifying feels so clear that it seems like the answer should be obvious: of course they are different. Of course $\mathcal{P} \neq \mathcal{NP}$. Doing the homework and checking the homework are not the same thing.
 
-But I actually lean the other way. I think $\mathcal{P} = \mathcal{NP}$. I think the solution to every problem exists before we find it, and the gap we feel is not a permanent wall but a gap in our understanding. We just have not built the right mathematics yet.
+But I actually lean the other way. I think $\mathcal{P} = \mathcal{NP}$. I think the fast algorithms for these problems exist before we find them, and the gap we feel is not a permanent wall but a gap in our understanding. We just have not built the right mathematics yet.
 
 Either way, feeling is not proof. And the gap between feeling and proof here is enormous.
 
@@ -120,10 +120,10 @@ To prove $\mathcal{P} \neq \mathcal{NP}$, you would need to show that no polynom
 
 That is a statement about every possible algorithm, including every algorithm that has not been invented yet. Ruling out an infinite space of possibilities requires a completely different kind of argument than just observing that checking homework is faster than doing it.
 
-And to prove $\mathcal{P} = \mathcal{NP}$, you would need to exhibit one polynomial-time solving algorithm for one of these hard problems in $\mathcal{NP}$. A single example that works. That sounds easier, but nobody has found one in over fifty years.
+And to prove $\mathcal{P} = \mathcal{NP}$, the most direct route would be to find one polynomial-time solving algorithm for one of the *hardest* problems in $\mathcal{NP}$ (the "NP-complete" ones; Phase 2 explains why a single one is enough). A single example that works. That sounds easier, but nobody has found one in over fifty years.
 
 :::caution The Feeling Is Not the Proof
-Almost every researcher in the field believes $\mathcal{P} \neq \mathcal{NP}$. I personally believe $\mathcal{P} = \mathcal{NP}$. Neither position has a proof. The mathematical argument has not arrived in either direction, and the problem has resisted every known technique. We will cover exactly why in Phase 4.
+The vast majority of researchers in the field believe $\mathcal{P} \neq \mathcal{NP}$. I personally believe $\mathcal{P} = \mathcal{NP}$. Neither position has a proof. The mathematical argument has not arrived in either direction, and the problem has resisted every known technique. We will cover exactly why in Phase 4.
 :::
 
 ---
@@ -134,11 +134,13 @@ It is worth sitting with the other possibility seriously, not just as a footnote
 
 If $\mathcal{P} = \mathcal{NP}$, it means the solving vs. verifying gap we feel is not fundamental. It means there exists a polynomial-time algorithm for Sudoku, for the Traveling Salesman Problem, for graph coloring, for hundreds of problems currently treated as intractable. We just have not found those algorithms yet.
 
-Personally, I think this is the answer. I believe every problem has a solution. Not because I have a proof, but because I think that is how problems work: the solution exists first, already fixed, already out there, and the problem is just our failure to reach it yet. The algorithms for these hard problems exist. We have not built the mathematics to find them.
+Personally, I think this is the answer. Not because I have a proof, but because of how I think about problems: the method exists first, already fixed, already out there, and the difficulty is just our failure to reach it yet. I believe fast algorithms for these hard problems exist. We have not built the mathematics to find them.
+
+(To be precise about what's in doubt: nobody doubts that these problems *can* be solved. Brute force, trying every possibility, always works eventually. The open question is only whether they can be solved *fast*, in polynomial time.)
 
 That is not a position most researchers hold. Most experts believe $\mathcal{P} \neq \mathcal{NP}$, that the asymmetry is real and permanent. And I understand why. The gap between solving and verifying feels enormous in every example we have looked at. But feeling is not proof in either direction. Nobody has proven $\mathcal{P} \neq \mathcal{NP}$ any more than anyone has proven $\mathcal{P} = \mathcal{NP}$. The question is genuinely open.
 
-If I am right, it also means every encryption scheme protecting the internet collapses. RSA, the cryptographic system securing your bank account, relies entirely on the assumption that factoring large numbers is hard to solve even though it is easy to verify. If $\mathcal{P} = \mathcal{NP}$, factoring becomes easy. Everything built on top of that assumption breaks. That is a real consequence of the answer I personally lean toward, and I am not pretending otherwise.
+If I am right, and the fast algorithm is practical to run, it also means almost every encryption scheme protecting the internet collapses. RSA, the cryptographic system securing your bank account, relies entirely on the assumption that factoring large numbers is hard to solve even though it is easy to verify. If $\mathcal{P} = \mathcal{NP}$, factoring becomes easy. Everything built on top of that assumption breaks. That is a real consequence of the answer I personally lean toward, and I am not pretending otherwise.
 
 Post 1 introduced these two worlds. Now that we have the formal machinery, the stakes are clearer. The solving vs. verifying gap is not just a mathematical curiosity. It is the assumption that modern digital security stands on.
 

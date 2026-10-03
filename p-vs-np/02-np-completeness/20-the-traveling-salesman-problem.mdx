@@ -136,7 +136,7 @@ Researchers have found **proven optimal** tours for enormous instances.
 
 How can that be, if TSP is NP-Hard?
 
-The answer is that NP-Hardness is a statement about the **worst case**. It says that for every algorithm we know, there are some instances that make it take exponential time. It doesn't say every instance is hard. Real maps have structure: cities cluster, distances obey geometry, the best tour rarely does anything bizarre. Clever solvers exploit that structure and prune away almost all of the search space, then prove that what is left can't beat their answer.
+The answer is that NP-Hardness is a statement about the **worst case**. It says that (unless $\mathcal{P} = \mathcal{NP}$) no algorithm can be fast on *every* instance: for any algorithm, some instances will make it slow. It doesn't say every instance is hard. Real maps have structure: cities cluster, distances obey geometry, the best tour rarely does anything bizarre. Clever solvers exploit that structure and prune away almost all of the search space, then prove that what is left can't beat their answer.
 
 So "NP-Hard" means "no guarantee", not "never". We'll come back to this idea in Phase 6, when we look at how SAT solvers handle formulas with millions of variables.
 

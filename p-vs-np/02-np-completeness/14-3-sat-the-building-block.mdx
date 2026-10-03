@@ -275,7 +275,7 @@ A 3-literal clause $(a \vee b \vee c)$ says at least one of $a$, $b$, $c$ is tru
 
 A directed graph edge connects exactly two nodes. It can encode "if A is false, then B must be true." It cannot encode "if A is false AND B is false, then C must be true." Two-condition implications do not fit into graph edges.
 
-The clean algorithm that solves 2-SAT simply does not generalize to 3-SAT. The problem becomes a search through the full exponential space of assignments, and that is where the NP-Completeness lives.
+The clean algorithm that solves 2-SAT simply does not generalize to 3-SAT. Without it, every known algorithm for 3-SAT falls back on some form of search that takes exponential time in the worst case, and that is where the NP-Completeness lives. (This is an explanation of why the 2-SAT trick fails, not a proof that nothing else could work. That proof would settle P vs NP.)
 
 <Tabs>
   <TabItem value="2sat" label="2-SAT: In P" default>
@@ -303,7 +303,7 @@ $(x_1 \vee \neg x_2 \vee x_3)$ means: if $x_1 = \text{false}$ AND $x_2 = \text{t
 
 That requires two conditions to hold simultaneously. A directed graph edge connects exactly two nodes. We cannot encode "A and B together imply C" as a single edge. The implication graph structure breaks down entirely.
 
-No polynomial algorithm is known. We are left searching through $2^n$ possible assignments.
+No polynomial algorithm is known. The best known algorithms are cleverer than trying all $2^n$ assignments, but they still take exponential time in the worst case.
 
   </TabItem>
 </Tabs>

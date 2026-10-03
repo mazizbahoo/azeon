@@ -17,13 +17,13 @@ import TabItem from '@theme/TabItem';
 
 ## A Prize Nobody Has Claimed
 
-In the year 2000, a private foundation called the **Clay Mathematics Institute** sat down and made a list. Not a grocery list, and not a to-do list. They listed the **seven most important unsolved problems in all of mathematics**: problems so deep, so resistant to attack, that they had survived decades of effort from the most brilliant minds on Earth.
+In the year 2000, a private foundation called the **Clay Mathematics Institute** sat down and made a list. Not a grocery list, and not a to-do list. They picked **seven of the most important unsolved problems in mathematics**: problems so deep, so resistant to attack, that they had survived decades of effort from the most brilliant minds on Earth.
 
 They called them the **Millennium Prize Problems**.
 
 Then they did something extraordinary: they put a **\$1,000,000 bounty** on each one.
 
-Two and a half decades have passed since that announcement. Six of those problems remain completely unsolved. One was solved by a Russian mathematician named Grigori Perelman, who famously **turned down the money** because he didn't care about it.
+Two and a half decades have passed since that announcement. Six of those problems remain completely unsolved. One (the Poincaré Conjecture) was solved by a Russian mathematician named Grigori Perelman, who famously **turned down the money**, saying in part that the American mathematician Richard Hamilton, whose work he built on, deserved just as much credit.
 
 The problem we care about, **P versus NP**, still stands. Untouched. Unclaimed.
 
@@ -70,20 +70,20 @@ Let's make this concrete with two things you already know.
   </TabItem>
   <TabItem value="sudoku-solve" label="Solving a Sudoku Puzzle">
 
-    Now imagine you're handed a **blank** Sudoku grid with only five or six numbers already filled in.
+    Now imagine you're handed a mostly **empty** Sudoku grid with only a couple of dozen numbers already filled in.
 
-    Suddenly everything changes. You have to *find* the answer, not just check one. You try a number in one cell, follow the chain of consequences, hit a contradiction several moves later, erase everything, and start again. The number of possible board states grows in a way that is not $n^2$: it's exponential, something closer to $O(2^{n^2})$ in the worst case for large grids. That means for a generalized $n \times n$ Sudoku, the number of combinations explodes so violently that no computer on Earth could brute-force its way through all of them in any reasonable time.
+    Suddenly everything changes. You have to *find* the answer, not just check one. You try a number in one cell, follow the chain of consequences, hit a contradiction several moves later, erase everything, and start again. The number of possible ways to fill the board grows in a way that is not $n^2$: it's exponential. Each of the roughly $n^2$ empty cells can hold any of $n$ numbers, so a naive search faces up to $n^{n^2}$ combinations for large grids. That means for a generalized $n \times n$ Sudoku, the number of combinations explodes so violently that no computer on Earth could brute-force its way through all of them in any reasonable time.
 
-    This is **solving**: building the answer from scratch. It appears to require *exponential time*. And the gap between $n^2$ and $2^{n^2}$ is not a small gap. It is one of the most dramatic differences in all of mathematics.
+    This is **solving**: building the answer from scratch. It appears to require *exponential time*. And the gap between $n^2$ and $n^{n^2}$ is not a small gap. It is one of the most dramatic differences in all of mathematics.
 
   </TabItem>
   <TabItem value="cube-verify" label="Verifying a Rubik's Cube">
 
     Someone hands you a Rubik's Cube and claims every face is a single solid color. **Checking this takes roughly two seconds.** You rotate the cube, glance at all six faces, and confirm: yes, solved. Green: ✓. White: ✓. Red, blue, orange, yellow: ✓ ✓ ✓ ✓.
 
-    It doesn't matter *how* the cube got to that state. There are exactly $6$ faces with $9$ stickers each, $54$ stickers total, and you check all of them in constant time. Formally, verification here is $O(1)$: the work doesn't grow at all as the puzzle scales in complexity.
+    It doesn't matter *how* the cube got to that state. There are exactly $6$ faces with $9$ stickers each, $54$ stickers total, and you check all of them in a fixed amount of time. Formally, verification here is $O(1)$ ("constant time"): no matter how badly the cube was scrambled beforehand, checking the finished cube is always the same 54 stickers of work.
 
-    *(By the way, I can personally verify a Rubik's Cube solution in under 45 seconds. The solving part took considerably longer to learn.)*
+    *(By the way, I can personally solve a Rubik's Cube in under 45 seconds. Learning how to do that took considerably longer than learning how to check one.)*
 
   </TabItem>
   <TabItem value="cube-solve" label="Solving a Rubik's Cube">
@@ -96,11 +96,13 @@ Let's make this concrete with two things you already know.
     \frac{8! \times 3^8 \times 12! \times 2^{12}}{12} = 43{,}252{,}003{,}274{,}489{,}856{,}000 \text{ possible states}
     $$
 
-    That is roughly $4.3 \times 10^{19}$ (forty-three quintillion). If you tried every possible sequence of moves at random, you would statistically never solve it in your lifetime, even with help from a computer. Expert speedcubers don't brute-force it: they've memorized structured *algorithms* that reduce the chaos into manageable steps.
+    That is roughly $4.3 \times 10^{19}$ (forty-three quintillion). If you just twisted it at random, hoping to stumble on the solved state, you would statistically never solve it in your lifetime, even if a computer made a billion random twists per second. Expert speedcubers don't brute-force it: they've memorized structured *algorithms* that reduce the chaos into manageable steps.
 
     Here's what makes this profound: we know mathematically that any scrambled cube can be solved in **at most 20 moves**. This was proven in 2010. Twenty moves, yet *finding* those 20 moves from a scrambled position, without a memorized method, is genuinely hard. The gap between *knowing a solution exists* and *finding that solution* is enormous.
 
     This is exactly the gap $\mathcal{P}$ vs $\mathcal{NP}$ is asking about.
+
+    *(A small honesty note: a single $3 \times 3$ cube is a fixed-size puzzle, and today's computer programs can find an optimal solution for it in seconds. Complexity theory really cares about how difficulty grows as puzzles get bigger. For the general $n \times n \times n$ cube, finding the shortest solution was proven NP-complete in 2017, so the intuition here does carry over.)*
 
   </TabItem>
 </Tabs>
@@ -114,11 +116,11 @@ Both analogies point to the same underlying tension: **checking an answer and fi
 This question isn't just a piece of pure mathematics that lives only in journals and lecture halls. The answer, whichever way it falls, would reshape our world.
 
 :::tip If $\mathcal{P} \neq \mathcal{NP}$ (the common belief)
-This means solving is *genuinely harder* than verifying. Some problems are fundamentally difficult, and no amount of clever programming will change that. This result, the one most experts expect, actually *protects* us. Every time you buy something online, your credit card number is kept safe by the mathematical assumption that $\mathcal{P} \neq \mathcal{NP}$. The encryption holding together the internet depends on this being true.
+This means solving is *genuinely harder* than verifying. Some problems are fundamentally difficult, and no amount of clever programming will change that. This result, the one most experts expect, actually *protects* us. Every time you buy something online, your credit card number is kept safe by encryption that relies on certain problems being hard to solve. For that to be possible at all, $\mathcal{P} \neq \mathcal{NP}$ has to be true. (It's a necessary condition, not a guarantee: the encryption also depends on the specific problems it uses being hard, which is an even stronger assumption.)
 :::
 
 :::danger If $\mathcal{P} = \mathcal{NP}$ (the world-changing scenario)
-This means every problem whose solution can be checked quickly could also be *solved* quickly. Drug discovery, supply chains, artificial intelligence, financial markets, all of these involve problems we currently approximate or brute-force. A proof that $\mathcal{P} = \mathcal{NP}$ would mean perfect solutions become easy to find. It would also mean every encryption scheme protecting your passwords, your bank, your private messages, would collapse overnight.
+This means every problem whose solution can be checked quickly could also be *solved* quickly. Drug discovery, supply chains, artificial intelligence, financial markets, all of these involve problems we currently approximate or brute-force. A proof that $\mathcal{P} = \mathcal{NP}$ would mean perfect solutions are, in principle, efficiently findable. If the proof came with a fast algorithm that is practical to run, it would also break almost every encryption scheme protecting your passwords, your bank, your private messages.
 :::
 
 ---
@@ -134,7 +136,7 @@ It's not that we haven't tried hard enough. It's that every known proof techniqu
 Over the decades, researchers have identified multiple fundamental *barriers*: mathematical reasons why entire families of proof strategies are doomed to fail. We'll dissect all of them in Phase 4.
 
 :::caution A Warning About Amateur Proofs
-Every few years, someone announces they've solved P vs NP. These proofs almost always fail within days or weeks. The problem is subtle in ways that aren't obvious. Part of this documentation exists to help you understand *why* it's hard to prove, not just what it asks.
+Every year, people announce they've solved P vs NP. These proofs almost always fail within days or weeks. The problem is subtle in ways that aren't obvious. Part of this documentation exists to help you understand *why* it's hard to prove, not just what it asks.
 :::
 
 ---

@@ -103,7 +103,9 @@ Now notice what this tells us about difficulty. If you have a fast algorithm for
 
 The conversion itself cost almost nothing: I fed the same list in and read one element out. It is clearly polynomial, so the reduction is valid.
 
-(In practice, you can solve Maximum in $O(n)$ by just scanning the list once, while sorting requires $O(n \log n)$. So Sorting is actually strictly harder than Maximum. The reduction goes one way but not the other. That is fine. A reduction only needs to go one way to tell us something useful.)
+(In practice, you can solve Maximum in $O(n)$ by just scanning the list once, while the standard sorting methods, which work by comparing pairs of numbers, need about $n \log n$ steps. So Sorting takes a bit more work than Maximum, even though both are comfortably polynomial. The reduction goes one way but not the other. That is fine. A reduction only needs to go one way to tell us something useful.)
+
+(One more honest note: Maximum and Sorting aren't yes/no problems, and this reduction does a little extra work *after* calling the solver: it reads off the last element. So it is a looser kind of reduction than the strict yes/no definition above. It shows the idea in its simplest form. The graph example below is a reduction in the strict sense.)
 
 ---
 
@@ -155,7 +157,7 @@ Now here is the reduction itself. Suppose someone asks: does this map have an In
 
 Instead of solving that directly, I convert the question: does this map have a Vertex Cover of size $n - k$, where $n$ is the total number of cities?
 
-Same map. I just subtract $k$ from $n$ and ask the camera question instead of the strangers question. That is the entire conversion: one subtraction. And the answer carries over exactly, because the two groups are always opposites.
+Same map. I just subtract $k$ from $n$ and ask the camera question instead of the no-roads question. That is the entire conversion: one subtraction. And the answer carries over exactly, because the two groups are always opposites.
 
 Same value, different currency.
 

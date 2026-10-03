@@ -45,7 +45,7 @@ You could describe your reasoning. You could explain how you eliminated possibil
 
 The completed grid is all they need. They check every row, every column, every box. If everything passes, the puzzle has a solution. Your entire argument collapses into one object: the answer itself. Hand it over, let them check, done.
 
-This is the core idea behind $\mathcal{NP}$. For every problem in this class, a *yes* answer comes with a piece of evidence you can hand over. That evidence has two properties: it is short (not longer than the problem itself, roughly speaking), and checking it is fast (polynomial time). You do not need to explain how you found it. You just produce it, and verification takes care of the rest.
+This is the core idea behind $\mathcal{NP}$. For every problem in this class, a *yes* answer comes with a piece of evidence you can hand over. That evidence has two properties: it is short (its length is at most a polynomial in the size of the problem, so it can't be astronomically long), and checking it is fast (polynomial time). You do not need to explain how you found it. You just produce it, and verification takes care of the rest.
 
 Computer scientists call this piece of evidence a **certificate**. The word sounds formal, but it is just that: the thing you hand over to prove the answer is yes. A completed Sudoku grid is a certificate. A list of moves that solves a scrambled Rubik's Cube is a certificate. A coloring of a graph that uses only three colors is a certificate.
 
@@ -61,9 +61,9 @@ Three things to notice: the certificate must be short (polynomial in the input s
 
 Let me slow down on the Rubik's Cube because it is the example that made this feel real for me.
 
-The question we can ask in NP terms is: "Given a scrambled Rubik's Cube, does a solution exist?" The certificate for a *yes* answer is just the sequence of moves that solves it. I hand you the move sequence. You apply those moves to the scrambled cube and check whether the result is fully solved. Checking that takes time proportional to the length of the solution sequence, which is at most 20 moves for any standard cube (this was proven in 2010). Polynomial in the input size. Fast.
+The question we can ask in NP terms is: "Given a scrambled Rubik's Cube of any size ($3 \times 3 \times 3$, $10 \times 10 \times 10$, and so on), can it be solved in at most $k$ moves?" (We need the "at most $k$ moves" part, because simply asking "can it be solved?" is boring: every properly scrambled cube can be.) The certificate for a *yes* answer is just the sequence of moves. I hand you the move sequence. You count that it has at most $k$ moves, apply them to the scrambled cube, and check whether the result is fully solved. Checking takes time proportional to the length of the sequence times the work of applying one move. Polynomial in the input size. Fast.
 
-Notice what this does not give me. The definition says a certificate exists and can be verified quickly. It does not say finding that certificate is fast. For the Rubik's Cube, finding the optimal 20-move solution from a given scramble is genuinely hard. Checking it once you have it is easy. That gap is exactly the point.
+Notice what this does not give me. The definition says a certificate exists and can be verified quickly. It does not say finding that certificate is fast. For cubes of arbitrary size, finding a solution with the fewest possible moves was proven NP-complete in 2017, which means it is believed to have no fast algorithm at all. (For the standard $3 \times 3 \times 3$ cube we know any scramble can be solved in at most 20 moves, proven in 2010, and computers can find an optimal solution in seconds, but that's because the cube has a fixed size.) Checking a solution once you have it is easy. That gap is exactly the point.
 
 This is the same asymmetry I noticed when I was learning to solve the cube. Checking someone else's completed cube: two seconds. Learning to produce the solution myself: months of practice.
 
@@ -144,7 +144,7 @@ When I worked through this properly, something bothered me that I didn't see add
 
 If $\mathcal{NP}$ is the class of problems whose solutions are easy to verify, then what about sorting? Given a sorted list, I can verify it is sorted in $O(n)$ time. Does sorting belong to $\mathcal{NP}$?
 
-Yes. It does.
+Yes. It does (in its yes/no form, like every problem in these classes).
 
 And binary search. And shortest paths. And primality testing. Every problem in $\mathcal{P}$ is also in $\mathcal{NP}$.
 
@@ -154,7 +154,7 @@ They are not separate. $\mathcal{P}$ sits *inside* $\mathcal{NP}$:
 
 $$\mathcal{P} \subseteq \mathcal{NP}$$
 
-The reason is simple once you see it. If a problem can be solved in polynomial time, then it can certainly be *verified* in polynomial time too. The certificate is just the answer itself, and you verify it by solving the problem again. Solving is at least as powerful as verifying. So everything solvable fast is also verifiable fast.
+The reason is simple once you see it. If a problem can be solved in polynomial time, then it can certainly be *verified* in polynomial time too. The verifier doesn't even need the certificate: it can ignore whatever it is handed, solve the problem itself in polynomial time, and check that the answer is yes. Solving is at least as powerful as verifying. So everything solvable fast is also verifiable fast.
 
 $\mathcal{NP}$ is not the class of hard problems. It is the class of problems with fast verification. Some of those problems are also easy to solve (they live in $\mathcal{P}$). Others appear to require exponential time to solve, even though checking a given solution is fast.
 
@@ -172,7 +172,7 @@ $\mathcal{P}$ sits inside $\mathcal{NP}$. This is proven. Every problem solvable
 
 What we do not know is whether $\mathcal{P}$ and $\mathcal{NP}$ are actually the same set. The question mark in $\mathcal{P} \stackrel{?}{=} \mathcal{NP}$ is asking whether the containment is proper (they are truly different sets, with problems in $\mathcal{NP}$ that are not in $\mathcal{P}$) or whether the two sets are identical.
 
-Almost every researcher in the field believes $\mathcal{P} \neq \mathcal{NP}$. Sudoku, TSP, graph coloring, and hundreds of other problems feel fundamentally harder to solve than to verify. The intuition is strong. But intuition is not a proof, and no proof exists in either direction.
+The vast majority of researchers in the field believe $\mathcal{P} \neq \mathcal{NP}$. Sudoku, TSP, graph coloring, and hundreds of other problems feel fundamentally harder to solve than to verify. The intuition is strong. But intuition is not a proof, and no proof exists in either direction.
 
 Here is that picture with some familiar problems placed in it. Everything inside $\mathcal{P}$ is also inside $\mathcal{NP}$. What nobody knows is whether the problems sitting outside $\mathcal{P}$ truly belong out there.
 

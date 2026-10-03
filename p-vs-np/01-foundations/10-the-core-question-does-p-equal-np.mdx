@@ -39,7 +39,7 @@ Let me trace the chain, because it is worth seeing whole before we ask the quest
 
 **Post 8** gave us $\mathcal{NP}$: problems where yes instances have short certificates verifiable in polynomial time. Sudoku, TSP, graph coloring. If a problem is in $\mathcal{NP}$, a computer can *check* an answer fast.
 
-**Post 9** put those two experiences side by side and showed that checking genuinely seems easier than finding. Handing someone a completed Sudoku grid takes two seconds to verify. Constructing that grid from scratch is a completely different kind of difficulty.
+**Post 9** put those two experiences side by side and showed that checking genuinely seems easier than finding. A completed Sudoku grid takes under a minute to verify. Constructing that grid from scratch is a completely different kind of difficulty.
 
 All of that was setup. This is the question.
 
@@ -74,7 +74,7 @@ $$\mathcal{P} \subsetneq \mathcal{NP}$$
 
 $\mathcal{P}$ is a strictly smaller set than $\mathcal{NP}$. There are problems in $\mathcal{NP}$ that genuinely cannot be solved in polynomial time. Not because we have not found the right algorithm yet. Because no such algorithm exists. The gap between checking and solving is real, mathematically fundamental, and permanent.
 
-This world is the one we already live in, whether or not it has been proven. Our cryptographic systems assume it. RSA encryption works because factoring large numbers appears to be hard. Every time you pay for something online, that transaction is protected by the assumption that $\mathcal{P} \neq \mathcal{NP}$.
+This world is the one we already live in, whether or not it has been proven. Our cryptographic systems assume it. RSA encryption works because factoring large numbers appears to be hard. Every time you pay for something online, that transaction is protected by assumptions that are only possible if $\mathcal{P} \neq \mathcal{NP}$ (and that actually go a bit further: they need *specific* problems, like factoring, to be hard).
 
 If this is the answer, computers have hard limits that no engineering advancement will ever overcome. Some problems are simply out of reach. That is not a failure of cleverness. It is a fact about the structure of computation itself.
 
@@ -83,11 +83,11 @@ If this is the answer, computers have hard limits that no engineering advancemen
 
 This is the world almost no one believes, but the one no one can rule out.
 
-If $\mathcal{P} = \mathcal{NP}$, solving and verifying are equally hard. Every problem whose solution can be checked quickly can also be *found* quickly. The two boxes are the same box.
+If $\mathcal{P} = \mathcal{NP}$, solving is never fundamentally harder than verifying: whenever checking takes polynomial time, finding also takes polynomial time (though possibly a bigger polynomial). Every problem whose solution can be checked quickly can also be *found* quickly. The two boxes are the same box.
 
 Every NP-Complete problem would have a polynomial-time solution. Not approximately. Exactly. Drug discovery would transform overnight. Supply chain optimization, circuit design, protein folding, scheduling: all of them would become tractable. AI systems that currently approximate answers would find optimal ones.
 
-And then the other side: every encryption scheme protecting passwords, bank accounts, private messages, government systems would become breakable in polynomial time. The mathematical guarantee behind internet security would dissolve. The proof itself would probably arrive hand-in-hand with an algorithm: a construction that, once you had it, could break any cryptographic system ever devised.
+And then the other side: almost every encryption scheme protecting passwords, bank accounts, private messages, government systems would become breakable in polynomial time. The mathematical foundation behind internet security would dissolve. The proof itself would probably arrive hand-in-hand with an algorithm: a construction that, if it were fast enough to run in practice, could break nearly every cryptographic system in use. (A few rare schemes, like the "one-time pad," don't rely on hard problems at all and would survive.)
 
 If $\mathcal{P} = \mathcal{NP}$, the proof would be the most consequential piece of mathematics ever written.
 
@@ -118,7 +118,7 @@ A correct proof of P vs NP will require a technique that does not yet exist. Tha
 
 The two possible answers are not symmetric in what proving them would require.
 
-To prove $\mathcal{P} = \mathcal{NP}$, you need to construct one polynomial-time algorithm for any single NP-Complete problem. One algorithm. Show it works. Done. The proof is constructive: you exhibit the object.
+To prove $\mathcal{P} = \mathcal{NP}$, the natural route is to construct one polynomial-time algorithm for any single NP-Complete problem. One algorithm. Show it works. Done. A proof like that is *constructive*: you exhibit the object.
 
 To prove $\mathcal{P} \neq \mathcal{NP}$, you need to show that no polynomial-time algorithm exists for certain problems. Not just that none has been found. That none could ever exist. You need to rule out every algorithm that anyone could conceive of, across all of mathematics and all of time. That is not a statement about one object. It is a statement about an infinite class of non-objects.
 
@@ -161,7 +161,7 @@ Phase 2 builds the next layer. It introduces **NP-Complete problems**: the harde
 That mechanism is called a **reduction**. It is what Post 11 is about.
 
 :::note What We Have Established
-$\mathcal{P} \subseteq \mathcal{NP}$ is proven. Whether $\mathcal{P} = \mathcal{NP}$ or $\mathcal{P} \neq \mathcal{NP}$ is unknown. Almost all researchers believe the classes are strictly separate, but no proof exists in either direction. Every known proof technique fails for formal mathematical reasons. The question remains the most important open problem in computer science.
+$\mathcal{P} \subseteq \mathcal{NP}$ is proven. Whether $\mathcal{P} = \mathcal{NP}$ or $\mathcal{P} \neq \mathcal{NP}$ is unknown. Almost all researchers believe the classes are strictly separate, but no proof exists in either direction. The major known proof techniques have been formally shown to be unable to settle it on their own. The question remains the most important open problem in computer science.
 :::
 
 See you in Phase 2. 🚀

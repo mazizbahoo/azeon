@@ -75,7 +75,9 @@ $$O(n^2) \Rightarrow 2{,}500 \text{ steps}$$
 
 $$O(2^n) \Rightarrow 1{,}125{,}899{,}906{,}842{,}624 \text{ steps}$$
 
-Same input size. Three completely different universes of difficulty. The exponential figure there, over a quadrillion steps, would take longer than the age of the universe to complete on any existing hardware. That's not an exaggeration. That's just what $2^{50}$ is.
+Same input size. Three completely different universes of difficulty. On a computer doing a billion steps per second, the linear and quadratic versions finish in a tiny fraction of a millisecond. The exponential one, over a quadrillion steps, takes about **13 days**.
+
+And it gets worse fast. Bump the input to $n = 100$ and $2^{100}$ is about $1.3 \times 10^{30}$ steps. At the same billion steps per second, that's roughly 40 trillion years, around 3,000 times the age of the universe. That's not an exaggeration. That's just what doubling does.
 
 This is why Big-O matters. Not as abstract math, but because it's the difference between an algorithm that runs in milliseconds and one that is physically impossible to finish.
 
@@ -109,7 +111,7 @@ $$12 = 12$$
 
 The $3{,}000{,}000$ term is more than 400 times larger than the $7{,}000$ term. By $n = 1{,}000{,}000$, the lower terms are completely invisible noise. They don't change the *shape* of how the algorithm grows, and that shape is what we're measuring.
 
-**Part 2: Constants are hardware artifacts.** The $3$ in $3n^2$ says "this particular machine executes 3 operations per iteration of this loop." On a different processor, that constant might be $1$ or $8$. The constant changes depending on the machine you run the algorithm on. The *exponent* doesn't. It's a property of the algorithm itself, not the hardware. So we keep what's mathematically meaningful and drop what isn't.
+**Part 2: Constants depend on the details.** The $3$ in $3n^2$ might mean "each pass through this loop costs 3 basic operations." But that count depends on things like the processor, the programming language, and exactly what you decide to call one "step." On a different setup, that constant might be $1$ or $8$. The *exponent* doesn't change like that. It's a property of the algorithm itself. So we keep the part that describes the algorithm's growth and drop the part that depends on the setup.
 
 :::note The Formal Version (If You're Curious)
 The formal definition says that $f(n) = O(g(n))$ if, beyond some input size, $f$ never outgrows a constant multiple of $g$. Concrete example: suppose algorithm A takes $3n^2$ steps and algorithm B takes $100n^2$ steps. Both are $O(n^2)$, because no matter how far apart their step counts are at any specific $n$, they grow at the same *rate* as $n$ increases. Doubling $n$ quadruples both. That shared growth shape is what the notation is capturing. You don't need to memorize the formal definition. The intuition above is what actually matters here.
@@ -121,9 +123,9 @@ The formal definition says that $f(n) = O(g(n))$ if, beyond some input size, $f$
 
 I said in Post #1 that $\mathcal{P}$ is the class of problems a computer can *solve* quickly, and $\mathcal{NP}$ is the class of problems whose solutions can be *verified* quickly. Now I can tell you what "quickly" actually means in precise language.
 
-It means **polynomial time**. A polynomial is just a mathematical expression where $n$ is raised to some fixed power: $n^2$, $n^3$, $n^{10}$. So polynomial time means the number of steps is something like $O(n^2)$ or $O(n^{10})$. As the input grows, the work grows too, but it grows in a way that stays manageable. Even $O(n^{1000})$ is technically polynomial. It's absurdly slow in practice, but it belongs to the same family. Computer scientists call these algorithms *tractable*, meaning in-principle solvable.
+It means **polynomial time**. A polynomial is just a mathematical expression where $n$ is raised to some fixed power: $n^2$, $n^3$, $n^{10}$. So polynomial time means the number of steps is something like $O(n^2)$ or $O(n^{10})$. As the input grows, the work grows too, but it grows in a way that stays manageable. Even $O(n^{1000})$ is technically polynomial. It's absurdly slow in practice, but it belongs to the same family. Computer scientists call problems with polynomial-time algorithms *tractable*, meaning efficiently solvable, at least in principle.
 
-Algorithms that run in $O(2^n)$ or $O(n!)$ are a different story entirely. They are called *intractable*. Not just slow, but categorically out of reach. As we saw in the table above, $2^{50}$ is already over a quadrillion steps. No fixed power of $n$ ever behaves like that.
+Algorithms that run in $O(2^n)$ or $O(n!)$ are a different story entirely. Problems that *only* have algorithms like these are called *intractable*. They can still be solved in principle, but for large inputs they are categorically out of reach. As we saw in the table above, $2^{50}$ is already over a quadrillion steps. No fixed power of $n$ ever behaves like that.
 
 So $\mathcal{P}$, the class of problems we can *solve* quickly, is the collection of all problems where a polynomial-time solution algorithm exists. A useful way to picture it: if you can solve a problem and the worst case fits somewhere in the table above the $O(2^n)$ line, that problem is in $\mathcal{P}$.
 
@@ -142,16 +144,16 @@ Big-O is a tool for understanding how algorithms behave at scale. It is not a co
 In the real world, you care about both. For the theoretical question of P vs NP, Big-O is exactly the right lens.
 
 :::caution Upper Bound, Not Exact Count
-Big-O describes a *worst-case upper bound*: the most work an algorithm could ever need for an input of size $n$. An algorithm being $O(n^2)$ doesn't mean it always takes exactly $n^2$ steps. It means it *never* takes more than some constant multiple of $n^2$ steps. There are related notations: $\Omega$ for lower bounds and $\Theta$ for tight bounds. In this series, $O$ is the one we'll reach for.
+Big-O describes an *upper bound*. When we say an algorithm runs in $O(n^2)$, we usually mean its *worst case*: the most work it could ever need for an input of size $n$. An algorithm being $O(n^2)$ doesn't mean it always takes exactly $n^2$ steps. It means it *never* takes more than some constant multiple of $n^2$ steps. There are related notations: $\Omega$ for lower bounds and $\Theta$ for tight bounds. In this series, $O$ is the one we'll reach for.
 :::
 
 ---
 
 ## What's Coming Next
 
-The next post takes a step back from notation and asks a deeper question: what is a Turing machine, and why do computer scientists use it to define what computation even means?
+The next post zooms in on the most dramatic row in that table: exponential growth. We'll see just how violently $2^n$ explodes, why faster hardware can't rescue an exponential algorithm, and why that explosion is the reason $\mathcal{P}$ vs $\mathcal{NP}$ matters so much.
 
-The Turing machine is the theoretical foundation underneath everything in this series, including the formal definitions of $\mathcal{P}$ and $\mathcal{NP}$ that we'll build in the posts after that. It sounds abstract. The actual idea, once you see it, is one of the most elegant things in all of computer science.
+After that, we'll finally be ready to build the formal definitions of $\mathcal{P}$ and $\mathcal{NP}$.
 
 See you there. 🚀
 

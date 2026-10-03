@@ -53,7 +53,7 @@ Try it. Pick 8 or 9 cities, press **Random tour** to start from a messy route, t
 
 <TSPRoutes heuristic localSearch />
 
-A random tour of 9 cities is usually bad: on this map, about 50% longer than the best on average. 2-opt fixes most of that in just a few steps. Sometimes it reaches the shortest tour. Sometimes the status line says "local optimum": no single swap helps, but the tour still isn't the best.
+A random tour of 9 cities is usually bad: on this map, about 60% longer than the best on average. 2-opt fixes most of that in just a few steps. Sometimes it reaches the shortest tour. Sometimes the status line says "local optimum": no single swap helps, but the tour still isn't the best.
 
 I got curious about how often that happens, so I ran 2-opt from random starting tours a couple of thousand times on the 9-city map. About **a third** of the runs got stuck at a tour that wasn't the shortest, and it took about four steps on average to get there. So 2-opt is fast and usually good, but it can't promise the best.
 

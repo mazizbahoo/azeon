@@ -25,7 +25,7 @@ If your answer is something like *"a set of instructions"*, you're not wrong. Th
 
 A recipe is an algorithm. You take ingredients (input), follow numbered steps (instructions), and end up with food (output).
 
-The directions your GPS gives you are an algorithm. You start somewhere (input), follow turn-by-turn steps, and arrive somewhere (output).
+The method your GPS app uses to plan a route is an algorithm. It takes a starting point and a destination (input), follows a fixed procedure to search the road map, and hands you turn-by-turn directions (output).
 
 The method you use to sort a deck of cards by number is an algorithm. Your personal strategy for doing long division is an algorithm.
 
@@ -157,10 +157,10 @@ The algorithm above looks at each element once. If the list has $n$ elements, it
 
 But some problems seem to require algorithms that take an astronomically larger number of steps: steps that grow not proportionally to $n$, but *exponentially* with $n$. The gap between those two kinds of growth is one of the most dramatic things in all of mathematics, and it sits at the center of everything we're building toward.
 
-Before we can talk about fast and slow, though, we need a precise language for measuring speed. That's what the next post is about.
+Before we can talk about fast and slow, though, we need two things: a precise definition of what a single "step" of computation is, and a precise language for measuring how many steps an algorithm takes. The next few posts build both.
 
 :::note Coming Up Next
-Post #3 introduces **Big-O notation**, the tool CS uses to describe how fast (or slow) an algorithm grows as its input gets larger. Once you have Big-O, the formal definitions of $\mathcal{P}$ and $\mathcal{NP}$ become much easier to state precisely.
+Post #3 introduces the **Turing machine**, the simple imaginary machine computer scientists use to pin down exactly what an algorithm and a "step" are. Post #4 compares two kinds of these machines, and Post #5 introduces **Big-O notation**, the tool CS uses to describe how fast (or slow) an algorithm's work grows as its input gets larger. With those in hand, the formal definitions of $\mathcal{P}$ and $\mathcal{NP}$ become much easier to state precisely.
 :::
 
 ---

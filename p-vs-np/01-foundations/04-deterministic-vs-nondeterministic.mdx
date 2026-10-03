@@ -76,7 +76,13 @@ Here is a small maze drawn as a tree of junctions. Every junction splits two way
 
 <MazeSearch />
 
-The maze isn't just an analogy. The problem of finding a path through a graph is a real computational problem, and the contrast between how a deterministic and nondeterministic machine handles it captures exactly the kind of difference P vs NP is asking about.
+The maze isn't just an analogy. The problem of finding a path through a graph is a real computational problem, and the contrast between how a deterministic and nondeterministic machine handles it captures the *style* of difference P vs NP is asking about.
+
+:::note An Honest Caveat About Mazes
+Plain maze-solving is actually one of the *easy* problems. A deterministic machine that keeps track of which junctions it has already visited never needs to walk a corridor more than twice, so its running time only grows in proportion to the size of the maze. That's fast, and it puts "is there a path to the exit?" firmly in $\mathcal{P}$.
+
+The gap becomes dramatic for puzzles where the number of *candidate answers* explodes, for example "is there a route that visits every junction exactly once?" There, keeping a list of visited junctions doesn't save you, and no fast deterministic method is known. We'll meet that exact problem (the Hamiltonian Cycle) in Phase 2.
+:::
 
 ---
 
@@ -112,7 +118,7 @@ $$\mathcal{P} \Rightarrow \text{Deterministic machine, polynomial time}$$
 
 $$\mathcal{NP} \Rightarrow \text{Nondeterministic machine, polynomial time}$$
 
-And the central question of this entire series becomes, in this language: do nondeterministic machines have real power that deterministic machines lack? Is being able to guess perfectly actually an advantage, in terms of the problems you can solve efficiently? Or can a deterministic machine always simulate a nondeterministic one without a polynomial blowup in the number of steps?
+And the central question of this entire series becomes, in this language: do nondeterministic machines have real power that deterministic machines lack? Is being able to guess perfectly actually an advantage, in terms of the problems you can solve efficiently? Or can a deterministic machine always simulate a nondeterministic one with at most a polynomial increase in the number of steps (instead of an exponential one)?
 
 If yes: $\mathcal{P} = \mathcal{NP}$. Guessing gives you nothing extra.
 
@@ -131,7 +137,7 @@ Nondeterminism is easy to misread, so let me flag the two mistakes I made when I
 **Mistake 2: Thinking nondeterministic machines are a hardware proposal.** They're not. Nobody is trying to build a nondeterministic computer. The nondeterministic Turing machine is a theoretical tool, a way of asking the question: "what could we compute if guessing were free?" It's useful precisely because it gives us a clean mathematical definition to reason about, not because anyone expects to build one.
 
 :::caution Not the Same as Quantum Computing
-Quantum computers are also sometimes described as exploring multiple paths simultaneously, so it's tempting to think quantum computing is a physical implementation of nondeterminism. It's not. Quantum computers use superposition and interference, which is a different mathematical structure entirely. Quantum computers are conjectured to be more powerful than classical deterministic machines for some problems, but almost certainly not as powerful as a true nondeterministic machine. We'll cover this properly in Phase 3.
+Quantum computers are also sometimes described as exploring multiple paths simultaneously, so it's tempting to think quantum computing is a physical implementation of nondeterminism. It's not. Quantum computers use superposition and interference, which is a different mathematical structure entirely. Quantum computers are conjectured to be more powerful than classical deterministic machines for some problems, but most experts believe they are not as powerful as a true nondeterministic machine. We'll cover this properly in Phase 3.
 :::
 
 ---

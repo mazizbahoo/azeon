@@ -23,7 +23,7 @@ In CS class at FC College, my teacher described NP-Hard problems as the hardest 
 
 **NP-Complete** problems are the hardest problems that are still *inside* $\mathcal{NP}$. They can be verified in polynomial time, so they belong to $\mathcal{NP}$, and at the same time everything else in $\mathcal{NP}$ reduces to them. They are the hardest of what is inside the class.
 
-**NP-Hard** problems are at least as hard as everything in $\mathcal{NP}$, but they do not have to be in $\mathcal{NP}$ at all. Some NP-Hard problems sit completely outside $\mathcal{NP}$, which means they cannot even be verified in polynomial time. No short certificate exists for them.
+**NP-Hard** problems are at least as hard as everything in $\mathcal{NP}$, but they do not have to be in $\mathcal{NP}$ at all. Some NP-Hard problems are known to sit completely outside $\mathcal{NP}$, which means their answers cannot even be verified in polynomial time. The Halting Problem from Post 3 is an example: it is NP-Hard, but no algorithm can solve it at all, let alone check a short certificate for it.
 
 So my teacher was describing NP-Complete more precisely than NP-Hard. NP-Complete is NP-Hard with the extra requirement that the problem also lives inside $\mathcal{NP}$. The Cook-Levin theorem is about NP-Complete, not NP-Hard alone.
 
@@ -63,7 +63,7 @@ The formula is built from **Boolean variables**. Each variable can only be true 
 - **OR** (written $\vee$): true when at least one side is true. "It is raining OR cold" is true as long as at least one of them is happening.
 - **NOT** (written $\neg$): flips whatever follows it. NOT true becomes false. NOT false becomes true.
 
-A SAT formula groups variables into **clauses**. A clause is a bunch of variables (some possibly negated with NOT) all connected by OR. Then the whole formula is every clause connected by AND. Here is what that looks like.
+A SAT formula groups variables into **clauses**. A clause is a bunch of variables (some possibly negated with NOT) all connected by OR. Then the whole formula is every clause connected by AND. (This particular shape is called *conjunctive normal form*, or CNF. SAT can be stated for any formula, but CNF is the standard shape, and it is the one we will use.) Here is what that looks like.
 
 I am using the Greek letter $\phi$ (pronounced "fee") as just a name for the formula, the same way $x$ is a name for an unknown number in algebra:
 
@@ -154,7 +154,7 @@ So the conversion from any $\mathcal{NP}$ problem to SAT produces a polynomial-s
 
 Before Cook's result, researchers suspected many problems were hard. They could not prove it for any of them. And every hard problem was isolated, with no connection to the others.
 
-Cook-Levin connected all of them. Once SAT is NP-Complete, there is a benchmark problem at the top of the class. Showing that SAT reduces to your problem immediately proves your problem is NP-Complete too. You do not need to re-prove that everything in $\mathcal{NP}$ reduces to your new problem. You just show that SAT reduces to it, and the chain of reductions does the rest.
+Cook-Levin connected all of them. Once SAT is NP-Complete, there is a benchmark problem at the top of the class. Showing that your problem is in $\mathcal{NP}$ and that SAT reduces to it immediately proves your problem is NP-Complete too. You do not need to re-prove that everything in $\mathcal{NP}$ reduces to your new problem. You just show that SAT reduces to it, and the chain of reductions does the rest.
 
 Every NP-Completeness proof in Phase 2 follows exactly this pattern. Cook-Levin is the root. Every other result grows from it.
 
@@ -170,7 +170,7 @@ Stephen Cook published this in 1971. What is less known is that Leonid Levin ind
 
 The theorem carries both names because of that. Two researchers on opposite sides of the Iron Curtain, no contact between them, the same fundamental result, the same period.
 
-Neither of them knew what they had started. The year after Cook's publication, Richard Karp published a paper showing that 21 completely different real-world problems were each NP-Complete, all connected to SAT through chains of reductions. The field went from zero known NP-Complete problems to 21 in a single paper.
+Neither of them knew what they had started. The year after Cook's publication, Richard Karp published a paper showing that 21 completely different real-world problems were each NP-Complete, all connected to SAT through chains of reductions. The field went from a handful of known NP-Complete problems (SAT and a few close relatives in Cook's paper) to more than twenty in a single paper.
 
 :::danger What Cook-Levin Did Not Prove
 Cook proved SAT is NP-Complete. That is not the same as proving $\mathcal{P} \neq \mathcal{NP}$. He showed that if you solve SAT, you solve everything in $\mathcal{NP}$. But whether SAT itself can be solved in polynomial time is still completely open. The theorem made the P vs NP question precise and gave it real stakes. It did not answer it.

@@ -68,7 +68,7 @@ Each moment, the head can do exactly three things:
 
 - **Read** the symbol in the square it's currently above
 - **Write** a new symbol into that square (or leave it alone)
-- **Move** one square to the left, or one square to the right
+- **Move** one square to the left, or one square to the right (many versions also allow it to stay where it is)
 
 That's all. It cannot jump. It cannot look at two squares at once. It reads one thing, writes one thing, moves one step.
 
@@ -88,11 +88,11 @@ Think of a traffic light. It is always in one of three modes: red, yellow, or gr
 
 The Turing Machine works exactly like this. It has a set of modes it can be in. At any moment, it's in exactly one of them. We label them $q_0$, $q_1$, $q_2$: the numbers are just names, like naming the traffic light modes "mode A," "mode B," "mode C." They don't carry any mathematical meaning on their own.
 
-The mode is the machine's only form of memory. It has no variables, no notepad. The only way it carries information forward from one step to the next is by switching into a mode that encodes that information.
+Apart from whatever it writes on the tape, the mode is the machine's only form of memory. It has no variables, no separate notepad. The only way it carries information forward from one step to the next, without writing it down on the tape, is by switching into a mode that encodes that information.
 
 There are two special modes every Turing Machine has:
 - A **start mode**: the machine always begins here
-- A **halt mode**: when the machine reaches this, it stops and the answer is ready
+- One or more **halt modes**: when the machine reaches one, it stops and the answer is ready. For yes/no questions there are usually two: an **Accept** mode (the answer is yes) and a **Reject** mode (the answer is no)
 
 ### Part 4: The Rulebook
 
@@ -103,7 +103,7 @@ The machine needs to know: *given the mode I'm currently in and the symbol I'm c
 The answer is in a **rulebook**: a list of plain if-then rules. Every rule has exactly this shape:
 
 > **If** I am in mode X **and** I am reading symbol Y,
-> **then** write symbol Z, switch to mode W, and move left or right.
+> **then** write symbol Z, switch to mode W, and move left or right (or stay put).
 
 That is the entire "intelligence" of the machine. When the machine runs, it looks up the matching rule every single step and follows it. No exceptions. No judgment calls. Pure mechanical execution.
 
@@ -123,7 +123,7 @@ The machine runs like this, over and over:
 1. Read the symbol under the head
 2. Find the rule that matches (current mode + symbol read)
 3. Write the new symbol, switch to the new mode, move one step
-4. Go back to step 1, unless the current mode is the halt mode
+4. Go back to step 1, unless the current mode is a halt mode
 
 That's the entire machine. There is nothing else.
 :::
@@ -140,7 +140,7 @@ The tape we'll test:
 1 | 1 | 0 | 1 | _
 ```
 
-The answer should be **no**: there's a `0` in position three.
+The answer should be **no**: the third square holds a `0`.
 
 <Tabs>
   <TabItem value="rulebook" label="The Rulebook" default>
@@ -206,11 +206,11 @@ Here is the part that matters most for $\mathcal{P}$ vs $\mathcal{NP}$.
 
 When we ask "how fast is this algorithm?" we are really asking: **how many steps does the Turing Machine take before it halts?**
 
-Each single operation counts as one step. Read a symbol: one step. Write a symbol: one step. Move left or right: one step.
+Each time the machine applies one rule (read the symbol, write a symbol, switch mode, move), that counts as one step.
 
 The total number of steps is the machine's **running time**. And since inputs can be different sizes, we ask: how does the step count grow as the input gets longer?
 
-In the "all 1s" example, on an input of $n$ symbols, the machine takes exactly $n$ steps (one per symbol, then it stops). That's the best case. We write this as $O(n)$, which just means "the number of steps grows in proportion to the input size."
+In the "all 1s" example, on an input of $n$ symbols, the machine takes at most $n + 1$ steps: one per symbol, plus one more to read the blank at the end. That's the worst case, which happens when the input really is all `1`s. If a `0` shows up early, the machine stops sooner. We write this as $O(n)$, which just means "the number of steps grows in proportion to the input size."
 
 Some machines take $n^2$ steps. Some take $2^n$ steps. The difference between those, between slow growth and explosive growth, is exactly what $\mathcal{P}$ vs $\mathcal{NP}$ is about. We'll build this up carefully in Posts #5 and #6.
 

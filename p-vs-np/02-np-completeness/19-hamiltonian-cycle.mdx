@@ -31,7 +31,9 @@ Think about any piece of land in the middle of your walk. Every time you arrive 
 
 That condition turns out to be enough as well. A connected map has a walk that uses every road exactly once and comes home **if and only if** every place touches an even number of roads.
 
-In Königsberg, all four pieces of land touched an odd number of bridges. No walk was possible.
+(If you don't need to end where you started, the rule relaxes a little: exactly two places are allowed to touch an odd number of bridges, the place you start and the place you finish.)
+
+In Königsberg, all four pieces of land touched an odd number of bridges. Four odd places is too many even for the relaxed rule. No walk was possible.
 
 :::tip Why Euler's problem is easy
 Euler's rule is a local check. You look at each place on its own and count its roads. You never have to think about the route as a whole. That count takes polynomial time, linear in fact, and once the condition passes there is also a fast way to actually build the route.
@@ -63,7 +65,7 @@ So why doesn't an Euler-style counting rule work for cities?
 
 I spent a whole evening on this question. What I eventually understood is that for roads, every place has a **local** budget: arrivals must match departures, and you can check that one place at a time. For cities, every city is visited once, so every city uses exactly two of its roads, one in and one out. That sounds local too. But which two roads? The choice at one city affects which roads are still useful at its neighbours, which affects their neighbours, and so on, all the way around the graph. There is no way to check the whole thing by looking at one city at a time.
 
-There are some helpful rules. For example, in 1952 Gabriel Dirac proved that if every node is connected to at least half of all the other nodes, a Hamiltonian cycle definitely exists. But that is only a "sometimes yes" rule. Lots of graphs with a Hamiltonian cycle fail it. Nobody has ever found a simple rule that is both necessary and sufficient, the way Euler's even-roads rule is.
+There are some helpful rules. For example, in 1952 Gabriel Dirac proved that if a graph has at least three nodes and every node is connected to at least half of all the nodes ($n/2$ or more of them), a Hamiltonian cycle definitely exists. But that is only a "sometimes yes" rule. Lots of graphs with a Hamiltonian cycle fail it. Nobody has ever found a simple rule that is both necessary and sufficient, the way Euler's even-roads rule is.
 
 And by now you can probably guess why nobody has found one.
 

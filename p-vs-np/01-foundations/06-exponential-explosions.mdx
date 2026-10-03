@@ -106,7 +106,7 @@ With 100 numbers (still a completely ordinary input size), there are $2^{100} \a
   </TabItem>
   <TabItem value="large2" label="n = 300 (Realistic)">
 
-Real-world cryptography uses numbers with hundreds of digits. At $n = 300$, we have $2^{300} \approx 2 \times 10^{90}$ subsets. There are estimated to be around $10^{80}$ atoms in the observable universe. This number is larger than that. No computer, no supercomputer cluster, no hypothetical computer the size of a planet could ever work through this before the stars go cold.
+Real-world problems with a few hundred items are completely normal. At $n = 300$, we have $2^{300} \approx 2 \times 10^{90}$ subsets. There are estimated to be around $10^{80}$ atoms in the observable universe. This number is larger than that. No computer, no supercomputer cluster, no hypothetical computer the size of a planet could ever work through this before the stars go cold.
 
   </TabItem>
 </Tabs>
@@ -137,7 +137,7 @@ To feel this properly, drag the slider below. It shows how long each growth rate
 <RuntimeCalculator />
 
 :::info An important clarification
-When I say $O(2^n)$ is "practically impossible," I mean that for large enough inputs, no advancement in hardware will save you. Moore's Law doubling processor speed every two years only adds about one to the effective input size you can handle per year. If you can solve $n = 60$ today, in a year you might solve $n = 61$. In 10 years, maybe $n = 70$. The problem has you outpaced forever.
+When I say $O(2^n)$ is "practically impossible," I mean that for large enough inputs, no advancement in hardware will save you. Even if computers kept doubling in speed every two years (the famous Moore's Law trend), each doubling only lets you handle *one* more input element, because one extra element doubles the work. If you can solve $n = 60$ today, in two years you might solve $n = 61$. In 10 years, maybe $n = 65$. In 20 years, $n = 70$. The problem has you outpaced forever.
 :::
 
 ---
@@ -152,12 +152,12 @@ The question is whether the solving and verifying boxes are the same.
 
 What we've just seen is *why that question is so dramatic*. For many problems, the best known algorithm to find a solution runs in exponential time. The best known algorithm to *check* a solution runs in polynomial time. That's a gap the size of the universe. Literally.
 
-If $\mathcal{P} = \mathcal{NP}$, it would mean that gap is an illusion: a polynomial-time algorithm exists for those problems, we just haven't found it yet. If $\mathcal{P} \neq \mathcal{NP}$, the gap is real, and some problems are permanently, mathematically beyond reach for any computer that could ever exist.
+If $\mathcal{P} = \mathcal{NP}$, it would mean that gap is an illusion: a polynomial-time algorithm exists for those problems, we just haven't found it yet. If $\mathcal{P} \neq \mathcal{NP}$, the gap is real: for some problems, no algorithm can solve every large input efficiently, on any computer that could ever exist. (Individual inputs can still be easy. The claim is about the hardest inputs, as the size grows.)
 
 Think of it as two categories, separated by an uncrossable line:
 
 - **Polynomial time:** reachable. Solvable. Something computers can actually do.
-- **Exponential time:** permanently beyond reach. No hardware upgrade fixes it. No clever programming trick closes the gap.
+- **Exponential time:** beyond reach once inputs get large. No hardware upgrade fixes it. No clever programming trick closes the gap.
 
 That line between those two categories is where the entire P vs NP problem lives.
 
