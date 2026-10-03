@@ -11,7 +11,7 @@
 
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"><link rel="stylesheet" href="/azeon/assets/css/styles.a4d323d0.css">
-<script src="/azeon/assets/js/runtime~main.f0f5d9bb.js" defer="defer"></script>
+<script src="/azeon/assets/js/runtime~main.741f8e79.js" defer="defer"></script>
 <script src="/azeon/assets/js/main.c46becff.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -75,7 +75,7 @@
 <li class="">In 2006, a team led by David Applegate, Robert Bixby, Vašek Chvátal and William Cook solved an instance with <strong>85,900 points</strong>, which came from a real chip manufacturing problem. Their solver is called Concorde.</li>
 </ul>
 <p>How can that be, if TSP is NP-Hard?</p>
-<p>The answer is that NP-Hardness is a statement about the <strong>worst case</strong>. It says that for every algorithm we know, there are some instances that make it take exponential time. It doesn&#x27;t say every instance is hard. Real maps have structure: cities cluster, distances obey geometry, the best tour rarely does anything bizarre. Clever solvers exploit that structure and prune away almost all of the search space, then prove that what is left can&#x27;t beat their answer.</p>
+<p>The answer is that NP-Hardness is a statement about the <strong>worst case</strong>. It says that (unless <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="script">P</mi><mo>=</mo><mrow><mi mathvariant="script">N</mi><mi mathvariant="script">P</mi></mrow></mrow><annotation encoding="application/x-tex">\mathcal{P} = \mathcal{NP}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em"></span><span class="mord mathcal" style="margin-right:0.08222em">P</span><span class="mspace" style="margin-right:0.2778em"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em"></span></span><span class="base"><span class="strut" style="height:0.6833em"></span><span class="mord"><span class="mord mathcal" style="margin-right:0.08222em">NP</span></span></span></span></span>) no algorithm can be fast on <em>every</em> instance: for any algorithm, some instances will make it slow. It doesn&#x27;t say every instance is hard. Real maps have structure: cities cluster, distances obey geometry, the best tour rarely does anything bizarre. Clever solvers exploit that structure and prune away almost all of the search space, then prove that what is left can&#x27;t beat their answer.</p>
 <p>So &quot;NP-Hard&quot; means &quot;no guarantee&quot;, not &quot;never&quot;. We&#x27;ll come back to this idea in Phase 6, when we look at how SAT solvers handle formulas with millions of variables.</p>
 <hr>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="why-everyone-cares">Why Everyone Cares<a href="#why-everyone-cares" class="hash-link" aria-label="Direct link to Why Everyone Cares" title="Direct link to Why Everyone Cares" translate="no">​</a></h2>
