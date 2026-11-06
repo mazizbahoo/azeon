@@ -15,7 +15,6 @@
 
 [![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)]()
-[![X](https://img.shields.io/badge/Follow-@azeon__io-000000?style=flat-square&logo=x)](https://x.com/azeon_io)
 
 <br/>
 
@@ -90,7 +89,6 @@ The site will be live at `http://localhost:3000`.
 This project is updated regularly. The best ways to follow along:
 
 - ⭐ **Star this repo** — you'll get notified of new posts
-- 𝕏 **X (Twitter)**: [@azeon_io](https://x.com/azeon_io) — research updates & behind-the-scenes
 - 🌐 **Website**: [Azeon](https://mazizbahoo.github.io/azeon) — full documentation
 
 ---

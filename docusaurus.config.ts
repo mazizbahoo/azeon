@@ -118,10 +118,6 @@ const config: Config = {
               label: 'Founder Blog',
               href: '/blog',
             },
-            {
-              label: 'X (Twitter)',
-              href: 'https://twitter.com/azeon_io',
-            },
           ],
         },
         {
@@ -130,7 +126,7 @@ const config: Config = {
             {
               html: `
                 <p style="color: var(--ifm-footer-link-color); line-height: 1.6; max-width: 300px; font-size: 0.95rem;">
-                  CS student at FC College, Lahore. Founder of Azeon and Azizdevs. Rubik's cube solver. When I am not researching computational complexity, I am probably speedsolving a Rubik's cube.
+                  CS student at FC College, Lahore. Founder of Azeon and TrueVerdict. Rubik's cube solver. When I am not researching computational complexity, I am probably speedsolving a Rubik's cube.
                 </p>
               `,
             },

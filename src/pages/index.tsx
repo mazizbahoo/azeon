@@ -51,9 +51,10 @@ const STATS = [
 
 const ACHIEVEMENTS = [
   { icon: '🏆', text: 'Perfect CS score in Matriculation' },
-  { icon: '🧩', text: 'Rubik\'s Cube solver under 45 seconds' },
+  { icon: '🧩', text: 'Love solving a Rubik\'s Cube' },
   { icon: '💻', text: 'Web development & graphic designing since age 14' },
   { icon: '📖', text: 'Founder of Azeon' },
+  { icon: '👨🏻‍⚖️', text: 'Founder of TrueVerdict' }
 ];
 
 const SAFE_ITEMS = [
@@ -404,7 +405,7 @@ function AboutSection() {
             </h2>
             <p className="az-body">
               I'm a student at FC College in Lahore. I started freelancing in web development and
-              graphic design at 14, founded Azizdevs, and have been building things in public ever since.
+              graphic design at 14, founded TrueVerdict, and have been building things in public ever since.
             </p>
             <p className="az-body">
               Azeon is my attempt to do something different: instead of waiting until I understand
