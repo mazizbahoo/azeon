@@ -4,7 +4,7 @@ import Link from '@docusaurus/Link';
 import katex from 'katex';
 import { PhaseCard, usePhases } from '@site/src/components/PhasesGrid';
 import {
-  ArrowRight, BookOpen, Check, Code, FileText, Microscope, PenLine, Puzzle, Trophy, Zap,
+  ArrowRight, BookOpen, Check, Code, FileText, Microscope, PenLine, Puzzle, Trophy, UsersRound, Zap,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -25,9 +25,10 @@ const FLOATING_SYMBOLS = [
 
 const ACHIEVEMENTS: { icon: LucideIcon; text: string }[] = [
   { icon: Trophy, text: 'Perfect CS score in Matriculation' },
-  { icon: Puzzle, text: 'Rubik\'s Cube solver under 45 seconds' },
+  { icon: Puzzle, text: 'Love solving Rubik\'s Cube' },
   { icon: Code, text: 'Web development & graphic designing since age 14' },
   { icon: BookOpen, text: 'Founder of Azeon' },
+  { icon: UsersRound, text: 'Founder of TrueVerdict' },
 ];
 
 const SAFE_ITEMS = [
