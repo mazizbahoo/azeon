@@ -1,0 +1,159 @@
+---
+sidebar_position: 3
+title: "The Relativization Barrier"
+description: "In 1975, Baker, Gill and Solovay built two imaginary worlds: one where P equals NP, and one where it doesn't. Any proof that works the same in both worlds can't settle the question. That rules out the most natural attack of all."
+tags: [failed-proofs, relativization, baker-gill-solovay, oracles, diagonalization, barriers]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import OracleAdversary from '@site/src/components/OracleAdversary';
+
+# The Relativization Barrier
+
+The first barrier is my favourite, because of how simple it is once you see it. The proof uses nothing that we haven't already met. Oracles from Post 36, the "do the opposite" trick from Post 29, and one small game you can play in the figure below.
+
+It was published in 1975 by Theodore Baker, John Gill and Robert Solovay. It's usually called the **Baker-Gill-Solovay theorem**, or just BGS.
+
+---
+
+## The Theorem
+
+> **Baker-Gill-Solovay (1975):**
+> 1. There is an oracle $A$ such that $\mathcal{P}^A = \mathcal{NP}^A$.
+> 2. There is an oracle $B$ such that $\mathcal{P}^B \neq \mathcal{NP}^B$.
+
+Two imaginary worlds. In one, P equals NP. In the other, it doesn't.
+
+Let me build each one, then explain why having both is a problem.
+
+---
+
+## World A: Where P Equals NP
+
+The trick here is to choose an oracle so powerful that it drowns out the difference between $\mathcal{P}$ and $\mathcal{NP}$.
+
+Take $A$ to be an oracle for **TQBF**, the PSPACE-Complete problem from Post 28: deciding quantified formulas with mixed $\exists$ and $\forall$.
+
+<Tabs>
+  <TabItem value="np" label="NP with A is no more than PSPACE" default>
+
+A nondeterministic machine with a TQBF oracle, running in polynomial time, can be simulated using only polynomial memory: try each guess one after another (reusing memory, like in Post 28), and whenever it asks the oracle a question, answer it directly, since TQBF itself is in $\mathcal{PSPACE}$.
+
+So $\mathcal{NP}^A \subseteq \mathcal{PSPACE}$.
+
+  </TabItem>
+  <TabItem value="p" label="P with A is all of PSPACE">
+
+TQBF is PSPACE-Complete, so every $\mathcal{PSPACE}$ problem reduces to it. A normal machine can do the reduction in polynomial time and ask the oracle once.
+
+So $\mathcal{PSPACE} \subseteq \mathcal{P}^A$.
+
+  </TabItem>
+</Tabs>
+
+Put the two together:
+
+$$\mathcal{NP}^A \subseteq \mathcal{PSPACE} \subseteq \mathcal{P}^A \subseteq \mathcal{NP}^A$$
+
+The chain starts and ends at the same place, so everything in it is equal. $\mathcal{P}^A = \mathcal{NP}^A$. In this world, the oracle is so strong that guessing gives you nothing extra.
+
+---
+
+## World B: Where P Doesn't Equal NP
+
+This one is a game, and you can play it.
+
+The oracle $B$ is a set of binary strings. For each length $n$, there are $2^n$ possible strings of that length. Think of them as $2^n$ boxes, and the oracle tells you whether a particular box contains a gem.
+
+Now consider this question:
+
+> **Is there a gem in any of the length-$n$ boxes?**
+
+<Tabs>
+  <TabItem value="nondet" label="Easy with guessing" default>
+
+A nondeterministic machine with oracle $B$ answers this easily. It guesses which box has the gem, and asks the oracle about that one box. If any box has a gem, some guess succeeds.
+
+So this question is in $\mathcal{NP}^B$.
+
+  </TabItem>
+  <TabItem value="det" label="Hard without guessing">
+
+A normal machine has to open boxes one at a time by asking the oracle. In polynomial time, it can only ask polynomially many questions. With $2^n$ boxes, that's a tiny fraction of them.
+
+So here's the plan for building $B$: make the oracle **adversarial**. Wait until the machine commits to an answer, then put the gem wherever makes its answer wrong.
+
+  </TabItem>
+</Tabs>
+
+Try to beat it. You get $n$ openings, out of $2^n$ boxes. (I'm using $n$ as a stand-in for "polynomially many"; the real argument works for any polynomial once $n$ is big enough.) Every box you open will be empty. Then answer whether there's a gem anywhere.
+
+<OracleAdversary />
+
+You can't win. If you say "a gem exists", the oracle makes every box empty. If you say "all empty", it puts the gem in a box you never opened. Since you can only open a tiny fraction of the boxes, there's always somewhere to hide it.
+
+### Building B for real
+
+The real construction does this against **every** polynomial-time machine, one at a time, using the same idea as the diagonal argument in Post 29:
+
+1. List all polynomial-time oracle machines: $M_1, M_2, M_3, \ldots$
+2. For machine $M_i$, pick a length $n$ big enough that $M_i$ can't possibly ask about all $2^n$ boxes in its time limit, and bigger than any length used for earlier machines.
+3. Run $M_i$ on the question for length $n$. Whenever it asks about a box that hasn't been decided yet, say "empty".
+4. If $M_i$ answers "a gem exists", leave every box of that length empty. If it answers "all empty", put a gem in some box of that length that it never asked about.
+
+Every machine in the list gets something wrong. So no polynomial-time machine with oracle $B$ solves the question, which means it's in $\mathcal{NP}^B$ but not in $\mathcal{P}^B$:
+
+$$\mathcal{P}^B \neq \mathcal{NP}^B$$
+
+---
+
+## Why This Is a Barrier
+
+Here's where the two worlds come together.
+
+A proof technique **relativizes** if it would still work, unchanged, when every machine in the argument has access to the same oracle. Post 36 explained why many techniques do: simulating one machine inside another, listing all machines, running "do the opposite of machine $i$". None of those care whether the machines have an oracle attached.
+
+Now suppose you had a relativizing proof that $\mathcal{P} \neq \mathcal{NP}$. Because it relativizes, it would also prove $\mathcal{P}^A \neq \mathcal{NP}^A$. But World A shows that's false. So the proof can't exist.
+
+And suppose you had a relativizing proof that $\mathcal{P} = \mathcal{NP}$. It would also prove $\mathcal{P}^B = \mathcal{NP}^B$. World B shows that's false too.
+
+:::caution The Relativization Barrier
+No proof technique that relativizes can settle P vs NP, in either direction.
+:::
+
+---
+
+## What This Kills
+
+When I first read this, I thought, "fine, so some odd techniques don't work". Then I realised which techniques it was talking about.
+
+The **diagonalization** argument from Post 29, the one that proved $\mathcal{P} \neq \mathcal{EXP}$, relativizes. It only lists machines and simulates them. Put an oracle on everything and the same proof shows $\mathcal{P}^A \neq \mathcal{EXP}^A$ for every oracle $A$.
+
+That was the main tool complexity theory had in the early 1970s. It had separated time classes, space classes, and proved the Halting Problem undecidable. The natural hope was that a cleverer diagonalization would separate $\mathcal{P}$ from $\mathcal{NP}$. BGS showed, in one short paper, that no diagonalization of that standard kind ever could.
+
+I find it oddly beautiful that the theorem uses diagonalization itself (to build World B) to prove that diagonalization isn't enough.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+**Baker-Gill-Solovay (1975):** with oracle $A$ = TQBF, $\mathcal{P}^A = \mathcal{NP}^A$, because both equal $\mathcal{PSPACE}$. With an adversarially built oracle $B$, $\mathcal{P}^B \neq \mathcal{NP}^B$, because a polynomial-time machine can't check enough of the $2^n$ boxes to find a hidden gem, while a guessing machine finds it in one question.
+
+A technique **relativizes** if it works the same with any oracle attached. Since there are oracle worlds where $\mathcal{P} = \mathcal{NP}$ and others where $\mathcal{P} \neq \mathcal{NP}$, no relativizing technique can settle the question. Standard diagonalization relativizes.
+:::
+
+---
+
+## Up Next
+
+BGS doesn't say P vs NP is unsolvable. It says a proof has to use something that **doesn't** survive having an oracle attached: some fact about how computation actually works, inside the machine.
+
+Post 38 is about what those techniques look like, and the moment in 1990 when one of them proved a famous result that **cannot** be relativized, and people briefly hoped the barrier had been broken.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

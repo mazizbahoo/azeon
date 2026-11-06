@@ -1,0 +1,185 @@
+---
+sidebar_position: 12
+title: "Subset Sum"
+description: "Can some of these numbers add up to exactly the target? I finally prove it's NP-Complete, by turning a logic formula into a list of carefully designed numbers where every digit is doing a job."
+tags: [np-completeness, subset-sum, 3-sat, reductions, partition, pseudo-polynomial]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import SolveVsVerify from '@site/src/components/SolveVsVerify';
+import SubsetSumReduction from '@site/src/components/SubsetSumReduction';
+
+# Subset Sum
+
+This is the first reduction in this phase where I had to get a pen and paper out and actually do arithmetic before I believed it.
+
+Every reduction so far has turned one kind of picture into another kind of picture. Formulas into graphs. Graphs into other graphs. Graphs into distance tables. This one turns a logic formula into a plain list of numbers. No nodes, no edges, nothing to look at, just numbers. And the trick that makes it work is something you learned when you were about seven: column addition.
+
+I owe you this proof, because Post 21 leaned on it. Let's pay it back.
+
+---
+
+## The Problem
+
+> **Subset Sum:** given a list of whole numbers $a_1, a_2, \ldots, a_n$ and a target $T$, is there a group of them that adds up to exactly $T$?
+
+For example: the list is $\{3, 34, 4, 12, 5, 2\}$ and the target is $9$. Yes: $4 + 5 = 9$. Or $3 + 4 + 2 = 9$. If the target were $30$, the answer would be no. (I checked. It took a while.)
+
+You already met this problem in Post 9, in a slightly different form: given a list containing positive **and** negative numbers, is there a non-empty group that adds up to exactly **zero**? Those two versions are really the same problem, and I'll show you why at the end of this post.
+
+**Subset Sum is in $\mathcal{NP}$.** The certificate is the group of numbers. Add them up and compare with $T$. Polynomial.
+
+Here's the race from Post 9 again, because it's worth watching one more time now that you know where this is going. The solver tries groups one after another. The verifier just adds up the answer it was handed.
+
+<SolveVsVerify />
+
+---
+
+## The Idea: Digits as Separate Counters
+
+Here's the observation the whole reduction rests on.
+
+When you add numbers in columns, each column is its own little counter, **as long as nothing carries over**. If I add $102 + 011 + 010$, I get $123$. The hundreds column counted to 1, the tens column counted to 2, the ones column counted to 3. The columns didn't interfere with each other at all, because no column ever reached 10.
+
+So if I'm careful to keep every column small, a single big number can act like a row of separate tally counters. And I can make the target say exactly what I want each counter to reach.
+
+That's the whole trick. Now let's use it to encode a 3-SAT formula.
+
+---
+
+## The Construction
+
+Take a 3-SAT formula with variables $x_1, \ldots, x_n$ and clauses $C_1, \ldots, C_k$. Every number we build has $n + k$ digits: one **variable column** for each variable, then one **clause column** for each clause.
+
+<Tabs>
+  <TabItem value="vars" label="Two numbers per variable" default>
+
+For each variable $x_i$, make two numbers:
+
+- A **"true" number**: a 1 in the column for $x_i$, plus a 1 in the column of every clause that contains $x_i$.
+- A **"false" number**: a 1 in the column for $x_i$, plus a 1 in the column of every clause that contains $\neg x_i$.
+
+The target will have a **1** in every variable column. Only these two numbers have anything in $x_i$'s column, so the chosen group must contain **exactly one** of them. Choosing the "true" number means $x_i$ is true. Choosing the "false" number means $x_i$ is false.
+
+  </TabItem>
+  <TabItem value="clauses" label="Slack per clause">
+
+The target will have a **3** in every clause column.
+
+When you pick one number per variable, a clause's column ends up counting how many of its literals are true. That could be 0, 1, 2 or 3.
+
+To let any clause with **at least one** true literal reach 3, add two **slack numbers** for each clause. Each has a single 1 in that clause's column and zeros everywhere else. They can top the count up by 0, 1 or 2.
+
+- 1 true literal: add both slack numbers to reach 3.
+- 2 true literals: add one slack number.
+- 3 true literals: add none.
+- **0 true literals**: even both slack numbers only reach 2. The column can never hit 3.
+
+So the slack can rescue a clause that's partly true, but never one that's completely false.
+
+  </TabItem>
+  <TabItem value="carries" label="Why nothing carries">
+
+A clause column can receive at most 3 from literals (a clause has three of them) plus 2 from slack. That's 5. A variable column receives at most 1 from the two numbers for that variable, if you only pick one, or 2 if you pick both. Either way, every column stays below 10.
+
+So no column ever carries into its neighbour, and every column really is an independent counter. That's the reason we write the numbers in base 10 with plenty of room. The base just has to be big enough that no column can overflow.
+
+  </TabItem>
+</Tabs>
+
+Then the target $T$ is the number whose digits are 1 in every variable column and 3 in every clause column.
+
+### Try it
+
+Here's the construction for a small formula with three variables and two clauses:
+
+$$\phi = (x_1 \vee x_2 \vee x_3) \wedge (\neg x_1 \vee \neg x_2 \vee x_3)$$
+
+So every number has five digits, $x_1\,x_2\,x_3\,|\,C_1\,C_2$, and the target is $11133$. Pick a truth value for each variable at the top. The figure picks the matching "true" or "false" number for each variable, adds as many slack numbers as each clause needs, and shows the column sums.
+
+<SubsetSumReduction />
+
+Start with $x_1 = $ T, $x_2 = $ F, $x_3 = $ F. The chosen numbers are $10010$, $01001$ and $00100$, which add up to $11111$. Each clause column has 1, so each clause takes both slack numbers, and the total is $11133$. Exactly the target.
+
+Now set $x_1 = $ T and $x_2 = $ T with $x_3 = $ F. Clause 2 is $(\neg x_1 \vee \neg x_2 \vee x_3)$, and all three of those literals are false now. Its column is stuck at 2, even with both slack numbers. There is no way to hit $11133$ with this assignment.
+
+### Why it works both ways
+
+If the formula has a satisfying assignment, take the matching "true" or "false" number for each variable, then top up each clause column with slack. Every variable column is 1, every clause column is 3. The group adds up to $T$.
+
+If some group adds up to $T$, then (since nothing carries) every column matches separately. Every variable column is 1, so exactly one number was picked per variable: that's an assignment. Every clause column is 3, but slack can only give 2, so at least 1 came from a literal number: that clause has a true literal. Every clause is satisfied.
+
+There are $2n + 2k$ numbers, each with $n + k$ digits. Building them is polynomial.
+
+$$\text{3-SAT} \leq_P \text{Subset Sum}$$
+
+So **Subset Sum is NP-Complete**, and from the one-line reduction in Post 21, so is **Knapsack**.
+
+---
+
+## Same Problem, Different Clothes
+
+Here are three versions of the same question, and why they're all equally hard.
+
+<Tabs>
+  <TabItem value="zero" label="Sum to zero" default>
+
+**The version from Post 9:** is there a non-empty group of numbers, some positive and some negative, that adds up to exactly 0?
+
+To turn an ordinary Subset Sum question (positive numbers, target $T$) into this one, just add one extra number: $-T$.
+
+A group that adds to zero must include $-T$, because the other numbers are all positive and positive numbers can't add to zero. So the rest of the group adds to $T$. And any group adding to $T$, together with $-T$, adds to zero. Same answer.
+
+  </TabItem>
+  <TabItem value="partition" label="Split in half">
+
+**Partition:** can you split a list of numbers into two groups with exactly equal totals? Think of splitting a pile of gold bars fairly between two people.
+
+This was also on Karp's 1972 list. It's Subset Sum with the target set to exactly half the total, plus a small padding trick to handle any target. Even this very simple looking fairness question is NP-Complete.
+
+  </TabItem>
+  <TabItem value="knapsack" label="Fill the bag">
+
+**Knapsack**, from Post 21, with every item's value equal to its weight: can you fill the bag exactly to its limit?
+
+  </TabItem>
+</Tabs>
+
+---
+
+## The Big-Number Catch
+
+Notice what the reduction had to do. With $n$ variables and $k$ clauses, the numbers it builds have $n + k$ digits. For a formula with 100 variables and 400 clauses, every number is 500 digits long.
+
+That is not an accident. Remember from Post 21 that Subset Sum has a pseudo-polynomial algorithm, a dynamic programming table whose width is the target $T$. If the numbers in the reduction were small, that table would be small too, and we would be solving 3-SAT in polynomial time.
+
+So the reduction **has** to produce enormous numbers. All the difficulty of the original formula gets packed into the length of the digits. When the numbers are small, Subset Sum is easy. When the numbers are huge, it's NP-Complete. Problems with this property are called **weakly NP-Complete**, and Post 70 is where we'll look at what that means for real engineering.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+**Subset Sum** asks whether some of a list of numbers add up to exactly $T$. It is NP-Complete.
+
+**In $\mathcal{NP}$:** add up the proposed group.
+
+**NP-Hard:** 3-SAT reduces to it. Every number has one digit per variable and one per clause. Two numbers per variable choose its truth value, two slack numbers per clause top up any clause with at least one true literal. The target is 1 in every variable column and 3 in every clause column. Columns never carry, so each one counts on its own.
+
+The sum-to-zero version, Partition and Knapsack are all equally hard. The reduction needs very large numbers, which is why small-number versions can be solved quickly by dynamic programming.
+:::
+
+---
+
+## Up Next
+
+We have spent twelve posts on abstract problems. The next two are about games you have probably played on a phone during a boring lecture.
+
+Post 23 is Sudoku. In Post 1, I said generalized Sudoku explodes in difficulty, and left it at that. Now I can actually prove it: an $n^2 \times n^2$ Sudoku is NP-Complete, and the reason connects back to Graph Coloring from Post 18.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

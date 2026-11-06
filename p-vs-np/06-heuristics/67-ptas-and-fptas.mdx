@@ -1,0 +1,128 @@
+---
+sidebar_position: 5
+title: "PTAS and FPTAS"
+description: "For some NP-Hard problems you get to choose: name any accuracy you like, say within 1% of the best, and there's a polynomial-time algorithm that achieves it. The price is time. Knapsack is the classic example, and it uses a rounding trick I love."
+tags: [heuristics, approximation-schemes, ptas, fptas, knapsack, dynamic-programming, euclidean-tsp]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import FPTASKnapsack from '@site/src/components/FPTASKnapsack';
+
+# PTAS and FPTAS
+
+The last two posts gave fixed guarantees: within 2 for vertex cover, within 1.5 for metric TSP. Those numbers are baked into the algorithms. You can't ask the vertex cover algorithm to try harder and get within 1.1.
+
+For some problems, you can. You pick how accurate you want to be, and there's an algorithm for that accuracy. Want to be within 10%? Fine. Within 1%? Also fine, it just takes longer. Within 0.1%? Longer still, but still polynomial.
+
+These are called **approximation schemes**, and they're the closest thing NP-Hard problems have to being "nearly easy".
+
+---
+
+## Two Kinds of Scheme
+
+Write $\varepsilon$ (from Post 64) for how far from optimal you're willing to be. $\varepsilon = 0.01$ means "within 1%".
+
+:::info PTAS
+A **Polynomial-Time Approximation Scheme** is a family of algorithms, one for every $\varepsilon > 0$, where the algorithm for $\varepsilon$ gets within a factor $(1 + \varepsilon)$ of optimal (or $(1 - \varepsilon)$ for maximisation), and runs in polynomial time **for each fixed** $\varepsilon$.
+:::
+
+The catch is in "for each fixed $\varepsilon$". The running time might be something like $n^{1/\varepsilon}$. For $\varepsilon = 0.5$ that's $n^2$, nice. For $\varepsilon = 0.01$ that's $n^{100}$, which is polynomial but useless.
+
+:::info FPTAS
+A **Fully Polynomial-Time Approximation Scheme** is a PTAS whose running time is polynomial in **both** $n$ **and** $\frac{1}{\varepsilon}$. Something like $n^3 / \varepsilon$.
+:::
+
+An FPTAS is the best you can hope for with an NP-Hard problem: getting 10 times more accurate costs only about 10 times more work, not an exponent of 10 more.
+
+---
+
+## The Knapsack FPTAS
+
+Knapsack (Post 21) has an FPTAS, first described by Oscar Ibarra and Chul Kim in 1975. It uses two ideas from earlier posts and joins them with one trick.
+
+<Tabs>
+  <TabItem value="dp" label="Idea 1: DP over values" default>
+
+Post 21 described a dynamic programming algorithm that's fast when the numbers are small. There's a version that builds the table over **total value** instead of total weight: for each possible total value, what's the lightest set of items that achieves it?
+
+That takes about $n \times (\text{sum of all values})$ steps. Fast if values are small numbers. Slow if they're huge.
+
+  </TabItem>
+  <TabItem value="round" label="Idea 2: Make values small">
+
+So make the values small. Pick a scaling factor
+
+$$K = \frac{\varepsilon \times (\text{largest value})}{n}$$
+
+and replace every value $v$ with $\lfloor v / K \rfloor$: divide by $K$ and throw away the fraction.
+
+:::info New Symbol: $\lfloor x \rfloor$
+"Floor of $x$": round down to the nearest whole number. $\lfloor 3.7 \rfloor = 3$, $\lfloor 5 \rfloor = 5$.
+:::
+
+Now every value is at most about $n / \varepsilon$, so the table is small, and the DP is fast.
+
+  </TabItem>
+  <TabItem value="why" label="Why little is lost">
+
+Rounding loses at most $K$ per item, so at most $nK = \varepsilon \times (\text{largest value})$ in total across any set of items.
+
+And the optimum is worth at least the largest single value (just take that item alone, assuming it fits). So the loss is at most $\varepsilon \times \text{OPT}$.
+
+The rounded problem is solved **exactly**, so its answer, evaluated with the real values, is worth at least $(1 - \varepsilon) \times \text{OPT}$.
+
+  </TabItem>
+</Tabs>
+
+The running time works out to about $n^3 / \varepsilon$. Polynomial in both $n$ and $1/\varepsilon$. That's an FPTAS.
+
+Here it is on ten items. Choose $\varepsilon$ and watch the rounded values, the size of the table, and the value found.
+
+<FPTASKnapsack />
+
+With $\varepsilon = 0.9$ the values are rounded very coarsely, the table is small, and the answer is a little below the best (about 99% of it). As $\varepsilon$ shrinks, the rounding gets finer and the table grows. The guarantee (shown in the status line) tightens every time.
+
+Notice one thing that confused me for a moment: on this instance, $\varepsilon = 0.1$ happens to find a slightly worse answer than $\varepsilon = 0.25$. That's allowed. The **guarantee** always gets better as $\varepsilon$ shrinks, but on any particular instance, the actual answer can wobble. Usually the real answer is much better than the guarantee anyway.
+
+---
+
+## Why This Doesn't Contradict NP-Hardness
+
+If we can get within any $\varepsilon$ we like in polynomial time, why not set $\varepsilon$ tiny enough to get the exact answer?
+
+Because "tiny enough" depends on the numbers. To guarantee the **exact** optimum, $\varepsilon$ has to be smaller than 1 divided by the optimum, so that the allowed error is less than 1. Then $1/\varepsilon$ is about as large as the values themselves, and the running time becomes polynomial in the **values**, not in their number of **digits**. That's exactly the pseudo-polynomial algorithm from Post 21 again, and it's exponential in the input length.
+
+So the FPTAS sits right on the boundary: as accurate as you like, but never exactly accurate without paying the exponential price. Post 70 looks at that boundary more closely.
+
+It also explains which problems can have an FPTAS. A problem that stays NP-Hard even when all its numbers are small (called **strongly** NP-Hard, like bin packing in Post 56 or TSP) can't have an FPTAS unless $\mathcal{P} = \mathcal{NP}$. The rounding trick only works when the hardness lives in the size of the numbers.
+
+---
+
+## A PTAS for TSP on a Map
+
+Metric TSP can't have a PTAS unless $\mathcal{P} = \mathcal{NP}$; the "within about 1.008 is hard" result from Post 66 rules it out. But if the cities are points on a **flat map** with straight-line distances (called **Euclidean TSP**), it can.
+
+In 1996, Sanjeev Arora found a PTAS for Euclidean TSP, and Joseph Mitchell found one independently around the same time. The idea, very roughly, is to divide the map into squares, recursively, and force the tour to cross square boundaries only at a limited number of "portals". Then dynamic programming over the squares finds the best portal-respecting tour, which is provably close to the true best. Arora and Mitchell shared the Gödel Prize in 2010 for this work.
+
+The running time is polynomial for each fixed $\varepsilon$, but grows very quickly as $\varepsilon$ shrinks, so it's a PTAS, not an FPTAS. In practice, other heuristics are faster. But it settled a big theoretical question: on a flat map, you really can get as close to the best tour as you like.
+
+:::note What We Have Established
+A **PTAS** gets within a factor $(1 + \varepsilon)$ of optimal for any chosen $\varepsilon > 0$, in polynomial time for each fixed $\varepsilon$ (possibly like $n^{1/\varepsilon}$). An **FPTAS** is polynomial in both $n$ and $1/\varepsilon$.
+
+**Knapsack has an FPTAS** (Ibarra and Kim, 1975): scale values down by $K = \varepsilon v_{\max} / n$, round down, and solve the rounded problem exactly by dynamic programming over values. The loss is at most $\varepsilon \times \text{OPT}$, and the time is about $n^3/\varepsilon$.
+
+Strongly NP-Hard problems can't have an FPTAS unless $\mathcal{P} = \mathcal{NP}$. **Euclidean TSP has a PTAS** (Arora; Mitchell; 1996), while general metric TSP doesn't, unless $\mathcal{P} = \mathcal{NP}$.
+:::
+
+---
+
+## Up Next
+
+Approximation algorithms come with proofs. Most of the algorithms people actually write are simpler and come with nothing. Post 68 is about the simplest family of all: **greedy algorithms**. Always take the best-looking option right now and never look back. With code, and with examples of when that's perfect and when it fails.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

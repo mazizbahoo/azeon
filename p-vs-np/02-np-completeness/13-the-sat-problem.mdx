@@ -193,7 +193,7 @@ Not all SAT instances are equally hard. I found this surprising when I first loo
 
 **2-SAT is in $\mathcal{P}$.**
 
-If every clause contains exactly two literals, the problem is called 2-SAT. There is a polynomial-time algorithm that solves it. The algorithm converts the formula into a kind of directed graph and analyzes its structure. I have not learned the full details yet so I will not pretend to explain it properly here. But the key fact is: 2-SAT has a real polynomial-time solution. Restricting every clause to exactly two literals makes the problem tractable in a way that three literals does not.
+If every clause contains at most two literals, the problem is called 2-SAT. There is a polynomial-time algorithm that solves it. The algorithm converts the formula into a kind of directed graph and analyzes its structure. I have not learned the full details yet so I will not pretend to explain it properly here. But the key fact is: 2-SAT has a real polynomial-time solution. Restricting every clause to exactly two literals makes the problem tractable in a way that three literals does not.
 
 **3-SAT is NP-Complete.**
 
@@ -207,7 +207,7 @@ When there are very few clauses relative to the number of variables, the formula
 
 When there are very many clauses relative to variables, the formula is almost always unsatisfiable. The constraints pile up and contradict each other.
 
-But right around a specific ratio (around 4.27 clauses per variable for 3-SAT), the formula flips sharply from almost always satisfiable to almost always unsatisfiable. And the hardest instances for real SAT solvers cluster right at this boundary. Not because anyone designed them to be hard, just because that is where the constraints are tight enough to resist easy solution but not so overwhelming that contradictions are obvious.
+But right around a specific ratio (around 4.27 clauses per variable for 3-SAT), the formula flips sharply from almost always satisfiable to almost always unsatisfiable. And the hardest *random* instances for real SAT solvers cluster right at this boundary. Not because anyone designed them to be hard, just because that is where the constraints are tight enough to resist easy solution but not so overwhelming that contradictions are obvious.
 
 This is one of the most actively studied phenomena in SAT research and I find it genuinely fascinating. The boundary is not well understood theoretically, but computationally you can see it clearly in experiments.
 
@@ -221,9 +221,9 @@ Each variable has two choices: true or false. With $n$ variables, there are $2^n
 
 You cannot check them all. Any algorithm that works by trying every assignment is dead on arrival.
 
-Can you do better than checking every assignment? This is where it gets interesting. Modern SAT solvers, programs like MiniSat and Glucose, are genuinely powerful. They solve formulas with millions of variables in seconds by using smart techniques: they propagate forced assignments, they learn from failed branches, they backtrack non-chronologically. They are not doing brute force.
+Can you do better than checking every assignment? This is where it gets interesting. Modern SAT solvers, programs like MiniSat and Glucose, are genuinely powerful. On many real-world formulas, even ones with millions of variables, they finish in seconds or minutes by using smart techniques: they propagate forced assignments, they learn from failed branches, they backtrack non-chronologically. They are not doing brute force.
 
-But no one has found a polynomial-time algorithm for SAT. Every solver eventually hits instances where the search explodes. And the theoretical wall is exactly what Cook proved: if you found a polynomial-time algorithm for SAT, you would have $\mathcal{P} = \mathcal{NP}$. Every problem in $\mathcal{NP}$ would become efficiently solvable. All of modern cryptography would collapse overnight. The belief that this cannot happen is what makes SAT hard to doubt.
+But no one has found a polynomial-time algorithm for SAT. Every solver eventually hits instances where the search explodes. And the theoretical wall is exactly what Cook proved: if you found a polynomial-time algorithm for SAT, you would have $\mathcal{P} = \mathcal{NP}$. Every problem in $\mathcal{NP}$ would become efficiently solvable, and if the algorithm were practical, most of modern cryptography would collapse. The belief that this cannot happen is what makes SAT hard to doubt.
 
 :::note The two-sided mystery
 We do not know of a polynomial-time SAT algorithm. We also cannot prove that no such algorithm exists. SAT sits exactly at the line where our tools run out. It is in $\mathcal{NP}$ because a satisfying assignment is a certificate that can be checked in polynomial time. It is NP-Hard because everything in $\mathcal{NP}$ reduces to it. Whether it is in $\mathcal{P}$ is the $\mathcal{P}$ vs $\mathcal{NP}$ question itself.

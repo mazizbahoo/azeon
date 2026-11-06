@@ -1,0 +1,131 @@
+---
+sidebar_position: 3
+title: "Approximating Vertex Cover"
+description: "Back to the cameras from Posts 11 and 16. Pick any unwatched road and put cameras on both ends. Repeat. That's the whole algorithm, it's never worse than twice the best, and the proof fits in four lines."
+tags: [heuristics, approximation-algorithms, vertex-cover, matching, two-approximation, unique-games]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import MatchingCover from '@site/src/components/MatchingCover';
+
+# Approximating Vertex Cover
+
+Vertex Cover has followed us through this whole series. Post 11 used it to explain reductions. Post 16 proved it NP-Complete. Post 17 connected it to Independent Set, and Post 63 showed a fast method when the number of cameras is small.
+
+This post is the happy ending. There's an algorithm for Vertex Cover that's so simple I could explain it to my younger brother, and it comes with a guarantee: it never uses more than **twice** as many cameras as necessary.
+
+The first time I worked through the proof, it took about four lines. I remember thinking "that can't be all". It is.
+
+---
+
+## The Problem Again
+
+Cities connected by roads. Put cameras on cities so every road has a camera on at least one end. Use as few cameras as possible.
+
+Finding the minimum is NP-Hard. So we'll find a cover quickly, and prove it's never more than twice the minimum.
+
+---
+
+## The Algorithm
+
+Here it is in full:
+
+> Repeat until every road is watched:
+> 1. Pick **any** road that has no camera at either end.
+> 2. Put cameras on **both** of its ends.
+
+That's it. Step through it here. Picked roads turn thick. Roads that are already watched, because one of their ends has a camera, turn dashed.
+
+<MatchingCover />
+
+On this map, the algorithm picks 4 roads and places 8 cameras. The best possible cover uses 5. So we used 3 more than necessary, but 8 is less than twice 5, as the guarantee promises.
+
+---
+
+## The Proof
+
+Here's the whole proof. I'll go slowly, because every line matters.
+
+**1. The picked roads never share a city.**
+
+When we pick a road, neither end has a camera yet. After we pick it, both ends do. So no later pick can touch either of those cities, because a later pick must have no camera at either end. So the picked roads are completely separate from each other.
+
+A set of edges that share no endpoints is called a **matching**. We've picked a matching, of some size $m$.
+
+**2. Our cover uses exactly $2m$ cameras.**
+
+Two cameras per picked road, and no city gets counted twice, because the picked roads don't share cities.
+
+**3. Every cover, including the best one, needs at least $m$ cameras.**
+
+Each picked road must be watched by at least one camera at one of its ends, in **any** valid cover. And since the picked roads share no cities, one camera can't watch two of them. So any cover needs at least one camera per picked road: at least $m$ cameras.
+
+So $\text{OPT} \geq m$.
+
+**4. Put them together.**
+
+$$\text{our cameras} = 2m \leq 2 \times \text{OPT}$$
+
+That's the proof. The matching is the **bound** from Post 64: something we can compute, which the optimum can't beat. We never found $\text{OPT}$. We didn't need to.
+
+:::tip What the proof is really saying
+Every road we picked is a piece of **evidence** that the optimum needs a camera somewhere near there. We put down two cameras for each piece of evidence, where the optimum needs at least one. So we can be at most twice as bad.
+:::
+
+---
+
+## Is 2 the Best Possible?
+
+For **this** algorithm, yes: there are maps where it really does use twice the minimum. The simplest is a single road between two cities. The algorithm puts cameras on both; the best answer needs only one.
+
+For **any** algorithm, the question is still partly open, and it's one of the most famous open problems in approximation.
+
+<Tabs>
+  <TabItem value="known" label="What's proved" default>
+
+In 2005, Irit Dinur and Shmuel Safra proved that getting within about 1.36 of the optimum is NP-Hard. Later work by Subhash Khot, Dor Minzer and Muli Safra (2018) raised that to about 1.41 (that is, $\sqrt{2}$).
+
+So unless $\mathcal{P} = \mathcal{NP}$, no efficient algorithm can get within about 1.41 of the best. Our simple algorithm gets within 2. The truth is somewhere in between.
+
+  </TabItem>
+  <TabItem value="ugc" label="The Unique Games Conjecture">
+
+In 2002, Subhash Khot proposed the **Unique Games Conjecture**, a specific statement about how hard a certain kind of constraint problem is to approximate. It's unproven, but it's been incredibly productive.
+
+In 2008, Khot and Oded Regev showed that **if** the Unique Games Conjecture is true, then doing better than 2 for Vertex Cover is NP-Hard. In that case, the simple algorithm in this post would be **optimal**. No efficient method could ever beat "cameras on both ends".
+
+Khot received the Nevanlinna Prize (now called the IMU Abacus Medal) in 2014, largely for this line of work.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Why the Obvious Greedy Rule Is Worse
+
+My first instinct, before learning this algorithm, was a different greedy rule: **always put the next camera on the city with the most unwatched roads**. That seems smarter. It looks at the whole map and picks the most useful city each time.
+
+Surprisingly, it's **worse** in the worst case. There are carefully built maps where that "most roads first" rule uses about $\ln n$ times the optimum, and $\ln n$ keeps growing as the map gets bigger, while 2 stays 2.
+
+That was a real lesson for me. The rule that looks smart locally doesn't come with a good guarantee, and the rule that looks almost wasteful (two cameras when one might do) comes with an excellent one. Good approximation algorithms aren't about making each step look clever. They're about making each step **provable**.
+
+:::note What We Have Established
+**Algorithm:** while some road has no camera at either end, pick it and put cameras on both ends.
+
+**Proof of the factor 2:** the picked roads form a **matching** of size $m$ (they share no cities). Our cover has exactly $2m$ cameras. Any cover needs at least one camera per matched road, so $\text{OPT} \geq m$. Therefore our cover is at most $2 \times \text{OPT}$.
+
+Getting within about $\sqrt{2}$ is NP-Hard (Khot, Minzer and Safra, 2018). If the **Unique Games Conjecture** holds, beating 2 is NP-Hard (Khot and Regev, 2008), so this algorithm would be optimal. The "most unwatched roads first" greedy rule can be a factor of about $\ln n$ off.
+:::
+
+---
+
+## Up Next
+
+Post 66 does the same thing for the Traveling Salesman, with one condition: distances have to obey the **triangle inequality**, meaning going directly is never longer than going via somewhere else. With that one rule, a spanning tree gives a tour within twice the optimum, and a 1976 trick gets that down to 1.5.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

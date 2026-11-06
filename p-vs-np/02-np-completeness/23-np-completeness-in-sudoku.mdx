@@ -1,0 +1,171 @@
+---
+sidebar_position: 13
+title: "NP-Completeness in Sudoku"
+description: "In Post 1 I said generalized Sudoku explodes in difficulty and moved on. Now I can actually prove it: an n² × n² Sudoku is NP-Complete, and the proof runs through Latin squares and graph colouring."
+tags: [np-completeness, sudoku, latin-squares, graph-coloring, puzzles, reductions]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import SudokuGrid from '@site/src/components/SudokuGrid';
+
+# NP-Completeness in Sudoku
+
+Sudoku was the very first example in this series. In Post 1, I used it to explain the difference between checking a solution and finding one. I said that checking a finished grid takes a couple of seconds, that finding one from a nearly empty grid is a completely different kind of effort, and that for bigger and bigger grids the difficulty "explodes".
+
+I said that without proving it. At the time I couldn't have proved it. I didn't even know what proving it would mean.
+
+Twenty-two posts later, I do. So this post closes a loop I opened at the very beginning, and I have to admit that felt really good to write.
+
+---
+
+## First, a Strange Problem With "Sudoku Is Hard"
+
+Here's something that bothered me as soon as I tried to state the claim properly.
+
+A normal Sudoku is a $9 \times 9$ grid. That's a **fixed** size. There are only finitely many ways to fill a $9 \times 9$ grid, about $6.67 \times 10^{21}$ valid completed grids, as counted by Bertram Felgenhauer and Frazer Jarvis in 2005. That is a huge number, but it is a **fixed** number. A computer could, in principle, have a lookup table for every possible puzzle.
+
+In the language of Post 5, solving a $9 \times 9$ Sudoku takes $O(1)$ time. Constant. The input never grows.
+
+So "Sudoku is NP-Complete" can't be about the $9 \times 9$ puzzle in the newspaper. It's about the **whole family** of Sudokus as they grow:
+
+- $4 \times 4$ grids with $2 \times 2$ boxes,
+- $9 \times 9$ grids with $3 \times 3$ boxes,
+- $16 \times 16$ grids with $4 \times 4$ boxes,
+- $25 \times 25$ grids with $5 \times 5$ boxes,
+- and so on forever.
+
+In general, an $n^2 \times n^2$ grid split into $n \times n$ boxes, filled with the numbers 1 to $n^2$.
+
+:::tip Complexity is about growth
+This is true of every problem in this series. Complexity theory never asks how hard one particular puzzle is. It asks how the difficulty **grows** as the puzzles get bigger. A single fixed puzzle, no matter how hard it feels to a human, is always technically constant time.
+:::
+
+> **Generalized Sudoku:** given an $n^2 \times n^2$ grid with some cells already filled in, can the rest be filled so that every row, every column and every $n \times n$ box contains each number from 1 to $n^2$ exactly once?
+
+---
+
+## Play With It
+
+Here are two puzzles. The small one is a $4 \times 4$, which is gentle. The other is a classic $9 \times 9$. Click an empty cell to cycle its digit. If a digit appears twice in the same row, column or box, both copies turn red.
+
+<SudokuGrid />
+
+When you get bored, press **Solve**. It runs the simplest possible method, called **backtracking**: go to the first empty cell, try the smallest digit that doesn't clash, move on to the next cell, and whenever you get stuck, go back and change the most recent choice. The status line tells you how many guesses it made.
+
+On the $9 \times 9$ puzzle, the solver makes a few thousand guesses. Checking the finished grid, on the other hand, is one look per cell. That's the whole of Post 1, in one figure.
+
+---
+
+## Sudoku Is in NP
+
+The certificate is the filled grid. To check it:
+
+- each of the $n^2$ rows: does it contain every number once?
+- each of the $n^2$ columns: same check.
+- each of the $n^2$ boxes: same check.
+
+That's $3 n^2$ groups of $n^2$ cells each. About $3 n^4$ checks, polynomial in the size of the grid. Also check that the solver didn't change any of the starting numbers. Done.
+
+---
+
+## Sudoku Is Graph Colouring in Disguise
+
+Back in Post 18, I said Sudoku was a colouring problem. Let me make that precise, because it's the cleanest way to see what Sudoku really is.
+
+- Every **cell** is a node.
+- Two cells are joined by an **edge** if they're in the same row, the same column, or the same box.
+- The **digits** are the colours.
+
+"No digit twice in a row, column or box" is exactly "no two joined nodes get the same colour". A completed $9 \times 9$ Sudoku is a valid colouring of an 81-node graph with 9 colours, where every node is joined to exactly 20 others: 8 in its row, 8 in its column, and 4 more in its box that aren't already in its row or column.
+
+The starting numbers are nodes that come **pre-coloured**. The puzzle is to finish the colouring.
+
+That sounds like it should prove Sudoku is NP-Complete straight away, since colouring is NP-Complete. But it doesn't. Graph colouring is hard on **general** graphs. A Sudoku graph is one very specific, very regular kind of graph. It's possible in principle for a special family of graphs to be easy. Remember from Post 18 that colouring maps with four colours is trivial even though colouring in general is hard.
+
+So we need an actual reduction **into** Sudoku. That's where Latin squares come in.
+
+---
+
+## Latin Squares
+
+A **Latin square** of size $N$ is an $N \times N$ grid filled with $N$ symbols, where every symbol appears exactly once in every row and exactly once in every column. That's a Sudoku with no boxes.
+
+They're much older than Sudoku. Leonhard Euler studied them in the 1700s, and they've been used for centuries in things like designing fair experiments. If you want to test 5 fertilisers on 5 types of soil over 5 weeks, a Latin square tells you a schedule where every fertiliser meets every soil and every week exactly once.
+
+> **Latin Square Completion:** given an $N \times N$ grid with some cells filled, can it be completed into a Latin square?
+
+In 1984, Charles Colbourn proved that **Latin Square Completion is NP-Complete**. His proof is a chain of reductions starting from a problem about splitting the edges of a graph into triangles. I'm not going to reproduce that chain, it's long and very technical. But the result itself is the stepping stone we need.
+
+---
+
+## From Latin Squares to Sudoku
+
+In 2003, Takayuki Yato and Takahiro Seta showed that Latin Square Completion reduces to Sudoku. The idea is to build a big Sudoku that has a partially filled Latin square hidden inside it.
+
+<Tabs>
+  <TabItem value="idea" label="The idea" default>
+
+A Sudoku has three kinds of rule: rows, columns, boxes. A Latin square has only two: rows and columns.
+
+So the reduction has to build a Sudoku where the **box** rule is automatically satisfied, no matter how you fill in the hidden Latin square. Then the only rules that matter for the hidden part are rows and columns, which is exactly a Latin square.
+
+  </TabItem>
+  <TabItem value="how" label="How they do it">
+
+They take an $n \times n$ partial Latin square and build an $n^2 \times n^2$ Sudoku. Most of the Sudoku is filled in ahead of time with a carefully structured pattern. The cells that are left blank are placed so that the box rule never forces anything the Latin square's own row and column rules don't already force.
+
+Then the hidden Latin square can be completed **if and only if** the Sudoku can be completed. The construction is just writing down a fixed pattern of numbers, so it takes polynomial time.
+
+  </TabItem>
+</Tabs>
+
+$$\text{Latin Square Completion} \leq_P \text{Generalized Sudoku}$$
+
+And since Latin Square Completion is NP-Complete:
+
+**Generalized Sudoku is NP-Complete.**
+
+:::note A note on honesty
+This is the first proof in the series that I'm describing at the level of ideas rather than walking through completely. Colbourn's original reduction and Yato and Seta's construction are both too long to fit in one post in a way that would make sense to someone without a lot more background. I'd rather tell you that clearly than pretend I've shown you the full thing. The reference names and years above are where you'd go to read the real proofs.
+:::
+
+---
+
+## Things That Surprised Me About Sudoku
+
+A few facts I found while reading for this post.
+
+**The fewest starting numbers is 17.** For a $9 \times 9$ Sudoku to have exactly one solution, it needs at least 17 starting numbers. People had found many 17-clue puzzles and no 16-clue ones, but proving no 16-clue puzzle could exist took a massive computer search. Gary McGuire, Bastian Tugemann and Gilles Civario announced the proof in 2012.
+
+**Newspaper puzzles are designed to be solvable by logic.** The puzzles in newspapers usually have exactly one solution and can be solved without guessing, using step-by-step deductions. That's a property the puzzle designer chooses. It says nothing about the hardest possible puzzles of a given size.
+
+**Real Sudoku solvers turn it into SAT.** One common approach is to encode a Sudoku as a SAT formula, with a variable for "cell $(r, c)$ holds digit $d$", and hand it to a SAT solver. For a $9 \times 9$, that's 729 variables, and modern SAT solvers finish it almost instantly. We'll talk about why SAT solvers are so good in practice in Post 74. It's the reduction chain running in the useful direction.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+A single $9 \times 9$ Sudoku is technically constant time. The complexity question is about **Generalized Sudoku**, on $n^2 \times n^2$ grids.
+
+It's in $\mathcal{NP}$: check every row, column and box of the filled grid.
+
+It's NP-Hard: Latin Square Completion (NP-Complete, Colbourn 1984) reduces to it (Yato and Seta, 2003) by hiding a partial Latin square inside a larger Sudoku where the box rule is always satisfied.
+
+Sudoku is a graph colouring problem on a very specific graph, which is why the general colouring result alone wasn't enough to prove it.
+:::
+
+---
+
+## Up Next
+
+Phase 2 has one post left, and it's my favourite game from when I was younger.
+
+Post 24 is Minesweeper. Most people think of it as a game of luck with a bit of logic. It turns out that figuring out whether the numbers on a Minesweeper board even make sense is NP-Complete, and you can build actual logic gates out of Minesweeper squares to prove it.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

@@ -1,0 +1,173 @@
+---
+sidebar_position: 9
+title: "Shor's Algorithm"
+description: "How a quantum computer would factor huge numbers in polynomial time. Most of the algorithm is ordinary arithmetic you can do by hand. The quantum part is exactly one step: finding when a repeating pattern starts over."
+tags: [complexity-zoo, shor, factoring, quantum-computing, period-finding, rsa, bqp]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PeriodFinder from '@site/src/components/PeriodFinder';
+
+# Shor's Algorithm
+
+In 1994, a mathematician at Bell Labs named Peter Shor found a quantum algorithm that factors whole numbers in polynomial time.
+
+Factoring is the problem underneath RSA, the encryption scheme that protected most secure web traffic for decades. So Shor's algorithm means that a large enough quantum computer could break it. That single result is the main reason governments and companies poured money into quantum computing, and the main reason the world is now switching to new kinds of encryption.
+
+I want to be careful with my wording before we start, because I got this wrong in my own notes. Shor's algorithm doesn't "factor primes". A prime can't be factored, that's what prime means. It factors **composite** numbers, like $15$ or a 600-digit RSA number, into the primes they're built from.
+
+The best part, for me, is that most of Shor's algorithm isn't quantum at all. It's arithmetic you can do on paper. So let's do it on paper.
+
+---
+
+## Step 1: Turn Factoring Into a Repeating Pattern
+
+Pick a number $N$ to factor. Pick any number $a$ smaller than $N$, at random.
+
+Now write down the powers of $a$, but only keep the remainder after dividing by $N$. That's the $\bmod$ from Post 31.
+
+Let's take $N = 15$ and $a = 7$:
+
+| $x$ | $7^x$ | $7^x \bmod 15$ |
+|---|---|---|
+| 0 | 1 | **1** |
+| 1 | 7 | 7 |
+| 2 | 49 | 4 |
+| 3 | 343 | 13 |
+| 4 | 2401 | **1** |
+| 5 | 16807 | 7 |
+| 6 | 117649 | 4 |
+
+The remainders go $1, 7, 4, 13$ and then repeat forever: $1, 7, 4, 13, 1, 7, 4, 13, \ldots$
+
+This always happens. There are only $N$ possible remainders, so the sequence must eventually repeat, and it turns out (when $a$ and $N$ share no factor) that it always comes back to 1 and cycles from there. The length of the cycle is called the **period**, written $r$. Here, $r = 4$.
+
+---
+
+## Step 2: Turn the Period Into Factors
+
+Here's the clever bit, and it's just algebra.
+
+The period $r$ means $a^r \bmod N = 1$. In other words, $a^r - 1$ is a multiple of $N$.
+
+If $r$ is even, we can split $a^r - 1$ using the difference of two squares, the same identity as $x^2 - 1 = (x - 1)(x + 1)$:
+
+$$a^r - 1 = \left(a^{r/2} - 1\right)\left(a^{r/2} + 1\right)$$
+
+So $N$ divides the product of those two brackets. As long as $N$ doesn't divide either bracket by itself, each bracket must share **part** of $N$. And finding the shared part of two numbers is easy. It's the **greatest common divisor**, or gcd, which Euclid's algorithm computes in polynomial time.
+
+For $N = 15$, $a = 7$, $r = 4$:
+
+- $a^{r/2} = 7^2 = 49$, and $49 \bmod 15 = 4$.
+- $\gcd(4 - 1, 15) = \gcd(3, 15) = \mathbf{3}$
+- $\gcd(4 + 1, 15) = \gcd(5, 15) = \mathbf{5}$
+
+And $15 = 3 \times 5$. Factored.
+
+:::info New Word: gcd
+The **greatest common divisor** of two numbers is the largest number that divides both of them. $\gcd(12, 18) = 6$. $\gcd(3, 15) = 3$. Euclid described a fast method for it about 2,300 years ago, and it's still how computers do it.
+:::
+
+Sometimes it doesn't work: the period might be odd, or $a^{r/2}$ might be exactly $N - 1$, which makes one bracket a multiple of $N$ and tells you nothing. Then you just pick a new random $a$ and try again. For the numbers that matter (odd, and not a power of a single prime), at least half of all choices of $a$ work, so a few tries are almost always enough. That's a randomized algorithm, like in Post 31.
+
+Try it yourself. Pick a number to factor and slide $a$ around. Some values of $a$ give you the factors; some are unlucky and you have to try again. And occasionally $a$ already shares a factor with $N$, and the gcd hands you the answer immediately.
+
+<PeriodFinder />
+
+---
+
+## Step 3: The One Step That Needs a Quantum Computer
+
+Everything above is ordinary arithmetic. So why can't a normal computer just do it for a 600-digit $N$?
+
+Because of **step 1**. For $N = 15$, I listed four powers and saw the repeat. For a 600-digit $N$, the period $r$ could be a number with hundreds of digits. Listing powers one at a time until the pattern repeats would take longer than the age of the universe. Nobody knows a fast classical way to find the period.
+
+This is the step Shor's algorithm hands to a quantum computer, and here's the idea of how it works.
+
+<Tabs>
+  <TabItem value="spread" label="1. Spread out" default>
+
+Using Hadamard gates (the H from Post 32), put a register of qubits into an even spread over a huge range of values of $x$, all at once.
+
+  </TabItem>
+  <TabItem value="compute" label="2. Compute the powers">
+
+Compute $a^x \bmod N$ into a second register, for every $x$ in the spread, at the same time. This step uses normal arithmetic circuits, built from quantum gates.
+
+Then measure the second register. You get some random remainder, say 7. That measurement leaves the first register holding only the values of $x$ that give 7, which are $x = 1, 5, 9, 13, \ldots$, evenly spaced, $r$ apart.
+
+The period is now hidden in the **spacing** of the amplitudes. But measuring the first register directly would just give one random $x$, which tells you nothing.
+
+  </TabItem>
+  <TabItem value="qft" label="3. Interfere">
+
+Here's the interference trick. Apply an operation called the **quantum Fourier transform**. A Fourier transform is the mathematical tool that picks out the frequencies in a signal, like a music app showing which notes are being played.
+
+Because the amplitudes are spaced exactly $r$ apart, the quantum Fourier transform makes them reinforce at a handful of values related to $1/r$, and cancel almost everywhere else. Measure now, and you very likely land on one of those values.
+
+  </TabItem>
+  <TabItem value="read" label="4. Read off r">
+
+From that measured value, a classical method called **continued fractions** recovers $r$ with good probability. If it fails, run again.
+
+Then do step 2, with gcds, on an ordinary computer.
+
+  </TabItem>
+</Tabs>
+
+That's the shape of it. The quantum computer isn't trying every factor. It's using interference to measure the **rhythm** of a pattern too long to write out. That's exactly the "choreograph the cancellations" idea from Post 32. Factoring happens to have the special structure, a hidden period, that lets the cancellations line up.
+
+The whole algorithm runs in time polynomial in the number of **digits** of $N$, roughly the cube of the number of digits. The best known classical algorithm, the number field sieve, takes time that grows faster than any polynomial in the number of digits.
+
+---
+
+## How Close Are We?
+
+The honest answer: not that close, but closer every year.
+
+- **2001:** a team at IBM used a quantum computer based on molecules in a liquid to run Shor's algorithm on $N = 15$ and found $3 \times 5$. Since then, the largest numbers factored in genuine runs of Shor's algorithm have stayed very small.
+- **2019:** Craig Gidney and Martin Ekerå estimated that breaking 2048-bit RSA would need about 20 million noisy physical qubits running for around 8 hours.
+- **2025:** Gidney published a new estimate bringing that below a million noisy qubits, running for under a week.
+
+Today's machines have hundreds to a few thousand noisy qubits. The gap is still large, but it keeps shrinking from both sides: better hardware and cleverer algorithms.
+
+And the danger doesn't start the day the machine is built. Someone could record encrypted traffic today and decrypt it years from now. That's called **"harvest now, decrypt later"**, and it's why, in August 2024, the US National Institute of Standards and Technology published its first standards for **post-quantum cryptography**: encryption based on problems that, as far as anyone knows, quantum computers can't solve efficiently either.
+
+Shor's algorithm also breaks the other big family of public-key encryption, based on a problem called the discrete logarithm. Elliptic curve cryptography, which a huge share of secure connections use today, falls with it.
+
+---
+
+## What Shor's Algorithm Says About P vs NP
+
+This is where people often jump to a wrong conclusion, and I did too, the first time.
+
+Factoring is in $\mathcal{NP}$. Shor puts it in $\mathcal{BQP}$. So quantum computers solve an $\mathcal{NP}$ problem fast. Doesn't that mean they solve **all** $\mathcal{NP}$ problems fast?
+
+No. Remember Post 25: factoring is in $\mathcal{NP} \cap co\mathcal{NP}$, and it's believed **not** to be NP-Complete. It's one of the "in-between" problems. Solving it fast tells us nothing about SAT, or TSP, or Sudoku. Shor's algorithm works because factoring has a hidden periodic structure. NP-Complete problems, as far as anyone can tell, don't.
+
+So does that mean quantum computers can't help with NP-Complete problems at all? That's the next post.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+Shor's algorithm (1994) factors composite numbers in polynomial time on a quantum computer. It reduces factoring to **period finding**: the powers of a random $a$, taken mod $N$, repeat with some period $r$, and $\gcd(a^{r/2} \pm 1, N)$ usually gives the factors.
+
+Everything except finding $r$ is ordinary arithmetic. A quantum computer finds $r$ by spreading over many $x$, computing $a^x \bmod N$, and using the quantum Fourier transform to make the period show up through interference.
+
+Breaking real RSA would need roughly a million or more noisy qubits by recent estimates. Post-quantum encryption standards were published in 2024. Factoring is believed not to be NP-Complete, so Shor's algorithm says nothing about solving NP-Complete problems.
+:::
+
+---
+
+## Up Next
+
+Post 34 tackles the misconception I started Post 32 with. Will quantum computers solve NP-Complete problems? There's a quantum algorithm that speeds up brute-force search, and a theorem that says, in an important sense, it's the best you can do. The answer is "probably not", and the reasons are some of my favourite in this phase.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

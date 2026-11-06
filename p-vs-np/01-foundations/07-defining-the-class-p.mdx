@@ -14,6 +14,8 @@ For a long time, I assumed Sudoku and a Rubik's Cube were polynomial problems. T
 
 Then I saw what happens when you scale them up. A 9x9 Sudoku is hard enough to solve by hand. A 25x25 Sudoku explodes in difficulty. A bigger Rubik's Cube explodes further. The number of possible states does not grow the way I expected. It grows exponentially. And that, as Post 6 showed, is a completely different universe from polynomial.
 
+One careful point before we go on: a huge number of possibilities does *not* automatically make a problem hard. As we'll see below, sorting a list also has an exponential number of possible arrangements, yet it's easy, because there's a clever method that never looks at most of them. What makes puzzles like generalized Sudoku special is that, despite decades of effort, nobody has found such a shortcut.
+
 That realization is where this post starts. This post is about the problems that *do* stay manageable as they grow. The problems where a computer, even as input gets larger and larger, can still find the answer in a reasonable number of steps. We call the collection of those problems the class $\mathcal{P}$.
 
 ---
@@ -73,6 +75,8 @@ Let's look at actual problems that are provably inside $\mathcal{P}$.
 
     **The problem:** Given a list of $n$ numbers, arrange them in ascending order.
 
+    *(Strictly speaking, $\mathcal{P}$ contains yes/no questions, so the member of $\mathcal{P}$ here is a decision version like "is this list sorted?" or "is $x$ the $k$-th smallest number?" Sorting and shortest paths are the classic examples of problems that are fast to solve, so they're used here in their natural form.)*
+
     **Why it's in $\mathcal{P}$:** Merge Sort solves this in $O(n \log n)$. Since $n \log n$ grows slower than $n^2$, it is firmly polynomial.
 
     Merge Sort works like this: split the list in half, sort each half, then merge the two sorted halves back together. Merging takes $O(n)$ time, and you repeat this $O(\log n)$ levels deep. Multiply them: $O(n \log n)$.
@@ -99,7 +103,7 @@ Let's look at actual problems that are provably inside $\mathcal{P}$.
 
     **Why it's in $\mathcal{P}$:** Dijkstra's algorithm solves this in $O((V + E) \log V)$, where $V$ is the number of cities and $E$ is the number of roads. Both are polynomial in the input size.
 
-    This is exactly what your GPS is computing every time you ask for directions. Real maps have millions of nodes and Dijkstra handles them in seconds.
+    This is the kind of problem your GPS is solving every time you ask for directions. Real maps have millions of intersections, and navigation apps use sped-up refinements of this same idea to answer in well under a second.
 
     You might wonder: if shortest path is in $\mathcal{P}$, why is the Traveling Salesman Problem so hard? We will get there in Phase 2. The short version is that shortest path asks you to go from A to B. TSP asks you to visit every city exactly once and return home. That one addition changes everything.
 
@@ -108,9 +112,11 @@ Let's look at actual problems that are provably inside $\mathcal{P}$.
 
     **The problem:** Given a number $n$, decide whether it is prime.
 
-    **Why it's in $\mathcal{P}$:** For a long time, nobody knew whether this was in $\mathcal{P}$ or not. Then in 2002, three Indian computer scientists named Agrawal, Kayal, and Saxena proved that primality testing can be done in polynomial time. Their result is called the AKS primality test.
+    **Why it's in $\mathcal{P}$:** For a long time, nobody could prove whether this was in $\mathcal{P}$ or not. Then in 2002, three Indian computer scientists at IIT Kanpur, Agrawal, Kayal, and Saxena, proved that primality testing can be done in polynomial time. Their result is called the AKS primality test.
 
-    This example matters because it shows that intuition about what is hard is unreliable. Primality testing *seemed* difficult. It sat in an uncertain zone for decades. Then someone found the proof, and it turned out to be in $\mathcal{P}$ after all. The lesson: only a mathematical proof settles the question. Gut feeling is not enough.
+    ("Polynomial" here means polynomial in the number of *digits* of the number, which is the size of the input. Simply trying every possible divisor up to $n$ is exponential in the number of digits, so it doesn't count.)
+
+    This example matters because it shows how long a question can stay open even when people suspect the answer. Fast *randomized* tests for primality had existed since the 1970s, and many experts expected primality to be in $\mathcal{P}$, but for decades nobody could prove it. Then someone found the proof. The lesson: only a mathematical proof settles the question. Gut feeling is not enough.
 
   </TabItem>
 </Tabs>
@@ -123,11 +129,11 @@ This deserves honesty. When I first read that $O(n^{100})$ is considered "fast" 
 
 The honest answer: it is not fast in practice. Nobody runs $O(n^{100})$ algorithms on real data. But as a theoretical dividing line, polynomial is still the right choice, for three reasons.
 
-**First: in practice, polynomial algorithms have small exponents.** Every algorithm you actually encounter that belongs to $\mathcal{P}$ runs in $O(n)$, $O(n \log n)$, $O(n^2)$, or $O(n^3)$ at worst. The $O(n^{100})$ case is a theoretical edge that never appears. So the threshold lines up well with what is actually usable.
+**First: in practice, polynomial algorithms tend to have small exponents.** Most algorithms you actually encounter that belong to $\mathcal{P}$ run in $O(n)$, $O(n \log n)$, $O(n^2)$, or $O(n^3)$. Huge exponents are rare, and when a natural problem is first solved with one, researchers often bring the exponent down later. So the threshold lines up well with what is actually usable.
 
 **Second: polynomial builds on itself cleanly.** If you have a polynomial-time algorithm that calls another polynomial-time algorithm as a subroutine, the whole thing is still polynomial. You can build on top of $\mathcal{P}$ without stepping outside it. That makes the class mathematically well-behaved in a way exponential is not.
 
-**Third: the alternative is genuinely unworkable.** A problem requiring $O(2^n)$ time is not just slower. It is unreachable. No faster hardware rescues you. No better implementation helps. The growth is too fundamental. At $n = 300$, you need more steps than there are atoms in the universe, and no engineering trick changes that. Polynomial is where computers can actually find the answer. Exponential is where they cannot, regardless of what you do.
+**Third: the alternative is genuinely unworkable.** A problem requiring $O(2^n)$ time is not just slower. It is unreachable. No faster hardware rescues you. No better implementation helps. The growth is too fundamental. At $n = 300$, you need more steps than there are atoms in the universe, and no engineering trick changes that. Polynomial is where computers can actually find the answer. Exponential is where, for large inputs, they cannot, regardless of what you do.
 
 So: polynomial is not a perfect match for "fast in practice." But it is the natural line between "computers can handle this" and "computers fundamentally cannot," and that is the distinction $\mathcal{P}$ is trying to capture.
 
@@ -137,7 +143,9 @@ So: polynomial is not a perfect match for "fast in practice." But it is the natu
 
 When $\mathcal{P}$ and $\mathcal{NP}$ are discussed together, two symbols appear everywhere. Here is what they mean.
 
-**The symbol $\subset$** means "is a subset of." Writing $\mathcal{P} \subset \mathcal{NP}$ means: every problem inside $\mathcal{P}$ is also inside $\mathcal{NP}$. $\mathcal{P}$ is contained within $\mathcal{NP}$, the way a smaller circle sits inside a larger one.
+**The symbol $\subseteq$** means "is a subset of, and possibly equal to." Writing $\mathcal{P} \subseteq \mathcal{NP}$ means: every problem inside $\mathcal{P}$ is also inside $\mathcal{NP}$. $\mathcal{P}$ is contained within $\mathcal{NP}$, like a circle drawn inside another circle, where the two circles might turn out to be the very same circle.
+
+**The symbol $\subsetneq$** means "is a *strict* subset of": everything on the left is on the right, *and* the right has something extra. Writing $\mathcal{P} \subsetneq \mathcal{NP}$ would be claiming $\mathcal{P} \neq \mathcal{NP}$, which nobody has proven. (Be careful: some books use the plain symbol $\subset$ for "subset" and others use it for "strict subset," which is why the more explicit symbols above are safer.)
 
 If $\mathcal{P} = \mathcal{NP}$, the two sets contain exactly the same problems. Every problem verifiable fast would also be solvable fast.
 
@@ -153,9 +161,9 @@ What we know for certain is that $\mathcal{P}$ sits inside $\mathcal{NP}$:
 
 $$\mathcal{P} \subseteq \mathcal{NP}$$
 
-$\mathcal{NP}$ is what comes next. It is where the problems live that I used to think were polynomial, until I saw how they scale. Problems like Sudoku. Problems like the Rubik's Cube at arbitrary sizes. Problems where a given solution is easy to check, but finding that solution from scratch seems to require exponential effort.
+$\mathcal{NP}$ is what comes next. It is where the problems live that I used to think were polynomial, until I saw how they scale. Problems like Sudoku at arbitrary sizes. Problems like finding the *shortest* solution to a Rubik's Cube at arbitrary sizes. Problems where a given solution is easy to check, but finding that solution from scratch seems to require exponential effort.
 
-That gap between checking and solving is the subject of Post 8.
+That gap between checking and solving is the subject of Posts 8 and 9.
 
 :::note What We Have Established
 $\mathcal{P}$ is the set of decision problems solvable in polynomial time on a deterministic Turing machine. Sorting, binary search, shortest paths, and primality testing all live here. Polynomial time is the formal boundary between problems that computers can realistically solve and problems that they cannot.
@@ -165,7 +173,7 @@ $\mathcal{P}$ is the set of decision problems solvable in polynomial time on a d
 
 ## Up Next
 
-Post 8 defines the class $\mathcal{NP}$. We will finally see why Sudoku and the Rubik's Cube are not in $\mathcal{P}$, why verifying a solution is so much easier than finding one, and why that asymmetry is the core of the whole problem.
+Post 8 defines the class $\mathcal{NP}$. We will finally see why puzzles like Sudoku are *believed* not to be in $\mathcal{P}$ (nobody has proven it), why verifying a solution seems so much easier than finding one, and why that asymmetry is the core of the whole problem.
 
 See you there. 🚀
 

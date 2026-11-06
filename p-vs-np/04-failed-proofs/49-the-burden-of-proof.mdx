@@ -1,0 +1,115 @@
+---
+sidebar_position: 15
+title: "The Burden of Proof"
+description: "To prove P = NP, you need one algorithm. To prove P ≠ NP, you need to rule out every algorithm that could ever exist. And a strange twist: if P = NP, an algorithm that works is already written down."
+tags: [failed-proofs, burden-of-proof, asymmetry, levin-universal-search, non-constructive, lower-bounds]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# The Burden of Proof
+
+Post 10 had a short section called "The Asymmetry Nobody Tells You About". It said that proving $\mathcal{P} = \mathcal{NP}$ needs one algorithm, while proving $\mathcal{P} \neq \mathcal{NP}$ needs to rule out infinitely many.
+
+When I wrote that, I understood it as a slogan. After Phase 4, I understand it as the reason the whole field looks the way it does. This post goes back to that asymmetry with everything we've learned since, and adds two twists I didn't know about then.
+
+---
+
+## One Thing Versus Everything
+
+<Tabs>
+  <TabItem value="eq" label="To prove P = NP" default>
+
+You need **one** polynomial-time algorithm for **one** NP-Complete problem.
+
+Pick SAT, or 3-colouring, or Sudoku, whichever looks most promising. Write down an algorithm. Prove it's always correct. Prove it always runs in polynomial time. Done. Cook-Levin and the reductions from Phase 2 carry it to every other problem in $\mathcal{NP}$.
+
+This is a statement of the form "**there exists** an algorithm". You prove it by producing the algorithm.
+
+  </TabItem>
+  <TabItem value="neq" label="To prove P ≠ NP">
+
+You need to show that **no** polynomial-time algorithm for SAT exists, among all the infinitely many programs that could ever be written.
+
+Not just the ones people have tried. Not just the sensible-looking ones. Programs that use bizarre arithmetic, that exploit structure nobody has noticed, that run in $n^{1000}$ time with enormous constants. All of them.
+
+This is a statement of the form "**for every** algorithm, it fails". You can't prove it by checking cases, because there are infinitely many.
+
+  </TabItem>
+</Tabs>
+
+It's the same shape as $\mathcal{NP}$ versus $co\mathcal{NP}$ from Post 25. "There exists" is easy to prove when it's true: show the thing. "For all" has no such shortcut.
+
+That's why every barrier in Phase 4 is about $\mathcal{P} \neq \mathcal{NP}$, the "for all" direction. Relativization, natural proofs and algebrization each show that some way of handling **every algorithm at once** can't work. Nobody needs a barrier to explain why we haven't found a fast SAT algorithm. If one exists, we simply haven't found it.
+
+---
+
+## Twist 1: The Algorithm Might Already Exist
+
+This one surprised me more than anything else I read for Phase 4.
+
+In 1973, Leonid Levin (the Levin of Cook-Levin) described an algorithm now called **universal search**. Here's the idea, for finding satisfying assignments:
+
+1. List all programs: program 1, program 2, program 3, and so on.
+2. Run them all at once, but unevenly: give program 1 half of the computer's time, program 2 a quarter, program 3 an eighth, and so on.
+3. Whenever any program outputs something, check whether it's a satisfying assignment for the formula. Checking is fast, because SAT is in $\mathcal{NP}$.
+4. The moment any program produces a correct answer, stop and return it.
+
+Now suppose $\mathcal{P} = \mathcal{NP}$. Then somewhere in the list, at some fixed position $k$, there's a program that finds satisfying assignments in polynomial time. Universal search gives that program a fixed fraction of the time, $1/2^k$. That's a constant, however tiny. So universal search finds the answer in polynomial time too, just multiplied by a gigantic constant.
+
+So: **if $\mathcal{P} = \mathcal{NP}$, there is an explicit algorithm, already written down, that finds satisfying assignments for satisfiable formulas in polynomial time.** We just can't prove it runs in polynomial time, because that would require proving $\mathcal{P} = \mathcal{NP}$.
+
+:::caution Why this doesn't settle anything
+Universal search only stops when it finds an answer. On a formula with **no** satisfying assignment, it runs forever. So on its own it doesn't **decide** SAT.
+
+And the constant $2^k$ is absurd. If the fast program is the millionth one in the list, the constant has about 300,000 digits. Universal search is a beautiful theoretical object and completely useless in practice.
+:::
+
+What I take from this: the burden of proof for $\mathcal{P} = \mathcal{NP}$ isn't really about finding a clever algorithm. In a sense, one is already on paper. It's about **proving** that some algorithm works, which might require understanding as deep as a proof of the other direction.
+
+---
+
+## Twist 2: P = NP Wouldn't Necessarily Mean Fast
+
+When people imagine $\mathcal{P} = \mathcal{NP}$, they imagine every hard problem suddenly becoming easy. Post 10 painted that picture too.
+
+But "polynomial" includes $n^{100}$, and $n^{1000}$. For an input of size 100, $n^{100}$ is a 1 followed by 200 zeros. A proof that SAT is in $\mathcal{P}$ with an algorithm like that would be the most important mathematical result of the century, and it wouldn't help a single delivery company.
+
+There's an even stranger possibility: a **non-constructive** proof. That's a proof that shows a polynomial-time algorithm **exists** without telling you what it is.
+
+That sounds impossible, but it has happened for other problems. In the 1980s and 2000s, Neil Robertson and Paul Seymour proved a giant theorem about graphs (the Graph Minor Theorem) with a strange consequence: for certain families of graphs, there is a polynomial-time algorithm to test membership, but in many cases nobody knows what it is. The theorem guarantees it exists without constructing it.
+
+Donald Knuth, one of the most famous computer scientists alive, has said in interviews that he suspects $\mathcal{P} = \mathcal{NP}$ could be true in exactly this kind of useless way: an algorithm exists, but we'd never find or use it. That's a minority view, but it's a serious one from a serious person, and I think it's worth knowing that the "magical world" version of $\mathcal{P} = \mathcal{NP}$ is not the only possibility.
+
+---
+
+## What the Burden Means for a Real Proof
+
+Putting Phase 4 together, here's what I think the asymmetry means in practice.
+
+A proof that $\mathcal{P} \neq \mathcal{NP}$ has to say something true about **every** algorithm, so it has to capture something fundamental about what computation **is**. It can't just be clever about SAT; it has to be clever about all possible ways of being clever. And the three barriers say that the general-purpose ways of talking about all algorithms (simulation, simple combinatorial properties, algebraic extensions) are not enough.
+
+A proof that $\mathcal{P} = \mathcal{NP}$, on the other hand, has to produce or guarantee a specific algorithm, and it would run against the strong evidence that NP-Complete problems are hard: decades of failed attempts, the cryptographic world that seems to work, and the beautiful theory in Phase 3 that only makes sense if the hierarchy doesn't collapse.
+
+So the direction most people believe is the direction that's hardest to prove. That's not a coincidence. "Nothing can do this" is always going to be harder to show than "this can be done".
+
+:::note What We Have Established
+Proving $\mathcal{P} = \mathcal{NP}$ needs one algorithm for one NP-Complete problem ("there exists"). Proving $\mathcal{P} \neq \mathcal{NP}$ needs to rule out every possible algorithm ("for all"). All three barriers are about the "for all" direction.
+
+**Levin's universal search** (1973) runs every program in parallel with exponentially decreasing time shares and checks their outputs. If $\mathcal{P} = \mathcal{NP}$, it finds satisfying assignments in polynomial time, with an astronomically large constant. So a working algorithm may already be written down; the hard part is proving it works.
+
+$\mathcal{P} = \mathcal{NP}$ could in principle be true with an impractical exponent, or even non-constructively, as with algorithms guaranteed by the Robertson–Seymour Graph Minor Theorem.
+:::
+
+---
+
+## Up Next
+
+Post 50 closes Phase 4. It's a summary of every barrier and every approach, laid out side by side, plus one result from 2011 that managed to slip past the known barriers for a weaker question, and what it suggests about where a real proof might come from.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

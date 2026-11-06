@@ -1,0 +1,135 @@
+---
+sidebar_position: 8
+title: "Dynamic Programming Limits"
+description: "Dynamic programming solves knapsack exactly with a simple table. It looks polynomial. It isn't, and watching the table grow one digit at a time shows exactly why pseudo-polynomial time breaks down for big numbers."
+tags: [heuristics, dynamic-programming, pseudo-polynomial, knapsack, weakly-np-hard, strongly-np-hard]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import DPTable from '@site/src/components/DPTable';
+
+# Dynamic Programming Limits
+
+Back in Post 21, I said there was a knapsack algorithm that looked like it ran in polynomial time, and that I'd been confused about it for two days. I explained the reason quickly and promised to come back.
+
+This is me coming back. I want to actually fill in the table, cell by cell, so you can see exactly what the algorithm does, and then push on the one number that makes it fall apart.
+
+---
+
+## What Dynamic Programming Is
+
+**Dynamic programming** is a strategy for problems that can be broken into smaller versions of themselves, where the same smaller versions keep coming up again and again. Instead of solving them repeatedly, you solve each one **once**, write the answer in a table, and look it up when you need it.
+
+The name was coined by Richard Bellman in the 1950s. He later wrote that he picked the word "dynamic" partly because it sounded impressive and was hard to object to. The "programming" means planning, as in a schedule, not computer code.
+
+We've already met two examples: Held and Karp's TSP algorithm (Post 20), and the "fewest coins" column in Post 68's figure.
+
+---
+
+## The Knapsack Table
+
+Take four items and a bag that holds 8 kg:
+
+| Item | Weight | Value |
+|---|---|---|
+| A | 2 | 3 |
+| B | 3 | 4 |
+| C | 4 | 5 |
+| D | 5 | 6 |
+
+The table has one row for each "how many items have I considered so far" (none, then A, then A and B, and so on) and one column for each capacity from 0 to 8. Each cell answers:
+
+> What's the best value I can get using only these items, with a bag of this capacity?
+
+To fill a cell, there are only two choices for the newest item:
+
+- **Skip it.** Then the best is whatever the row above says for the same capacity.
+- **Take it.** Then you use up its weight, and the best is its value plus the row above at the **smaller** capacity left over.
+
+Take whichever is bigger. If the item doesn't fit, you can only skip it.
+
+$$\text{best}[i][c] = \max\big(\text{best}[i-1][c],\; \text{best}[i-1][c - w_i] + v_i\big)$$
+
+Step through it. The cell being filled is highlighted, and the cells it reads from are outlined.
+
+<DPTable />
+
+The bottom-right cell is the answer: **10**, from items B and D (3 + 5 = 8 kg, worth 4 + 6). The table has 36 cells to fill (4 items × 9 capacities), and each takes a moment. Compare that with trying all $2^4 = 16$ combinations: not a big difference here. But with 100 items, $2^{100}$ combinations is hopeless, while the table would be $100 \times 9$ cells.
+
+That's why dynamic programming feels like magic for knapsack. Until you look at the other number.
+
+---
+
+## The Number That Breaks It
+
+The table's width is the **capacity**, $W$. The work is about $n \times W$.
+
+Now use the **Scale the weights** buttons. Multiply every weight, and the capacity, by 10. The problem is exactly the same, just measured in units ten times smaller. Grams instead of kilograms, say. The answer doesn't change at all.
+
+But the table gets ten times wider. Multiply by 1,000, and it's a thousand times wider.
+
+<Tabs>
+  <TabItem value="digits" label="Why that matters" default>
+
+The input to the problem is a list of numbers, written down in digits. Writing the capacity $8$ takes 1 digit. Writing $8{,}000$ takes 4 digits. Writing $8{,}000{,}000{,}000$ takes 10 digits.
+
+So each **extra digit** in the input makes the table about **ten times** bigger. The work grows like $10^{\text{digits}}$. That's exponential in the length of the input, exactly like the $2^n$ explosions from Post 6.
+
+  </TabItem>
+  <TabItem value="pseudo" label="Pseudo-polynomial">
+
+An algorithm whose running time is polynomial in the **numeric values** of the input, but exponential in the **number of digits**, is called **pseudo-polynomial**.
+
+Knapsack's dynamic programming algorithm is pseudo-polynomial. It's fast when the numbers are small and hopeless when they're large. That's why it doesn't contradict knapsack being NP-Complete, and doesn't touch P vs NP at all.
+
+  </TabItem>
+  <TabItem value="where" label="Where big numbers appear">
+
+Big numbers aren't exotic:
+
+- Money in a budget measured to the nearest rupee or cent, in the millions.
+- Times measured in milliseconds over a whole day.
+- The Subset Sum reduction from Post 22, which builds numbers with hundreds of digits **on purpose**, so that the dynamic programming escape hatch can't work.
+
+In practice, people often deal with this by rounding: measure in thousands instead of units. That's exactly the FPTAS idea from Post 67: you trade a little accuracy for a much smaller table.
+
+  </TabItem>
+</Tabs>
+
+There's also a second limit that's easy to forget: **memory**. The table has to be stored. A billion columns times a hundred rows is a hundred billion cells. Even when you have the time, you might not have the space. (There are tricks to keep only one row at a time, but then you lose the information needed to say **which** items to take.)
+
+---
+
+## Weak and Strong NP-Hardness
+
+This gives a useful way to sort NP-Hard problems, introduced by Michael Garey and David Johnson in the 1970s.
+
+| | What it means | Examples |
+|---|---|---|
+| **Weakly NP-Hard** | Hard only because the numbers can be huge. A pseudo-polynomial algorithm exists. | Knapsack, Subset Sum, Partition |
+| **Strongly NP-Hard** | Still hard even when every number is small (written in, say, at most a few digits). No pseudo-polynomial algorithm unless $\mathcal{P} = \mathcal{NP}$. | Bin packing, TSP, 3-colouring, SAT |
+
+For a weakly NP-Hard problem, dynamic programming and its rounded cousins are powerful practical tools. For a strongly NP-Hard problem, they can't save you, and you need the other methods in this phase.
+
+When I first learned this distinction, it explained something that had bothered me since Post 21: why does knapsack, which is NP-Complete, feel so much **easier** in practice than TSP, which is also NP-Complete? This is why. Knapsack's hardness lives entirely in the size of its numbers. TSP's hardness lives in its structure.
+
+:::note What We Have Established
+**Dynamic programming** solves each sub-problem once and stores the answer in a table. For knapsack, $\text{best}[i][c] = \max(\text{best}[i-1][c],\ \text{best}[i-1][c - w_i] + v_i)$, and the table has $(n+1)(W+1)$ cells.
+
+The work grows with the **value** of $W$, so each extra digit in the capacity makes the table about ten times bigger: the algorithm is **pseudo-polynomial**, exponential in the length of the input. Memory grows the same way.
+
+**Weakly** NP-Hard problems (knapsack, subset sum, partition) have pseudo-polynomial algorithms. **Strongly** NP-Hard problems (bin packing, TSP, SAT) stay hard with small numbers, so dynamic programming of this kind can't rescue them.
+:::
+
+---
+
+## Up Next
+
+Every method so far either builds a solution from scratch (greedy), searches systematically (branch and bound), or fills a table (dynamic programming). Post 71 is about a completely different idea: start with **any** solution, even a bad random one, and keep making small changes that improve it until you can't any more. It's called **local search**, and it's behind a huge amount of real-world optimisation.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

@@ -1,177 +1,97 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
+import { Figure, Playback, Segmented, usePlayback } from './figure';
+
+/* ── Machine: accept strings made only of 1s ─────────────── */
 
 const RULES = [
-  { mode: 'Checking', read: '1', write: '1', next: 'Checking', dir: 'Right' },
-  { mode: 'Checking', read: '_', write: '_', next: 'Accept', dir: 'Stay' },
-  { mode: 'Checking', read: '0', write: '0', next: 'Reject', dir: 'Stay' },
+  { mode: 'Checking', read: '1', write: '1', move: 'Right', next: 'Checking' },
+  { mode: 'Checking', read: '_', write: '_', move: 'Stay', next: 'Accept' },
+  { mode: 'Checking', read: '0', write: '0', move: 'Stay', next: 'Reject' },
 ];
 
-const INIT_TAPE = ['1', '1', '0', '1', '_', '_', '_'];
-const VISIBLE = 7;
-const GAP = 6;
-const ELLIPSIS = 20;
+const INPUTS = ['1101', '111', '11111'];
+const WINDOW = 8;
 
-function init() {
-  return {
-    tape: [...INIT_TAPE],
-    head: 0,
-    mode: 'Checking',
-    history: [],
-    log: 'Press Step to begin.',
-  };
-}
+const halted = s => s.mode !== 'Checking';
+const ruleIndex = s => RULES.findIndex(r => r.mode === s.mode && r.read === (s.tape[s.head] ?? '_'));
 
-function stepState(s) {
-  if (s.mode === 'Accept' || s.mode === 'Reject') return s;
-  const sym = s.tape[s.head] ?? '_';
-  const rule = RULES.find(r => r.mode === s.mode && r.read === sym);
-  if (!rule) return { ...s, log: 'No matching rule — halted.' };
+const init = input => ({ input, tape: [...input, '_', '_', '_', '_'], head: 0, mode: 'Checking', steps: 0, prev: null });
+
+function step(s) {
+  if (halted(s)) return s;
+  const i = ruleIndex(s);
+  if (i < 0) return { ...s, mode: 'Reject', prev: s };
+  const r = RULES[i];
   const tape = [...s.tape];
-  tape[s.head] = rule.write;
-  let head = s.head;
-  if (rule.dir === 'Right') head++;
-  if (rule.dir === 'Left') head = Math.max(0, head - 1);
+  tape[s.head] = r.write;
+  const head = r.move === 'Right' ? s.head + 1 : s.head;
   if (head >= tape.length) tape.push('_');
-  return {
-    tape, head,
-    mode: rule.next,
-    history: [...s.history, { tape: s.tape, head: s.head, mode: s.mode }],
-    log: `Read "${rule.read}", wrote "${rule.write}", switched to ${rule.next}, moved ${rule.dir}.`,
-  };
+  return { ...s, tape, head, mode: r.next, steps: s.steps + 1, prev: s };
 }
 
-function undoState(s) {
-  if (!s.history.length) return s;
-  const p = s.history[s.history.length - 1];
-  return {
-    tape: [...p.tape], head: p.head, mode: p.mode,
-    history: s.history.slice(0, -1),
-    log: 'Stepped back one move.',
-  };
-}
+const show = sym => (sym === '_' ? '' : sym);
 
 export default function TuringMachine() {
-  const [s, set] = useState(init);
-  const [running, setRunning] = useState(false);
-  const [cellWidth, setCellWidth] = useState(52);
-  const intervalRef = useRef(null);
-  const containerRef = useRef(null);
-  const done = s.mode === 'Accept' || s.mode === 'Reject';
+  const [s, set] = useState(() => init(INPUTS[0]));
+  const [playing, toggle, stop] = usePlayback(s, set, step, halted, 650);
 
-  const updateCellWidth = useCallback(() => {
-    if (!containerRef.current) return;
-    const w = containerRef.current.offsetWidth;
-    const available = w - 48 - (VISIBLE - 1) * GAP - ELLIPSIS * 2;
-    setCellWidth(Math.max(28, Math.min(52, Math.floor(available / VISIBLE))));
-  }, []);
+  const load = input => { stop(); set(init(input)); };
+  const start = Math.max(0, Math.min(s.head - 2, s.tape.length - WINDOW));
+  const next = halted(s) ? -1 : ruleIndex(s);
 
-  useEffect(() => {
-    updateCellWidth();
-    const ro = new ResizeObserver(updateCellWidth);
-    if (containerRef.current) ro.observe(containerRef.current);
-    return () => ro.disconnect();
-  }, [updateCellWidth]);
-
-  useEffect(() => () => clearInterval(intervalRef.current), []);
-
-  const reset = () => {
-    clearInterval(intervalRef.current);
-    setRunning(false);
-    set(init());
-  };
-
-  const toggleRun = () => {
-    if (running) {
-      clearInterval(intervalRef.current);
-      setRunning(false);
-      return;
-    }
-    setRunning(true);
-    intervalRef.current = setInterval(() => {
-      set(prev => {
-        if (prev.mode === 'Accept' || prev.mode === 'Reject') {
-          clearInterval(intervalRef.current);
-          setRunning(false);
-          return prev;
-        }
-        return stepState(prev);
-      });
-    }, 650);
-  };
-
-  const start = Math.max(0, s.head - 3);
-  const cells = Array.from({ length: VISIBLE }, (_, i) => {
-    const idx = start + i;
-    return {
-      idx,
-      sym: s.tape[idx] ?? '_',
-      active: idx === s.head,
-      first: i === 0,
-      last: i === VISIBLE - 1,
-    };
-  });
-
-  const CONTROLS = [
-    { label: 'Reset', onClick: reset, disabled: false, solid: false },
-    { label: 'Back', onClick: () => set(undoState), disabled: !s.history.length, solid: false },
-    { label: 'Step', onClick: () => set(stepState), disabled: done, solid: true },
-    { label: running ? 'Pause' : 'Run', onClick: toggleRun, disabled: done, solid: false },
-  ];
+  let status = <>Mode <b>{s.mode}</b> · step {s.steps}</>;
+  let tone;
+  if (s.mode === 'Accept') { status = <><b>Accepted</b> after {s.steps} steps</>; tone = 'good'; }
+  if (s.mode === 'Reject') { status = <><b>Rejected</b> after {s.steps} steps: found a 0</>; tone = 'bad'; }
 
   return (
-    <div className="az-viz" ref={containerRef}>
-      <div className="az-viz__head">
-        <span className="az-viz__label">Turing machine — accepts strings of only 1s</span>
-      </div>
-
-      <div className="az-viz__body">
-        <div className="az-tape">
-          <span className="az-tape__ellipsis">…</span>
-
-          {cells.map(({ idx, sym, active, first, last }) => (
-            <div className="az-tape__slot" key={idx} style={{ width: cellWidth }}>
-              <div className="az-tape__head" data-on={String(active)}>
-                <span className="az-tape__head-tag">Head</span>
-                <span aria-hidden="true">↓</span>
-              </div>
-              <div
-                className="az-tape__cell"
-                data-on={String(active)}
-                style={{
-                  width: cellWidth,
-                  marginLeft: first ? 0 : -1,
-                  borderRadius: first && last ? 8 : first ? '8px 0 0 8px' : last ? '0 8px 8px 0' : 0,
-                }}
-              >
-                {sym === '_' ? '' : sym}
-              </div>
+    <Figure
+      title="Turing machine"
+      tools={<Segmented label="Input" value={s.input} onChange={load} options={INPUTS.map(v => ({ value: v, label: v }))} />}
+      status={status}
+      tone={tone}
+    >
+      <div className="az-tm">
+        {Array.from({ length: WINDOW }, (_, i) => {
+          const idx = start + i;
+          const on = idx === s.head;
+          return (
+            <div key={idx} className="az-tm__slot">
+              <span className="az-tm__head" data-on={String(on)} aria-hidden="true" />
+              <span className="az-tm__cell" data-on={String(on)}>{show(s.tape[idx] ?? '_')}</span>
             </div>
-          ))}
-
-          <span className="az-tape__ellipsis">…</span>
-        </div>
-
-        <div className="az-tape__mode">
-          <span className="az-viz-verdict__label">Current mode</span>
-          <span className="az-tape__mode-value" data-mode={s.mode}>{s.mode}</span>
-        </div>
-
-        <div className="az-viz-controls">
-          {CONTROLS.map(({ label, onClick, disabled, solid }) => (
-            <button
-              key={label}
-              type="button"
-              onClick={onClick}
-              disabled={disabled}
-              className={'az-viz-btn' + (solid ? ' az-viz-btn--solid' : '')}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <p className="az-viz-hint" style={{ margin: 0 }}>{s.log}</p>
+          );
+        })}
       </div>
-    </div>
+
+      <div className="az-fig-well">
+        <table className="az-fig-table">
+          <thead>
+            <tr><th>Mode</th><th>Read</th><th>Write</th><th>Move</th><th>Next</th></tr>
+          </thead>
+          <tbody>
+            {RULES.map((r, i) => (
+              <tr key={i} data-on={String(i === next)}>
+                <td>{r.mode}</td>
+                <td>{r.read === '_' ? 'blank' : r.read}</td>
+                <td>{r.write === '_' ? 'blank' : r.write}</td>
+                <td>{r.move}</td>
+                <td>{r.next}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <Playback
+        onReset={() => load(s.input)}
+        onBack={() => { stop(); set(prev => prev.prev ?? prev); }}
+        canBack={!!s.prev}
+        onStep={() => set(step)}
+        playing={playing}
+        onTogglePlay={toggle}
+        done={halted(s)}
+      />
+    </Figure>
   );
 }

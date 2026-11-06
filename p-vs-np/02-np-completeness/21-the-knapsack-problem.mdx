@@ -1,0 +1,174 @@
+---
+sidebar_position: 11
+title: "The Knapsack Problem"
+description: "A bag with a weight limit and a pile of things worth different amounts. The obvious strategy fails, the clever strategy is secretly exponential, and an entire encryption scheme was once built on top of it and broken."
+tags: [np-completeness, knapsack, subset-sum, greedy, dynamic-programming, optimization]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import KnapsackPacker from '@site/src/components/KnapsackPacker';
+
+# The Knapsack Problem
+
+Before a trip up north with my family a while back, I was packing a bag that the airline would only let weigh so much. I had a pile of things I wanted to bring, and some of them mattered a lot more than others. I did what everyone does: I packed the most important things first, then filled the gaps with whatever fit.
+
+Afterwards I realised I had left behind two things I really wanted, because one big item I packed early took up the space both of them needed.
+
+That is the knapsack problem. Everyone has solved a small version of it. Nobody knows how to solve the big version quickly.
+
+---
+
+## The Problem
+
+You have a bag (the "knapsack") that can carry at most $W$ kilograms. You have $n$ items. Each item $i$ has a weight $w_i$ and a value $v_i$. Each item is either fully in the bag or fully out. You can't pack half a tent.
+
+:::info New Symbol: subscripts like $w_i$
+The small $i$ at the bottom just means "belonging to item number $i$". So $w_1$ is the weight of item 1, $v_3$ is the value of item 3, and $w_i$ is the weight of whichever item we're talking about at the moment. It's a label, not a calculation.
+:::
+
+The everyday question is "what's the most value I can fit?". As usual, we phrase it as a yes/no question:
+
+> **Knapsack (decision version):** given the items, a weight limit $W$ and a target $V$, can you choose some items whose total weight is at most $W$ and whose total value is at least $V$?
+
+This version is sometimes called the **0/1 knapsack**, because every item is either 0 (left out) or 1 (packed).
+
+**Knapsack is in $\mathcal{NP}$.** The certificate is the list of packed items. Add up the weights, check they're at most $W$. Add up the values, check they're at least $V$. Polynomial.
+
+---
+
+## The Obvious Strategy
+
+The strategy I used for my trip has a name. It's called **greedy**, and the clever version goes like this: work out the value per kilogram of every item, then pack in order from best value per kilogram to worst, skipping anything that doesn't fit.
+
+It sounds very sensible. Here's a bag where it fails.
+
+<KnapsackPacker />
+
+The bag holds 10 kg. Press **Greedy by value per kg**. The tent has the best ratio (30 value for 6 kg, so 5 per kg), so greedy packs it first. After that only 4 kg are left, so neither the sleeping bag nor the food box fits. Greedy fills the gap with the water and the jacket and ends up with a value of **38**.
+
+Now press **Best**. Leave the tent behind and take the sleeping bag and the food box. Exactly 10 kg, value **48**.
+
+Greedy lost by more than 20%, and the reason is exactly what happened with my bag: one early choice, the tent, used up space in an awkward way that blocked a better combination. The items that fit together well were not the items that looked best on their own.
+
+:::caution Locally best is not globally best
+Greedy makes the choice that looks best right now and never reconsiders. For 0/1 knapsack, that can be badly wrong. But in Post 69 we will look at a slightly different version, where you **can** take part of an item, and greedy suddenly becomes perfect. Same items, same bag, one rule changed.
+:::
+
+---
+
+## Why It's Hard
+
+With $n$ items, each one is in or out, so there are $2^n$ possible ways to pack. That's the same explosion as Post 6. With 80 items, there are about $10^{24}$ packings, and a computer checking a billion of them every second would need tens of millions of years.
+
+To prove Knapsack is NP-Complete, I need to reduce a known NP-Complete problem to it. The cleanest one to use is called **Subset Sum**, which is the topic of the next post:
+
+> **Subset Sum:** given a list of whole numbers and a target $T$, is there a group of them that adds up to exactly $T$?
+
+I'm going to borrow it a post early, and prove it is NP-Complete in Post 22. The reduction from Subset Sum to Knapsack is one line long.
+
+### The one line
+
+Given a Subset Sum question with numbers $a_1, a_2, \ldots, a_n$ and target $T$, build a knapsack where:
+
+- item $i$ has weight $a_i$ **and** value $a_i$, the same number for both,
+- the weight limit is $W = T$,
+- the value target is $V = T$.
+
+<Tabs>
+  <TabItem value="forward" label="Subset Sum yes → Knapsack yes" default>
+
+If some group of numbers adds up to exactly $T$, pack those items. Their weight is $T$, which fits within $W = T$. Their value is also $T$, which reaches $V = T$. Knapsack says yes.
+
+  </TabItem>
+  <TabItem value="backward" label="Knapsack yes → Subset Sum yes">
+
+If you can pack some items with weight at most $T$ and value at least $T$: weight and value are the same number for every item, so the total weight equals the total value. That total is at most $T$ and at least $T$ at the same time. So it is exactly $T$, and those items are a group adding up to $T$.
+
+  </TabItem>
+</Tabs>
+
+The conversion just copies the numbers. Polynomial.
+
+$$\text{Subset Sum} \leq_P \text{Knapsack}$$
+
+Once Post 22 shows Subset Sum is NP-Complete, Knapsack is NP-Complete too.
+
+I found it slightly funny that the hard part of the bag problem is not values at all. If every item's value equals its weight, you're just asking whether you can fill the bag **exactly** to the brim. That alone is already NP-Complete.
+
+---
+
+## The Twist: A Fast-Looking Algorithm That Isn't
+
+Here is where Knapsack gets genuinely interesting, and where I got confused for about two days.
+
+There's a famous algorithm for Knapsack using a technique called **dynamic programming**. Roughly, it builds a table with one row per item and one column for every possible weight from $0$ to $W$. Each cell answers: "using only the first few items, what's the best value I can get within this much weight?" Each cell is filled in from cells already done. When the table is full, the bottom right cell is the answer.
+
+The table has $n$ rows and $W + 1$ columns, so the work is about $n \times W$.
+
+When I read that, my reaction was: wait, $n \times W$ is a polynomial. Did someone solve an NP-Complete problem in polynomial time? Is $\mathcal{P} = \mathcal{NP}$ and nobody told me?
+
+No. And the reason is subtle, so let me go slowly.
+
+:::info The size of a number is its number of digits
+In complexity theory, "polynomial time" means polynomial in the **length of the input**, the number of symbols you need to write the problem down.
+
+Writing down the number $W = 1{,}000{,}000$ takes 7 digits, not a million symbols. If $W$ has $d$ digits, then $W$ itself can be as large as $10^d$.
+
+So the $n \times W$ algorithm takes about $n \times 10^d$ steps, where $d$ is the number of digits in the limit. That is **exponential** in the length of the input. Add one more digit to $W$ and the table gets ten times wider.
+:::
+
+This kind of algorithm, polynomial in the **value** of the numbers but exponential in their **length**, is called **pseudo-polynomial**. It's genuinely fast when the numbers are small, like weights in whole kilograms for a hiking bag. It falls apart when the numbers are huge, like amounts written to many decimal places, or numbers hundreds of digits long.
+
+That's the escape hatch that keeps Knapsack NP-Complete. Post 70 is entirely about this idea, because it's one of the most practically important ideas in the whole series.
+
+---
+
+## A Code That Was Built on a Knapsack, and Broke
+
+In 1978, Ralph Merkle and Martin Hellman proposed an encryption scheme built on knapsack problems. The idea was beautiful: a secret message becomes a choice of items, the encrypted message is the total weight, and anyone trying to read the message without the key would have to solve a knapsack problem, which is NP-Complete.
+
+In 1982, Adi Shamir broke it.
+
+He didn't solve NP-Complete problems in general. He showed that the **specific** knapsacks the scheme produced had hidden structure, because they had to be easy for the person holding the key. That same structure made them easy for an attacker too.
+
+I think this story is one of the most important lessons in this whole series, and it is going to come back in Phase 5. **NP-Completeness is about the hardest instances. An encryption scheme needs the instances it actually uses to be hard.** Those are not the same thing. Modern encryption is not built on NP-Complete problems at all, partly because of exactly this.
+
+---
+
+## Where It Shows Up
+
+Anywhere there's a budget and a set of yes-or-no choices:
+
+- **Investment:** a company has a fixed budget and a list of possible projects, each with a cost and an expected return. Which projects should it fund?
+- **Cargo:** what to load onto a truck or plane with a weight limit.
+- **Cutting materials:** how to cut a long steel bar or a roll of cloth into ordered pieces with the least waste. Larger versions of this are built from many knapsack-shaped pieces.
+- **Exam strategy:** honestly, picking which questions to attempt in a timed exam with marks attached is a knapsack. I didn't enjoy noticing that during an actual exam.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+**0/1 Knapsack** asks whether items can be chosen with total weight at most $W$ and total value at least $V$.
+
+It is in $\mathcal{NP}$: add up the chosen items.
+
+It is NP-Hard: Subset Sum reduces to it by giving each item equal weight and value, and setting both limits to the target. Post 22 proves Subset Sum is NP-Complete.
+
+Greedy by value per kilogram can fail badly. Dynamic programming solves it in about $n \times W$ steps, which looks polynomial but is exponential in the number of **digits** of $W$. That's called pseudo-polynomial time.
+
+Knapsack-based encryption (Merkle and Hellman, 1978) was broken by Shamir in 1982, because NP-Completeness only says the worst instances are hard.
+:::
+
+---
+
+## Up Next
+
+I owe you a proof. Post 22 is Subset Sum: given a list of numbers, can some of them add up to exactly a target, or exactly zero? You already met it in Post 9 when we raced a solver against a verifier. Now we show why it's NP-Complete, by turning a 3-SAT formula into a list of very carefully designed numbers.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

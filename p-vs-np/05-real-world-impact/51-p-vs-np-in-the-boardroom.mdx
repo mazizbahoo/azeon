@@ -1,0 +1,129 @@
+---
+sidebar_position: 1
+title: "P vs NP in the Boardroom"
+description: "Why should someone running a company care about a math problem? Because the moment a product promises the 'best' schedule, route or match, it has probably walked into NP-Hard territory, and the way you handle that is a business decision."
+tags: [real-world-impact, business, startups, optimization, scaling, solvers]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import RuntimeCalculator from '@site/src/components/RuntimeCalculator';
+
+# P vs NP in the Boardroom
+
+A friend of mine is building a startup. It's a small app that helps tutoring centres assign tutors to students. Each tutor has subjects they can teach and hours they're free. Each student has subjects they need and hours they can attend. Some students only want certain tutors. The app should produce the **best** timetable.
+
+When they described it to me, I asked one question: "best how?". They said: "you know, fewest clashes, everyone gets what they want, tutors aren't overloaded". I asked how many centres they were hoping to sign up and how big the biggest one was.
+
+Then I told them, as gently as I could, that they might have accidentally built their whole product around an NP-Hard problem.
+
+Welcome to Phase 5. Four phases of theory are behind us. This phase is about where P vs NP touches the real world, and I want to start with the most practical question I can think of: why should someone running a business care?
+
+---
+
+## How to Recognise It
+
+Most NP-Hard problems in business don't announce themselves. They show up as reasonable-sounding feature requests. Here are some I've now learned to spot:
+
+| What the requirement says | What it usually is underneath |
+|---|---|
+| "Give every driver the best route through their stops" | Traveling Salesman / vehicle routing (Post 20) |
+| "Build the timetable with no clashes" | Graph colouring (Post 18) |
+| "Fit the most valuable items into the shipment" | Knapsack (Post 21) |
+| "Put these jobs on the fewest servers" | Bin packing (Post 56) |
+| "Cover every shift with the cheapest set of staff" | Set cover (Post 55) |
+| "Find the group of users who all interact with each other" | Clique (Post 15) |
+
+The warning sign is almost always a combination of two words: **"best"** (or "optimal", "minimum", "maximum") together with **constraints that interact**. One constraint on its own is often easy. Several that affect each other, where satisfying one makes another harder, is where the exponential search lives.
+
+---
+
+## Why It Matters: Scale
+
+The danger isn't that the problem can't be solved at all. It's that it can be solved at the size you tested, and then can't be solved at the size you grew into.
+
+Here's the calculator from Post 6 one more time. Slide the input size and watch what happens to the exponential rows.
+
+<RuntimeCalculator />
+
+A brute-force scheduler that checks every possibility might be instant for a centre with 8 tutors. It might take a minute with 20. With 50, it might take longer than the company will exist. Nobody notices in the demo. Everyone notices when the biggest customer signs up.
+
+And because P vs NP is open, there's no reason to expect that some cleverer programmer will just fix it. If someone found a guaranteed fast algorithm for your problem, they wouldn't be patching your startup. They'd be collecting a million dollars from the Clay Institute.
+
+---
+
+## What Good Teams Do Instead
+
+I'm not saying "don't build products with hard problems in them". A lot of the most valuable software in the world solves NP-Hard problems every day. The point is to handle them deliberately.
+
+<Tabs>
+  <TabItem value="define" label="Define 'good enough'" default>
+
+Replace "the best" with something you can actually promise: "a timetable with no hard clashes, found in under ten seconds, that's usually within a few percent of the best we can find".
+
+That's not a weaker product. It's an honest one. Customers care about getting a good answer quickly and reliably, far more than about a mathematical guarantee of optimality they can't check anyway.
+
+  </TabItem>
+  <TabItem value="solvers" label="Use a solver">
+
+Don't write your own search. Decades of engineering have gone into general-purpose solvers for exactly these problems: mixed-integer programming solvers like Gurobi and CPLEX, constraint solvers like Google's open-source OR-Tools, and SAT solvers.
+
+You describe the problem: the choices, the constraints and what "better" means. The solver handles the search with techniques far beyond what one team could write. Phase 6 explains how many of these techniques work.
+
+  </TabItem>
+  <TabItem value="heuristics" label="Use heuristics on purpose">
+
+Sometimes a simple rule of thumb gets 95% of the value. Assign the hardest-to-place students first. Fill the most constrained slots first. Route to the nearest unvisited stop.
+
+These are called **heuristics**, and Phase 6 is about them. The key is to choose them knowingly, measure how far they are from the best you can find, and make sure they can't go catastrophically wrong.
+
+  </TabItem>
+  <TabItem value="shape" label="Change the problem">
+
+Sometimes the best move is to change the product so the hard problem goes away or gets smaller. Let tutors pick their own students from a short list. Split a big centre into independent groups. Fix some decisions by policy so the search has less to choose.
+
+Being able to see which constraints create the hardness lets you decide which ones are worth keeping.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Hardness Is Also an Asset
+
+There's a flip side that founders often miss. NP-Hardness isn't only a cost.
+
+- **Security:** the encryption that protects every login, payment and message in your product depends on certain problems being hard. If $\mathcal{P} = \mathcal{NP}$ in a practical way, that protection disappears. Posts 52 and 53 are about this.
+- **A moat:** if your product solves a hard optimisation problem well, with good modelling, a well-tuned solver and years of real-world data about which shortcuts work, that's genuinely difficult for a competitor to copy. Hard problems done well are durable advantages.
+- **Honest expectations:** knowing that some problems are fundamentally hard protects a team from wasting months chasing a "perfect" algorithm that probably doesn't exist.
+
+---
+
+## What I Told My Friend
+
+Here's roughly the advice I gave, after a long evening and a lot of tea:
+
+1. Write down exactly what "best timetable" means as a score.
+2. Find the size of your largest likely customer, and test at **ten times** that size.
+3. Use a proper constraint solver rather than a homemade search.
+4. Promise customers "a great timetable in seconds", never "the perfect timetable".
+
+I don't know yet whether their startup will work. But they're no longer surprised by why their prototype slowed to a crawl when they tested a big centre, and they stopped trying to "optimise the loop".
+
+:::note What We Have Established
+NP-Hard problems appear in products as requirements to find the **best** answer under **interacting constraints**: routing, timetabling, packing, staffing, matching. Exponential approaches that are instant in a demo can become hopeless at real customer sizes, and P vs NP being open means no guaranteed fast fix is expected.
+
+Good teams define "good enough", use mature solvers, use heuristics deliberately, and reshape the product to avoid unnecessary hardness. Hardness is also an asset: it underpins security and can make a well-solved hard problem a durable advantage.
+:::
+
+---
+
+## Up Next
+
+The most important place where hardness is an asset is encryption. Post 52 is about RSA: how it works, why its security depends on factoring being hard, and why "the internet depends on $\mathcal{P} \neq \mathcal{NP}$" is true in one sense and misleading in another.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

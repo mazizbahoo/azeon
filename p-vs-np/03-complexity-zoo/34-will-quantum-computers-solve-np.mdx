@@ -1,0 +1,150 @@
+---
+sidebar_position: 10
+title: "Will Quantum Computers Solve NP?"
+description: "Probably not. There's a quantum algorithm that speeds up brute-force search, and a theorem that says, in an important sense, it's the best possible. A square root of exponential is still exponential."
+tags: [complexity-zoo, quantum-computing, grover, bqp, np-complete, misconceptions]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import GroverSpeedup from '@site/src/components/GroverSpeedup';
+
+# Will Quantum Computers Solve NP?
+
+I started Post 32 with a sentence I used to believe: "a quantum computer tries every answer at the same time." If that were true, NP-Complete problems would be easy for quantum computers. Try all $2^n$ assignments at once, read off the one that works, done.
+
+This post is where I close that loop. The short answer is: **almost certainly not**. Quantum computers are expected to help with NP-Complete problems a little, in a specific and limited way, and there are solid reasons to think they can't do much more.
+
+Phase 3 ends here, and I think this is the right place to end it, because this post is about the difference between what sounds true and what's actually been shown.
+
+---
+
+## The Best Known Quantum Speedup for Search
+
+In 1996, Lov Grover, also at Bell Labs, found a quantum algorithm for a very general problem:
+
+> **Unstructured search:** there are $N$ boxes. Exactly one contains a prize. You can open a box and check. Find the prize.
+
+Classically, you have to open boxes one at a time. On average you'll open about half of them, and in the worst case all $N$. There's no shortcut, because the boxes have no structure. Nothing about one box tells you anything about another.
+
+**Grover's algorithm finds the prize in about $\sqrt{N}$ steps.**
+
+:::info New Symbol: $\sqrt{N}$
+The **square root** of $N$: the number that, multiplied by itself, gives $N$. $\sqrt{100} = 10$, $\sqrt{1{,}000{,}000} = 1{,}000$. For powers of two, $\sqrt{2^n} = 2^{n/2}$: the square root halves the exponent.
+:::
+
+How it works, very roughly: start with every box having an equal amplitude. Then repeat two steps. First, flip the **sign** of the amplitude on the prize box, using the "is this the prize?" check. Second, reflect every amplitude around the average. That second step makes the one negative amplitude grow and all the others shrink a little. Each round pushes more amplitude onto the prize. After about $\frac{\pi}{4}\sqrt{N}$ rounds, measuring finds the prize with high probability.
+
+It's interference again, from Post 32. Nothing tries every box. The amplitudes are slowly steered.
+
+---
+
+## What That Means for SAT
+
+SAT with $n$ variables has $N = 2^n$ possible assignments. Checking one assignment is fast. So SAT looks exactly like unstructured search: $2^n$ boxes, one quick check per box.
+
+Grover's algorithm cuts that from $2^n$ to about $2^{n/2}$.
+
+That's a genuinely big improvement. For 60 variables, it's the difference between about $10^{18}$ steps and about $10^9$. But look at what happens as $n$ grows:
+
+<GroverSpeedup />
+
+Slide it up to 200 variables. Classical brute force needs about $10^{60}$ steps. Grover needs about $10^{30}$. Both are hopeless. $2^{n/2}$ is still an exponential. It grows more slowly, but it still grows exponentially, and an exponential always wins eventually.
+
+:::tip The way I remember it
+A square-root speedup turns a problem with $n$ variables into one that's about as hard as a problem with $n/2$ variables. That helps a lot at the edge of what's feasible. It doesn't move anything from exponential to polynomial.
+:::
+
+And that figure is generous to the quantum computer. I gave it the same billion steps per second as the classical one, but real quantum operations, with error correction, are expected to be far slower than classical ones.
+
+---
+
+## Can We Do Better Than Grover?
+
+This is the important part. Grover's algorithm is a speedup. Could some smarter quantum algorithm find the prize in $\log N$ steps, or $(\log N)^2$, which would be polynomial in $n$?
+
+In 1997, Charles Bennett, Ethan Bernstein, Gilles Brassard and Umesh Vazirani proved: **no**. For unstructured search, where all you can do is open boxes and check, **any** quantum algorithm needs about $\sqrt{N}$ checks. Grover's algorithm is optimal.
+
+<Tabs>
+  <TabItem value="what" label="What this proves" default>
+
+It proves that a quantum computer that treats SAT as a black box (only plugging in assignments and checking them) can never do better than $2^{n/2}$. "Trying every answer at once" really doesn't work. The best you can get from that approach is a square root.
+
+It also implies that, relative to a black box, $\mathcal{NP}$ is not contained in $\mathcal{BQP}$. We'll see in Post 37 exactly what "relative to a black box" means, because it turns out to be one of the central ideas of Phase 4.
+
+  </TabItem>
+  <TabItem value="whatnot" label="What it doesn't prove">
+
+It doesn't prove that quantum computers can't solve SAT in polynomial time. A quantum algorithm could, in principle, look **inside** the formula and exploit its structure, the way Shor's algorithm exploits the hidden period in factoring.
+
+Nobody has found any such structure in NP-Complete problems. And proving that no quantum algorithm can solve SAT fast would, among other things, prove $\mathcal{P} \neq \mathcal{NP}$, since a normal computer is a special case of a quantum one. So we can't expect a proof any time soon.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Why Factoring Was Different
+
+This is the question that bothered me after Post 33. If Shor can get an **exponential** speedup for factoring, why only a square root for SAT?
+
+Because factoring isn't unstructured. It has a hidden period. The interference in Shor's algorithm works because the right answer is encoded in a regular, repeating pattern that the quantum Fourier transform can pick up.
+
+NP-Complete problems, as far as anyone has found, have no such pattern. A SAT formula can encode **any** computation at all (that's what Cook-Levin says), including computations that are designed to look like random noise. Somewhere in that huge family, there are instances with no regular structure for interference to grab. That's the intuition for why most researchers think:
+
+$$\mathcal{NP} \not\subseteq \mathcal{BQP}$$
+
+:::info New Symbol: $\not\subseteq$
+"Is **not** a subset of." There's at least one problem in $\mathcal{NP}$ that isn't in $\mathcal{BQP}$.
+:::
+
+This is believed, not proved. But it's believed for good reasons, and it's backed by the black-box theorem above.
+
+---
+
+## What About Other Kinds of Quantum Machines?
+
+You might have heard of companies selling **quantum annealers**, machines built specifically for optimisation problems, which are often NP-Hard. The idea is physics-inspired: encode the problem as an energy landscape and let the system settle into a low-energy state, which corresponds to a good solution.
+
+They're real machines, and they can find good solutions to some problems. But nobody has shown that they give an exponential speedup over the best classical methods for NP-Hard problems in general. When researchers compare them carefully against good classical algorithms, the results have been mixed. We'll meet the classical cousin of this idea, simulated annealing, in Phase 6.
+
+---
+
+## Phase 3 Is Complete
+
+Here's the zoo we've walked through:
+
+- **Post 25:** $co\mathcal{NP}$, where **no** answers have short proofs.
+- **Post 26:** TAUTOLOGY, the hardest problem in $co\mathcal{NP}$, and proof complexity.
+- **Post 27:** NP-Hard versus NP-Complete: a floor versus a floor and a ceiling.
+- **Post 28:** $\mathcal{PSPACE}$, polynomial memory, two-player games.
+- **Post 29:** $\mathcal{EXP}$, and the Time Hierarchy Theorem: our one solid separation.
+- **Post 30:** Chess and Go, provably outside $\mathcal{P}$ when generalised.
+- **Post 31:** $\mathcal{BPP}$, coin flips, and the belief that $\mathcal{P} = \mathcal{BPP}$.
+- **Posts 32 to 34:** $\mathcal{BQP}$, Shor's exponential speedup for factoring, and Grover's square-root speedup for search.
+
+The whole phase keeps arriving at the same place. We can define classes precisely. We can prove things are **inside** other things. But proving that one class is **bigger** than another, except in the special case of $\mathcal{P}$ versus $\mathcal{EXP}$, almost always runs into a wall.
+
+:::note What We Have Established
+Grover's algorithm (1996) searches $N$ possibilities in about $\sqrt{N}$ steps, so SAT with $n$ variables drops from $2^n$ to about $2^{n/2}$: still exponential.
+
+Bennett, Bernstein, Brassard and Vazirani (1997) proved that's optimal for black-box search, so "try every answer at once" can never beat a square root.
+
+Shor's algorithm gets an exponential speedup only because factoring has a hidden periodic structure. No such structure is known for NP-Complete problems, and most researchers believe $\mathcal{NP} \not\subseteq \mathcal{BQP}$. That's unproven, because proving it would also prove $\mathcal{P} \neq \mathcal{NP}$.
+:::
+
+---
+
+## Up Next
+
+Phase 4 is about that wall.
+
+The smartest people in the field have spent over fifty years on P vs NP. It's not that they haven't tried hard enough. It's that, three separate times, they've proved that whole families of proof techniques **cannot** work. Those proofs are called **barriers**.
+
+Post 35 is the overview: why haven't we solved it, and what does it even mean to prove that a proof can't work?
+
+See you in Phase 4. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

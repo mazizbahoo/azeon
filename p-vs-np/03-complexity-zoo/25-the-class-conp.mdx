@@ -1,0 +1,200 @@
+---
+sidebar_position: 1
+title: "The Class coNP"
+description: "NP is about problems where a yes has a short proof. Flip it, and you get coNP, where a no has a short proof. It sounds like a small twist. It turns out to be its own unsolved problem, sitting right next to P vs NP."
+tags: [complexity-zoo, conp, np, certificates, primality, factoring, complexity-classes]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import ComplexityZoo from '@site/src/components/ComplexityZoo';
+
+# The Class coNP
+
+Welcome to Phase 3.
+
+For twenty-four posts, the whole world has been two classes: $\mathcal{P}$ and $\mathcal{NP}$. That's the question in the title of this whole project, so it made sense to focus on them. But I always had a slight suspicion that I was looking at two animals in a much bigger zoo.
+
+I was right. Complexity theorists have defined hundreds of classes. Scott Aaronson, the researcher I quoted at the very top of Post 1, has run an online catalogue for years called the Complexity Zoo that lists over five hundred of them. I am not going to cover five hundred. This phase covers the handful that actually matter for understanding P vs NP.
+
+And the first one came straight out of the last post.
+
+---
+
+## The Question From Minesweeper
+
+At the end of Post 24, there were two questions about a Minesweeper board:
+
+- **Is this board consistent?** To convince you, I show you **one** mine layout that fits. You check it quickly.
+- **Is this square definitely safe?** To convince you, showing one layout where it's safe isn't enough. I have to somehow convince you that **no** layout puts a mine there.
+
+The first one has a short proof when the answer is **yes**. The second one has a short proof when the answer is **no**: if the square is **not** safe, I just show you one valid layout with a mine on it.
+
+That flip, short proofs for yes versus short proofs for no, is what this post is about.
+
+---
+
+## A Reminder: What NP Means
+
+From Post 8: a problem is in $\mathcal{NP}$ if, whenever the answer is **yes**, there is a short certificate that proves it, and that certificate can be checked in polynomial time.
+
+When the answer is **no**, $\mathcal{NP}$ promises nothing at all.
+
+Take SAT from Post 13. If a formula **is** satisfiable, the certificate is a satisfying assignment. You plug it in and check every clause. Fast.
+
+If a formula is **not** satisfiable, what would you hand me as proof? One assignment that fails proves nothing, because another assignment might work. You'd have to show me that **all** $2^n$ assignments fail. Nobody knows a short way to do that in general.
+
+---
+
+## Flipping the Question
+
+Now consider the opposite problem:
+
+> **UNSAT:** given a Boolean formula, is it **unsatisfiable**? That is, does every possible assignment make it false?
+
+UNSAT is SAT with the yes and no swapped. A formula is a yes-instance of UNSAT exactly when it's a no-instance of SAT.
+
+The opposite of a problem like this is called its **complement**. And now the short proof has moved to the other side:
+
+- When the answer to UNSAT is **no** (the formula **can** be satisfied), there's a short proof: a satisfying assignment.
+- When the answer is **yes** (the formula can **never** be satisfied), no short proof is known.
+
+:::info The Class coNP
+A problem is in $co\mathcal{NP}$ if its complement is in $\mathcal{NP}$.
+
+Equivalently: whenever the answer is **no**, there's a short certificate that proves it, checkable in polynomial time.
+
+The "co" stands for "complement". It's pronounced "co-N-P".
+:::
+
+So UNSAT is in $co\mathcal{NP}$. So is "is this Minesweeper square safe?". So is "does this graph have **no** Hamiltonian cycle?".
+
+A useful way I found to think about it:
+
+| | Short proof exists for... | Sounds like... |
+|---|---|---|
+| $\mathcal{NP}$ | yes answers | "**there exists** a solution" |
+| $co\mathcal{NP}$ | no answers | "**for every** possibility, it works out" |
+
+$\mathcal{NP}$ questions are "is there **some** way?". $co\mathcal{NP}$ questions are "does it hold **every** way?".
+
+---
+
+## Where coNP Sits
+
+Here's the little map of the zoo I'm going to use throughout this phase. A line from a lower class to a higher one means "proven to be inside". Click a class to read what it means and what's known to be inside it. Right now, $co\mathcal{NP}$ is selected.
+
+<ComplexityZoo focus="coNP" />
+
+I want to be careful about what the picture says. A missing line means "nobody knows", not "they're different". For example, there's no line between $\mathcal{NP}$ and $co\mathcal{NP}$, because nobody knows whether one contains the other.
+
+What we do know:
+
+**$\mathcal{P}$ is inside $co\mathcal{NP}$.** If you can solve a problem quickly, you can solve its complement quickly too. Just run the same algorithm and flip the answer. So every problem in $\mathcal{P}$ has its complement in $\mathcal{P}$, which is inside $\mathcal{NP}$. That puts the original problem in $co\mathcal{NP}$.
+
+So $\mathcal{P}$ sits inside **both**: $\mathcal{P} \subseteq \mathcal{NP} \cap co\mathcal{NP}$.
+
+:::info New Symbol: $\cap$
+Read it as "intersect", or just "and". $\mathcal{NP} \cap co\mathcal{NP}$ is the set of problems that are in $\mathcal{NP}$ **and** in $co\mathcal{NP}$ at the same time: problems where both yes **and** no answers have short proofs.
+:::
+
+---
+
+## Does NP Equal coNP?
+
+This is an open question too, and it's tied directly to P vs NP.
+
+**If $\mathcal{P} = \mathcal{NP}$, then $\mathcal{NP} = co\mathcal{NP}$.** Here's why. If every $\mathcal{NP}$ problem were in $\mathcal{P}$, then every $co\mathcal{NP}$ problem would have its complement in $\mathcal{P}$, and since $\mathcal{P}$ is closed under flipping answers, the problem itself would be in $\mathcal{P}$ too. So both classes would just be $\mathcal{P}$.
+
+Turn that around and you get something interesting:
+
+$$\mathcal{NP} \neq co\mathcal{NP} \implies \mathcal{P} \neq \mathcal{NP}$$
+
+:::info New Symbol: $\implies$
+Read it as "implies". "$A \implies B$" means "if $A$ is true, then $B$ is true". It's a one-way arrow, unlike $\iff$ from Post 16.
+:::
+
+So proving $\mathcal{NP} \neq co\mathcal{NP}$ would be **even stronger** than proving $\mathcal{P} \neq \mathcal{NP}$. It would solve the Millennium Prize problem as a side effect. Most researchers believe $\mathcal{NP} \neq co\mathcal{NP}$, for the same kind of reason they believe $\mathcal{P} \neq \mathcal{NP}$: nobody has ever found a short way to prove a formula is unsatisfiable in general, despite enormous effort.
+
+And there's one more link. If any NP-Complete problem, like SAT, turned out to also be in $co\mathcal{NP}$, then all of $\mathcal{NP}$ would collapse into $co\mathcal{NP}$, and the two would be equal. That's why finding a problem in $\mathcal{NP} \cap co\mathcal{NP}$ is a strong hint that it's **not** NP-Complete.
+
+---
+
+## Prime Numbers and Factoring: A Correction I Had to Make
+
+When I first planned this post, my notes said: "coNP example: prime factorisation". When I actually looked into it, I realised that's not quite right, and the true story is better. So here it is properly.
+
+<Tabs>
+  <TabItem value="composite" label="Is N composite?" default>
+
+**Composite** means "not prime": the number can be split into smaller whole-number factors. For example, $91 = 7 \times 13$.
+
+If $N$ is composite, the certificate is easy: give me one factor. I divide and check. So "is $N$ composite?" is in $\mathcal{NP}$.
+
+Its complement is "is $N$ **prime**?". So **primality is in $co\mathcal{NP}$**: if a number is **not** prime, a factor proves it.
+
+  </TabItem>
+  <TabItem value="prime" label="Is N prime?">
+
+For a while, that's where the story seemed to stop. How would you give a short proof that a number **is** prime?
+
+In 1975, Vaughan Pratt showed that you can. There's a clever kind of certificate, based on a number theory fact about prime numbers, that can be checked quickly. So primality is in $\mathcal{NP}$ too. It's in $\mathcal{NP} \cap co\mathcal{NP}$.
+
+Then in 2002, Manindra Agrawal, Neeraj Kayal and Nitin Saxena, a professor and two students at IIT Kanpur, found a polynomial-time algorithm for primality. It's called the AKS test. **Primality is in $\mathcal{P}$**, which Post 7 already mentioned.
+
+That's the full journey: $co\mathcal{NP}$, then $\mathcal{NP} \cap co\mathcal{NP}$, then $\mathcal{P}$.
+
+  </TabItem>
+  <TabItem value="factor" label="Factoring">
+
+Factoring is different from primality. Knowing that $N$ is not prime doesn't tell you its factors.
+
+As a yes/no question: "does $N$ have a factor smaller than $k$?"
+
+- **Yes certificate:** the factor. Check it divides $N$ and is smaller than $k$.
+- **No certificate:** the complete prime factorisation of $N$. Multiply the primes together to check they make $N$, check each one is prime (fast, thanks to AKS), and see that none of them is smaller than $k$.
+
+Both answers have short certificates. **Factoring is in $\mathcal{NP} \cap co\mathcal{NP}$.**
+
+Nobody knows a polynomial-time algorithm for it, so it's not known to be in $\mathcal{P}$. But because it sits in $co\mathcal{NP}$ as well, it is **very unlikely** to be NP-Complete. That's exactly why the diagram in Post 10 put factoring in its own special spot, inside $\mathcal{NP}$ but outside the NP-Complete region.
+
+This matters a lot for Phase 5. RSA encryption relies on factoring being hard, but factoring is probably **not** one of the hardest problems in $\mathcal{NP}$.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Why I Care About This Class
+
+When I first met $co\mathcal{NP}$, it felt like bookkeeping. Flip the answers, add "co" to the name, done.
+
+What changed my mind was realising that "is there a short proof of **no**?" is one of the most practical questions in the world. A chip designer wants to know that a circuit can **never** produce a wrong output. A software engineer wants to know that a program can **never** crash. Someone verifying a security protocol wants to know that **no** attack works. Those are all "for every possibility" questions. They live in $co\mathcal{NP}$ or above.
+
+Proving something can **never** happen is harder than showing that it **can**. That asymmetry, which we'll keep running into, has a precise home now.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+$co\mathcal{NP}$ is the class of problems whose complement is in $\mathcal{NP}$. When the answer is **no**, there's a short certificate that can be checked quickly. UNSAT, "is this square safe?" and "is this number prime?" are all in $co\mathcal{NP}$.
+
+$\mathcal{P} \subseteq \mathcal{NP} \cap co\mathcal{NP}$. Whether $\mathcal{NP} = co\mathcal{NP}$ is unknown. If $\mathcal{P} = \mathcal{NP}$ then $\mathcal{NP} = co\mathcal{NP}$, so proving they're different would also prove $\mathcal{P} \neq \mathcal{NP}$.
+
+Primality went from $co\mathcal{NP}$ to $\mathcal{NP} \cap co\mathcal{NP}$ (Pratt, 1975) to $\mathcal{P}$ (AKS, 2002). Factoring is in $\mathcal{NP} \cap co\mathcal{NP}$ and not known to be in $\mathcal{P}$, which is why it is believed not to be NP-Complete.
+:::
+
+---
+
+## Up Next
+
+$\mathcal{NP}$ has its hardest problems: the NP-Complete ones, with SAT at the top. Does $co\mathcal{NP}$ have hardest problems too?
+
+It does. Post 26 is about **tautologies**: formulas that are true no matter what you plug in. Deciding whether a formula is a tautology is the $co\mathcal{NP}$ version of SAT, and it's connected to a very old question about how long a proof has to be.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

@@ -1,0 +1,138 @@
+---
+sidebar_position: 2
+title: "Approximation Algorithms"
+description: "You can't find the best answer quickly, but you can sometimes prove your quick answer is never worse than twice the best, without ever knowing what the best is. Some problems allow amazing guarantees. Others allow none at all."
+tags: [heuristics, approximation-algorithms, approximation-ratio, max-sat, set-cover, inapproximability]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import SevenEighths from '@site/src/components/SevenEighths';
+
+# Approximation Algorithms
+
+The first time I read the phrase "this algorithm always finds a solution within twice the optimum", I didn't believe it. How can you promise you're close to the best answer if you don't know what the best answer is? It felt like saying "I'm within ten minutes of your house" without knowing where your house is.
+
+It turns out you can, and the trick is beautiful: you find something you **do** know about the best answer, a bound that the optimum can't beat, and compare against that instead. This post is about the idea in general. The next three posts are specific, famous examples.
+
+---
+
+## What an Approximation Guarantee Says
+
+Take a minimisation problem, like finding the smallest vertex cover. Call the size of the best possible answer $\text{OPT}$.
+
+:::info Approximation Ratio
+An algorithm is a **$c$-approximation** if, on **every** input, it runs in polynomial time and returns an answer of cost at most $c \times \text{OPT}$.
+
+For a maximisation problem, it's the other way round: the answer is always at least $\text{OPT} / c$, or equivalently at least a fraction $1/c$ of the best.
+:::
+
+So a 2-approximation for vertex cover always finds a cover **at most twice as big** as the smallest one. If the best cover has 50 nodes, you're guaranteed at most 100.
+
+Three things about this definition matter:
+
+- It holds on **every** input, including the worst one. It's a promise, not an average.
+- It runs in **polynomial** time. That's the whole point.
+- It doesn't tell you $\text{OPT}$. It only tells you how far away you could possibly be.
+
+---
+
+## The Trick: Compare Against a Bound
+
+How do you prove "at most twice the optimum" without knowing the optimum? You find a quantity that you can compute, and that's guaranteed to be **at most** $\text{OPT}$ (for minimisation). Then you show your answer is at most twice **that**.
+
+$$\text{your answer} \leq 2 \times \text{bound} \leq 2 \times \text{OPT}$$
+
+Every approximation proof I've read has this shape. The creativity is all in finding the right bound. For vertex cover, the bound is a matching (Post 65). For TSP, it's a spanning tree (Post 66). For many problems, it's a relaxation that allows fractions, the idea from Post 62.
+
+---
+
+## A Lovely Example: Just Guess Randomly
+
+Here's the simplest approximation algorithm I know. It's for **MAX-3SAT**: given a 3-SAT formula, satisfy as many clauses as possible (even if you can't satisfy them all).
+
+The algorithm: **flip a coin for every variable.**
+
+Why is that any good? Take a clause with three different variables, like $(x_1 \vee \neg x_4 \vee x_7)$. It's only false if all three literals are false. Each is false with probability $\frac{1}{2}$, independently, so the clause is false with probability $\frac{1}{8}$. So it's **true** with probability $\frac{7}{8}$.
+
+That's true of every clause. So on average, a random assignment satisfies $\frac{7}{8}$ of all the clauses. And since no assignment can satisfy more than all of them, that's at least $\frac{7}{8}$ of the optimum.
+
+Try it on a formula with 40 clauses:
+
+<SevenEighths />
+
+Random assignments hover around 35, sometimes a bit more, sometimes a bit less. The average settles near 35 as you add more runs.
+
+**No luck needed** shows that you don't even need luck. Go through the variables one at a time. For each one, work out the expected number of satisfied clauses if you set it true (with the rest still random), and the same if you set it false. Pick whichever is higher. The expected count never drops below its starting value of $\frac{7}{8} \times 40 = 35$, and once every variable is fixed, nothing is random any more, so you have an assignment that satisfies at least 35 clauses, guaranteed. This trick is called the **method of conditional expectations**, and it turns many randomized algorithms into deterministic ones.
+
+### And you can't do better
+
+Here's the astonishing part. In 2001, Johan Håstad proved that, unless $\mathcal{P} = \mathcal{NP}$, **no** polynomial-time algorithm can guarantee satisfying more than $\frac{7}{8} + \varepsilon$ of the optimum, for any $\varepsilon > 0$, on formulas where every clause has exactly three literals.
+
+:::info New Symbol: $\varepsilon$
+The Greek letter epsilon, $\varepsilon$, is what mathematicians use for "some small positive number, as small as you like". "$\frac{7}{8} + \varepsilon$" means "anything even slightly better than $\frac{7}{8}$".
+:::
+
+So flipping coins is **optimal**. The dumbest possible algorithm achieves the best guarantee that any efficient algorithm can. When I read that, I had to put my phone down for a minute.
+
+---
+
+## The Spectrum: From Great to Impossible
+
+Different NP-Hard problems allow very different guarantees, even though they're all equally hard to solve **exactly** (they all reduce to each other). This was one of the biggest surprises for me in this whole phase.
+
+| How well it can be approximated | Example | Where |
+|---|---|---|
+| As close as you want, quickly | Knapsack | Post 67 |
+| As close as you want, more slowly | TSP on a flat map (Euclidean) | Post 67 |
+| Within a fixed factor | Vertex cover (factor 2), TSP with the triangle rule (factor 1.5) | Posts 65, 66 |
+| Within a factor that grows slowly | Set cover (about $\ln n$) | below |
+| Within a factor that grows fast | Maximum clique (no better than nearly $n$) | Post 61 |
+| Not at all | General TSP | below |
+
+<Tabs>
+  <TabItem value="setcover" label="Set cover: about ln n" default>
+
+For set cover (the crew-pairing problem from Post 55, without the "exactly once" rule), a simple greedy rule works: keep choosing the set that covers the most still-uncovered items for its cost. This was analysed in the 1970s by David Johnson, László Lovász and Vašek Chvátal, and is guaranteed to be within about $\ln n$ of optimal, where $n$ is the number of items.
+
+:::info New Symbol: $\ln$
+$\ln n$ is the **natural logarithm**: a logarithm with a special base, about 2.718. It grows very slowly. $\ln 1{,}000{,}000$ is only about 14.
+:::
+
+And in 2014, Irit Dinur and David Steurer proved that doing noticeably better than $\ln n$ is NP-Hard. Greedy is essentially the best possible.
+
+  </TabItem>
+  <TabItem value="tsp" label="General TSP: no guarantee at all">
+
+Take TSP where distances can be anything, not following any geometric rules.
+
+Recall the reduction from Post 20: real roads get distance 1, missing roads get distance 2. Change the 2 to something huge, like $1000 \times n$. If the graph has a Hamiltonian cycle, the best tour costs $n$. If not, every tour uses at least one missing road, so it costs more than $1000 \times n$.
+
+Now suppose some algorithm always got within a factor of 1000 of optimal. On a graph **with** a Hamiltonian cycle, it would return a tour costing at most $1000 \times n$, which means a tour using only real roads. So it would decide Hamiltonian Cycle, which is NP-Complete.
+
+The same argument works for any factor, however big. So unless $\mathcal{P} = \mathcal{NP}$, general TSP can't be approximated within **any** factor that can be computed in polynomial time. Sartaj Sahni and Teofilo Gonzalez proved this in 1976.
+
+  </TabItem>
+</Tabs>
+
+Where do these "you can't do better" results come from? Mostly from the **PCP theorem** in Post 42. It turned out that "proofs you can check by reading a few random bits" are exactly the tool needed to show that even **approximately** solving many problems is NP-Hard. That was one of the great surprises of 1990s complexity theory.
+
+:::note What We Have Established
+A **$c$-approximation** runs in polynomial time and always returns an answer within a factor $c$ of optimal, proved by comparing the answer to a computable **bound** on $\text{OPT}$.
+
+For **MAX-3SAT**, a random assignment satisfies $\frac{7}{8}$ of the clauses on average, and the method of conditional expectations makes this a guarantee. Håstad (2001) proved that beating $\frac{7}{8}$ is NP-Hard, so this is optimal.
+
+Approximability varies widely: knapsack can be approximated arbitrarily well, vertex cover within 2, set cover within about $\ln n$ (and no better, Dinur and Steurer 2014), clique hardly at all, and general TSP not at all unless $\mathcal{P} = \mathcal{NP}$ (Sahni and Gonzalez, 1976). Most of these limits come from the PCP theorem.
+:::
+
+---
+
+## Up Next
+
+Post 65 is a full example, start to finish. Remember Vertex Cover, the cameras-on-cities problem from Posts 11 and 16? There's an algorithm so simple you could run it by hand, and a proof so short it fits in a few lines, that it always uses at most twice as many cameras as necessary.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

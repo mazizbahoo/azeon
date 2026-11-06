@@ -1,0 +1,182 @@
+---
+sidebar_position: 5
+title: "Circuit Complexity Primer"
+description: "Forget programs and tapes. A Boolean circuit is computation drawn as a diagram of AND, OR and NOT gates. Most functions need gigantic circuits, yet we can't prove it for a single function we care about."
+tags: [failed-proofs, circuits, circuit-complexity, lower-bounds, ac0, monotone-circuits, p-poly]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import CircuitEval from '@site/src/components/CircuitEval';
+
+# Circuit Complexity Primer
+
+In Post 13, I mentioned that every chip is built from three kinds of gate: AND, OR and NOT. I used that to explain why SAT is the "language of circuits", and then moved on.
+
+This post comes back to circuits properly, because in the 1980s they became the most promising road towards proving $\mathcal{P} \neq \mathcal{NP}$. They gave the field some of its only real lower bounds. And then they led directly to the second barrier.
+
+I spent a whole weekend drawing circuits in my notebook for this one. My little brother asked if I was designing a robot.
+
+---
+
+## What a Circuit Is
+
+A **Boolean circuit** is a diagram:
+
+- On the left are **input wires**, each carrying a 0 or a 1.
+- In the middle are **gates**: AND, OR and NOT. Each gate takes the values on its incoming wires and produces a new value on its outgoing wire.
+- On the right is a single **output wire**: the answer.
+
+There's no loop, no memory, no instructions. The values just flow from left to right, once.
+
+Here are two small circuits. Click the inputs to flip them and watch the values flow through.
+
+<CircuitEval />
+
+The **XOR** circuit outputs 1 when exactly one input is 1. It's built from four gates: "x or y" and "not (x and y)", joined by an AND.
+
+The **Majority** circuit outputs 1 when at least two of the three inputs are 1. It checks all three pairs with AND gates, then combines them with ORs.
+
+Two numbers describe a circuit:
+
+- **Size**: the number of gates. This is like the total amount of work.
+- **Depth**: the longest path from an input to the output. This is like how long you have to wait, if all the gates on one level can work at the same moment.
+
+---
+
+## One Circuit Per Input Size
+
+Here's the main difference between circuits and programs, and it confused me for a while.
+
+A program handles inputs of **every** length. You give the same sorting program 5 numbers or 5 million.
+
+A circuit has a **fixed** number of input wires. A circuit with 10 inputs can't take 11. So to solve a problem for every input size, you need a whole **family** of circuits: one for size 1, one for size 2, one for size 3, and so on forever.
+
+:::info The Class P/poly
+A problem is in $\mathcal{P}/\text{poly}$ if there's a family of circuits, one for each input size $n$, where the circuit for size $n$ has at most polynomially many gates.
+
+The circuits in the family don't have to be related to each other, or easy to construct. Each one just has to exist.
+:::
+
+That last point is what makes circuits strange. A family of circuits can be wildly different at each size, almost like having a separate cheat sheet for every length. That makes circuits **more** powerful than programs in a weird way. $\mathcal{P}/\text{poly}$ even contains some problems that no program can solve at all.
+
+But it also means that a lower bound for circuits is a **stronger** statement than a lower bound for programs.
+
+<Tabs>
+  <TabItem value="contain" label="P fits inside P/poly" default>
+
+Any polynomial-time program can be "unrolled" into a polynomial-size circuit for each input length. That's essentially what Cook-Levin does: it turns the step-by-step computation into a grid of small, local pieces. Each piece can be built from a few gates.
+
+So $\mathcal{P} \subseteq \mathcal{P}/\text{poly}$.
+
+  </TabItem>
+  <TabItem value="plan" label="The plan">
+
+So if you could show that SAT, or any NP problem, **needs** circuits of more than polynomial size, then SAT can't be in $\mathcal{P}/\text{poly}$, so it can't be in $\mathcal{P}$:
+
+$$\mathcal{NP} \not\subseteq \mathcal{P}/\text{poly} \implies \mathcal{P} \neq \mathcal{NP}$$
+
+  </TabItem>
+  <TabItem value="why" label="Why this looked promising">
+
+Circuits are just diagrams. No tapes, no oracles, no simulations, nothing about "listing all programs". You're proving a purely combinatorial fact: no small diagram of gates computes this function.
+
+Circuit arguments look inside the computation by definition, so they aren't stopped by relativization. In the 1980s, that made circuits look like a very good bet.
+
+  </TabItem>
+</Tabs>
+
+Most researchers believe $\mathcal{NP} \not\subseteq \mathcal{P}/\text{poly}$. There's even a theorem supporting it: in 1980, Richard Karp and Richard Lipton showed that if SAT did have polynomial-size circuits, a whole tower of complexity classes above $\mathcal{NP}$ (called the polynomial hierarchy) would collapse, which almost nobody believes.
+
+---
+
+## Almost Every Function Is Hard
+
+In 1949, long before anyone had defined $\mathcal{P}$ or $\mathcal{NP}$, Claude Shannon proved something remarkable by simply counting.
+
+<Tabs>
+  <TabItem value="functions" label="Count the functions" default>
+
+A Boolean function with $n$ inputs assigns 0 or 1 to each of the $2^n$ possible input combinations. So there are
+
+$$2^{2^n}$$
+
+different functions. For just $n = 6$, that's $2^{64}$, about 18 billion billion functions.
+
+  </TabItem>
+  <TabItem value="circuits" label="Count the small circuits">
+
+Now count circuits with at most $s$ gates. Each gate picks a type and picks its inputs from what's already there. The number of different circuits you can build grows roughly like $s^{2s}$, much more slowly than $2^{2^n}$ when $s$ is small.
+
+  </TabItem>
+  <TabItem value="compare" label="Compare">
+
+If there are far more functions than small circuits, then most functions can't have a small circuit. There just aren't enough small circuits to go around.
+
+Working out the numbers carefully shows that almost every function of $n$ inputs needs about $2^n / n$ gates, which is exponential.
+
+  </TabItem>
+</Tabs>
+
+So hard functions aren't rare. They're **almost all** of them. A random function is hard with overwhelming probability.
+
+And here's the frustrating part: this argument doesn't tell you **which** functions are hard. It's like proving that most houses in a city are taller than two floors, without being able to point to a single specific tall house. To separate $\mathcal{P}$ from $\mathcal{NP}$, you need to prove that one **specific** function, like SAT, is hard.
+
+---
+
+## What We've Actually Proved
+
+For general circuits, with AND, OR and NOT and no other restrictions, the best lower bound anyone has proved for a specific function in $\mathcal{NP}$ is tiny: a little over $3n$ gates. That's barely more than the number of inputs. Decades of effort have moved it up only by fractions.
+
+So researchers studied **restricted** circuits instead, hoping to build up from there. Two results stand out:
+
+<Tabs>
+  <TabItem value="ac0" label="Shallow circuits" default>
+
+Allow AND and OR gates with as many inputs as you like, but limit the **depth** to a fixed constant, like 5. This class is called $\mathcal{AC}^0$.
+
+**Parity** asks: is the number of 1s in the input odd? In 1981, Merrick Furst, James Saxe and Michael Sipser, and independently Miklós Ajtai, proved that parity can't be computed by polynomial-size $\mathcal{AC}^0$ circuits. In 1986, Johan Håstad sharpened this to show they need exponential size.
+
+That's a genuine, strong lower bound. Shallow circuits can't count, even just odd versus even.
+
+  </TabItem>
+  <TabItem value="mono" label="Circuits with no NOT">
+
+Ban NOT gates entirely, allowing only AND and OR. These are called **monotone** circuits.
+
+In 1985, Alexander Razborov proved that the Clique problem from Post 15 needs monotone circuits of superpolynomial size. Noga Alon and Ravi Boppana soon improved this to exponential.
+
+That's a lower bound for an **NP-Complete** problem. People were thrilled.
+
+Then Razborov himself showed the method had a limit: the same kind of bound holds for perfect matching, a problem that's in $\mathcal{P}$ and has small general circuits. So proving that monotone circuits need to be big says nothing about general circuits. NOT gates make a huge difference, and nobody could extend these arguments to handle them.
+
+  </TabItem>
+</Tabs>
+
+By the early 1990s, the pattern was clear: strong results for restricted circuits, and almost nothing for general ones. Why did every technique stall at the same point?
+
+Razborov and Rudich answered that in 1994, and the answer is the second barrier.
+
+---
+
+## Where We Stand
+
+:::note What We Have Established
+A **Boolean circuit** is a diagram of AND, OR and NOT gates. Its **size** is the number of gates; its **depth** is the longest path from input to output. A problem needs a separate circuit for each input size.
+
+$\mathcal{P} \subseteq \mathcal{P}/\text{poly}$, so proving that an NP problem needs superpolynomial circuits would prove $\mathcal{P} \neq \mathcal{NP}$.
+
+Shannon (1949) showed by counting that almost every function needs about $2^n/n$ gates, but that doesn't identify a specific hard function. The best general lower bound for an explicit function is only a little over $3n$. Strong bounds exist only for restricted circuits: parity is not in $\mathcal{AC}^0$ (Furst, Saxe and Sipser; Ajtai; Håstad), and Clique needs huge monotone circuits (Razborov; Alon and Boppana).
+:::
+
+---
+
+## Up Next
+
+Post 40 is the Natural Proofs barrier. Razborov and Rudich looked at every circuit lower bound proof known at the time, found that they all share the same simple shape, and then proved that, if strong cryptography exists, no proof of that shape can ever show $\mathcal{P} \neq \mathcal{NP}$.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

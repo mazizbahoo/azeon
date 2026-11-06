@@ -1,0 +1,147 @@
+---
+sidebar_position: 7
+title: "Cryptography vs. Natural Proofs"
+description: "Secure encryption needs functions that look random but aren't. If such functions exist, they hide their own simplicity so well that the natural way of proving hardness can't see it. The thing we want to prove protects itself."
+tags: [failed-proofs, natural-proofs, cryptography, pseudorandomness, one-way-functions, barriers]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import RandomOrNot from '@site/src/components/RandomOrNot';
+
+# Cryptography vs. Natural Proofs
+
+Post 40 ended with a strange claim: if secure encryption exists, then the most natural way to prove that problems are hard can't work. When I first read it, it sounded like two unrelated topics had been glued together.
+
+This post is about why they're actually the same topic. It's built around one idea, **pseudorandomness**, and a small game you can play to get a feel for it.
+
+---
+
+## Starting From One-Way Functions
+
+Almost all of modern cryptography rests on one assumption: that **one-way functions** exist.
+
+:::info One-Way Function
+A function $f$ is **one-way** if:
+- computing $f(x)$ from $x$ is easy (polynomial time), but
+- given $f(x)$ for a random $x$, finding **any** input that maps to it is hard for every efficient algorithm, except with tiny probability.
+:::
+
+Think of mixing paint. Mixing blue and yellow into green is easy. Given a bucket of green, working out exactly which shades went in is not.
+
+Nobody has proved any one-way function exists. But there are strong candidates. Multiplying two big primes is easy, and getting them back from the product (factoring) seems hard. Many hash functions, which we'll meet in Post 53, are designed to behave like one-way functions.
+
+And here's the first connection to P vs NP:
+
+$$\text{one-way functions exist} \implies \mathcal{P} \neq \mathcal{NP}$$
+
+Why? Inverting a function is an $\mathcal{NP}$ search: given an output, find an input that produces it. The certificate is the input, and checking it means computing $f$ once. If $\mathcal{P} = \mathcal{NP}$, every such search would be easy (using the search trick from Post 36), and no function could be one-way.
+
+So cryptography needs **more** than $\mathcal{P} \neq \mathcal{NP}$. It needs hardness on **typical** inputs, not just worst-case ones. But it certainly needs $\mathcal{P} \neq \mathcal{NP}$ as a starting point.
+
+---
+
+## From One-Way to Random-Looking
+
+Cryptographers built a tower on top of one-way functions:
+
+<Tabs>
+  <TabItem value="prg" label="Pseudorandom generators" default>
+
+A **pseudorandom generator** takes a short random **seed** and stretches it into a much longer string that **no efficient algorithm can tell apart** from a truly random string of that length.
+
+In 1999, Johan Håstad, Russell Impagliazzo, Leonid Levin and Michael Luby proved that if any one-way function exists, then pseudorandom generators exist.
+
+  </TabItem>
+  <TabItem value="prf" label="Pseudorandom functions">
+
+A **pseudorandom function** goes further. With a short secret key, it defines a whole function, and so a whole truth table of length $2^n$, that looks like a random truth table to any efficient algorithm that can query it.
+
+In 1986, Oded Goldreich, Shafi Goldwasser and Silvio Micali showed how to build pseudorandom functions from pseudorandom generators.
+
+These are what block cipher modes, message authentication codes, and lots of other everyday cryptography are modelled on.
+
+  </TabItem>
+</Tabs>
+
+So the chain is: one-way functions, then pseudorandom generators, then pseudorandom functions. And here's the key fact about a pseudorandom function: its truth table **looks** random, but it's computed by a **small circuit**, since it has to be fast to compute.
+
+---
+
+## A Game: Spot the Generator
+
+Below are two grids of 256 bits each. One is (effectively) random. The other comes from a generator with a short seed. Click the one you think came from the generator.
+
+<RandomOrNot />
+
+With the **weak generator**, you can win every time once you know what to look for. It's built from a tiny formula that repeats every 16 bits, so every row of the grid is identical. That repetition is a **pattern**, and a pattern is exactly what a "distinguisher" looks for.
+
+Switch to the **stronger generator** and try ten pairs. You'll probably get about half right, which is what you'd get by flipping a coin. You can't see any difference.
+
+(The stronger generator here is a simple one called xorshift. It's good enough to fool human eyes, but it's not cryptographically secure: careful statistical tests can catch it. Real cryptographic generators are designed to fool **every** efficient test, not just eyes.)
+
+---
+
+## The Collision
+
+Now put this together with Post 40.
+
+A **natural property** for proving circuit lower bounds is:
+
+- **Useful:** every truth table with the property needs a big circuit.
+- **Large:** a good fraction of random truth tables have it.
+- **Constructive:** it can be checked quickly given the truth table.
+
+Hold a pseudorandom function's truth table next to a truly random one.
+
+| | Truly random truth table | Pseudorandom truth table |
+|---|---|---|
+| Circuit size | Almost certainly huge (Post 39) | Small, by design |
+| Has the natural property? | Often, because the property is **large** | **Never**, because the property is **useful** and this function has a small circuit |
+
+So the natural property behaves differently on the two. And because it's **constructive**, you can check it. That makes it a **distinguisher**: a test that tells pseudorandom from random. Exactly what a secure pseudorandom function promises can't exist.
+
+One technical detail matters here, and I want to mention it honestly. Checking a property of a $2^n$-bit truth table takes time polynomial in $2^n$, which is exponential in $n$. So the barrier needs pseudorandom functions that stay secure even against attackers with that much time. Cryptographers believe such strong pseudorandom functions exist, for example ones based on the hardness of factoring or of certain lattice problems, but it is a stronger assumption than basic cryptography needs.
+
+---
+
+## Hardness Hides Itself
+
+This is the sentence I'd put on a poster:
+
+> **If problems are hard enough to build secure cryptography, they're hard enough to hide their hardness from natural proofs.**
+
+A pseudorandom function is a simple object (small circuit) disguised as a complicated one (random-looking truth table). A natural proof tries to recognise complexity by looking at the truth table. Cryptography exists exactly to make that kind of recognition fail.
+
+So the more we believe in cryptography, the more we should believe that natural proofs won't separate $\mathcal{P}$ from $\mathcal{NP}$.
+
+And notice the connection to Post 31, where I said hardness and randomness are two sides of one coin. Hard problems let you fake randomness (derandomization). Faked randomness then blocks natural proofs of hardness. It's the same coin, flipped twice.
+
+---
+
+## What This Means for a Real Proof
+
+Because of this barrier, a proof that $\mathcal{P} \neq \mathcal{NP}$ (through circuits, at least) would have to do one of two strange things:
+
+- Use a property that **random functions don't have**: something special about SAT, or about NP-Complete problems, that a random truth table lacks. That's the escape route people talk about most.
+- Use a property that **can't be checked efficiently**, even with the whole truth table in hand.
+
+Or it would have to avoid the circuit framework entirely. Each option is open. None of them has a clear path.
+
+:::note What We Have Established
+**One-way functions** are easy to compute and hard to invert. Their existence implies $\mathcal{P} \neq \mathcal{NP}$. From them you can build pseudorandom generators (Håstad, Impagliazzo, Levin and Luby, 1999) and pseudorandom functions (Goldreich, Goldwasser and Micali, 1986): functions with small circuits whose truth tables look random.
+
+A natural property would be large on random functions and absent on pseudorandom ones, and checkable, so it would be a distinguisher that breaks them. So if strong pseudorandom functions exist, natural proofs cannot prove superpolynomial circuit lower bounds. Hardness, if it is strong enough for cryptography, hides itself.
+:::
+
+---
+
+## Up Next
+
+Back in Post 38, I mentioned interactive proofs, the setting where $\mathcal{IP} = \mathcal{PSPACE}$ broke the relativization barrier. Post 42 is about them properly: what it means to prove something by conversation, how a prover can convince you two graphs are **different** without showing you anything, and why that idea led to the PCP theorem.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

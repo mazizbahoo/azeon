@@ -1,0 +1,136 @@
+---
+sidebar_position: 5
+title: "Airline Crew Scheduling"
+description: "Every flight needs a legal crew, every crew needs to get home, and the whole plan breaks when a storm hits. Airline crew scheduling is one of the largest NP-Hard problems solved routinely, and it's built on set covering."
+tags: [real-world-impact, airlines, crew-scheduling, set-cover, integer-programming, column-generation]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import CrewPairing from '@site/src/components/CrewPairing';
+
+# Airline Crew Scheduling
+
+The last time I flew from Lahore to Karachi, the flight was delayed by an hour. The announcement said we were "waiting for crew". I remember being annoyed, and then curious. The plane was right there. The passengers were right there. Why was the crew somewhere else?
+
+That question turned out to lead to one of the biggest optimisation problems that businesses solve on a regular basis. Airlines have entire teams, and serious computing power, dedicated to answering "who flies which flights?". This post explains why it's so hard.
+
+---
+
+## Why Crews Are Complicated
+
+A pilot or flight attendant isn't a machine you can move anywhere at any time. Each crew member:
+
+- has a **home base**, and has to end up back there after a few days,
+- has legal limits on **how many hours** they can fly and be on duty,
+- needs minimum **rest** between duty periods,
+- is qualified for particular **aircraft types**,
+- and works under union and company rules that can fill a thick rulebook.
+
+Meanwhile, every single flight needs a full, qualified crew, at the right airport, at the right time.
+
+Crew costs are among the largest costs an airline has, so even a small improvement in how efficiently crews are used is worth a lot of money. And unlike fuel prices, it's something the airline controls.
+
+---
+
+## Two Stages
+
+Airlines usually split the problem in two.
+
+<Tabs>
+  <TabItem value="pairing" label="1. Pairings" default>
+
+A **pairing** is a sequence of flights that a crew could legally fly, starting and ending at the same base. For example: Lahore to Karachi, Karachi to Islamabad, Islamabad back to Lahore, over a day or two.
+
+The first stage chooses a set of pairings so that **every flight is in exactly one chosen pairing**, at the lowest total cost.
+
+  </TabItem>
+  <TabItem value="roster" label="2. Rosters">
+
+The second stage assigns the chosen pairings to actual people over the month, respecting each person's limits, holidays, training and preferences. This is called **rostering**, and it's another hard problem of its own.
+
+  </TabItem>
+</Tabs>
+
+This post is about stage 1, because it has a beautifully simple structure underneath.
+
+---
+
+## Pick the Pairings
+
+Here's a tiny version. There are six flights between three cities. There are seven possible pairings, each a legal sequence of flights, each with a cost (the units are made up). Choose pairings so every flight is covered **exactly once**. A flight covered twice means one crew would be riding along as passengers, which costs money and achieves nothing.
+
+<CrewPairing />
+
+Try a few combinations. $A + B + C$ covers everything for 16. So does $D + E$. Is there anything cheaper? Press **Cheapest** to see. With seven pairings there are only $2^7 = 128$ combinations to try, so the figure checks them all instantly.
+
+A real airline has thousands of flights. The number of **possible** legal pairings is astronomically large, far too many to even list, let alone try every combination of.
+
+---
+
+## The Problem Underneath: Set Covering
+
+Strip away the aircraft and it's a classic problem.
+
+> **Set Partitioning:** given a list of items (flights) and a collection of groups (pairings), each with a cost, choose groups so every item is in exactly one chosen group, at minimum total cost.
+
+If you allow items to be covered more than once, it's called **Set Cover**. Both are NP-Hard. Set Cover and Exact Cover were both on Karp's 1972 list of 21 NP-Complete problems, alongside the ones we met in Phase 2.
+
+You can see a reduction from Post 16 hiding here. Vertex Cover is a special case of Set Cover: the roads are the items, and each city is a group containing the roads it touches. So if Set Cover were easy, Vertex Cover would be too.
+
+---
+
+## How Airlines Actually Solve It
+
+Since it's NP-Hard and huge, nobody tries every combination. The standard method is **integer programming**, combined with a clever trick called **column generation**.
+
+<Tabs>
+  <TabItem value="ip" label="Integer programming" default>
+
+Write one yes/no variable for each pairing: 1 if it's chosen, 0 if not. Write one equation per flight: the variables of the pairings that contain it must add up to exactly 1. Minimise total cost.
+
+That's an **integer program**. Solving integer programs is NP-Hard in general, but solvers like the ones mentioned in Post 51 have become extremely good at them in practice.
+
+  </TabItem>
+  <TabItem value="cg" label="Column generation">
+
+The problem: there are far too many possible pairings to even write down.
+
+The trick: start with a small set of reasonable pairings. Solve a relaxed version of the problem with just those. The solution produces "prices" for each flight, roughly how expensive it currently is to cover. Then search for a new pairing that would be **cheaper** than those prices suggest, and add it. Repeat until no such pairing exists.
+
+So the solver only ever looks at a tiny fraction of the possible pairings, the ones that could actually help. Combined with a branching search on top, this is called **branch-and-price**, and it's the backbone of airline crew planning systems.
+
+  </TabItem>
+</Tabs>
+
+These methods don't usually prove they've found **the** optimal set of pairings for a full airline. But they find solutions that are very close, often provably within a small percentage, in hours rather than centuries.
+
+---
+
+## When Things Go Wrong
+
+Planning happens weeks in advance. Then the real world arrives.
+
+A storm closes an airport. Flights are cancelled. Crews end up in the wrong cities. Some of them hit their legal hour limits waiting. Now the airline has to **re-solve** the problem, fast, with the plan half-executed and people stuck all over the network.
+
+This is called **disruption recovery**, and it's even harder than planning, because there's no time. In December 2022, during a severe winter storm in the United States, Southwest Airlines cancelled thousands of flights over about ten days. It was widely reported that the airline's crew-scheduling systems couldn't keep up with re-assigning crews, and many crew members couldn't even reach the company to find out where to go. It cost the airline hundreds of millions of dollars.
+
+That's what an NP-Hard problem looks like when the tools can't keep up with the scale.
+
+:::note What We Have Established
+Airline crew scheduling is usually split into **pairing** (sequences of flights a crew can legally fly from a base) and **rostering** (assigning pairings to people). Choosing pairings so each flight is flown exactly once at minimum cost is **set partitioning**, a close relative of **set cover**. Both are NP-Hard (Karp, 1972), and Vertex Cover is a special case.
+
+Airlines solve it with **integer programming** and **column generation**, generating only promising pairings instead of listing them all. Solutions are near-optimal rather than proven optimal. **Disruption recovery** must re-solve the problem under time pressure, and failures can be very costly, as in Southwest's December 2022 breakdown.
+:::
+
+---
+
+## Up Next
+
+Crews are scarce, and so are servers. Post 56 is about cloud computing: deciding which programs run on which machines, so you use as few machines as possible without overloading any of them. It's called bin packing, and it quietly decides how much your favourite apps cost to run.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*

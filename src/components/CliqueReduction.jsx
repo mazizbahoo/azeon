@@ -1,276 +1,129 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import BrowserOnly from '@docusaurus/BrowserOnly';
+import React, { useState } from 'react';
+import { Button, Figure, svgButton } from './figure';
 
-/* ── Formula ─────────────────────────────────────────────── */
+/* ── 3-SAT → Clique ──────────────────────────────────────── */
 
 // φ = (x₁ ∨ ¬x₂ ∨ x₃) ∧ (¬x₁ ∨ x₂ ∨ ¬x₃) ∧ (x₁ ∨ x₂ ∨ x₃)
 const CLAUSES = [
-  [{ var: 1, neg: false }, { var: 2, neg: true }, { var: 3, neg: false }],
-  [{ var: 1, neg: true }, { var: 2, neg: false }, { var: 3, neg: true }],
-  [{ var: 1, neg: false }, { var: 2, neg: false }, { var: 3, neg: false }],
+  [{ v: 1, neg: false }, { v: 2, neg: true }, { v: 3, neg: false }],
+  [{ v: 1, neg: true }, { v: 2, neg: false }, { v: 3, neg: true }],
+  [{ v: 1, neg: false }, { v: 2, neg: false }, { v: 3, neg: false }],
 ];
+const EXAMPLE = [0, 4, 6];
 
-const NODES = CLAUSES.flatMap((clause, ci) =>
-  clause.map((lit, li) => ({ id: ci * 3 + li, clause: ci, lit }))
+const SUB = ['', '₁', '₂', '₃'];
+const lit = ({ v, neg }) => `${neg ? '¬' : ''}x${SUB[v]}`;
+
+// Nodes on one circle, three arcs of three: every edge is a chord.
+const W = 560;
+const H = 400;
+const CX = 280;
+const CY = 205;
+const RING = 148;
+const R = 21;
+const ARCS = [-90, 30, 150];
+const polar = (deg, r) => ({ x: CX + r * Math.cos((deg * Math.PI) / 180), y: CY + r * Math.sin((deg * Math.PI) / 180) });
+const LABELS = [{ x: CX, y: 22 }, { x: 430, y: 384 }, { x: 130, y: 384 }];
+
+const NODES = CLAUSES.flatMap((clause, c) =>
+  clause.map((l, i) => ({ id: c * 3 + i, clause: c, lit: l, ...polar(ARCS[c] + (i - 1) * 24, RING) })),
 );
 
-const contradicts = (a, b) => a.var === b.var && a.neg !== b.neg;
-
+const contradicts = (a, b) => a.v === b.v && a.neg !== b.neg;
 const EDGES = [];
-for (let i = 0; i < NODES.length; i++) {
-  for (let j = i + 1; j < NODES.length; j++) {
-    if (NODES[i].clause !== NODES[j].clause && !contradicts(NODES[i].lit, NODES[j].lit)) {
-      EDGES.push([i, j]);
+NODES.forEach((a, i) => NODES.slice(i + 1).forEach(b => {
+  if (a.clause !== b.clause && !contradicts(a.lit, b.lit)) EDGES.push([a.id, b.id]);
+}));
+
+function check(sel) {
+  const nodes = sel.map(id => NODES[id]);
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const [a, b] = [nodes[i], nodes[j]];
+      if (a.clause === b.clause) return `${lit(a.lit)} and ${lit(b.lit)} are in the same clause`;
+      if (contradicts(a.lit, b.lit)) return `${lit(a.lit)} and ${lit(b.lit)} contradict`;
     }
   }
+  return null;
 }
 
-const litLabel = ({ var: v, neg }) => (neg ? `¬x${v}` : `x${v}`);
-
-const CLAUSE_COLORS = ['var(--az-c3)', 'var(--az-c5)', 'var(--az-c2)'];
-const CLAUSE_NAMES = ['Clause 1', 'Clause 2', 'Clause 3'];
-const CLIQUE_COLOR = 'var(--az-ok)';
-const EXAMPLE_CLIQUE = [0, 4, 6]; // x₁=T, x₂=T, x₃=T
-
-/* ── Layout ──────────────────────────────────────────────── */
-
-function layout(w) {
-  const groupR = Math.min(w * 0.28, 140);
-  const nodeR = Math.min(w * 0.1, 50);
-  const cy = 20 + groupR + 2 * nodeR;
-  const positions = [];
-  [-90, 30, 150].forEach(deg => {
-    const ga = (deg * Math.PI) / 180;
-    const gx = w / 2 + groupR * Math.cos(ga);
-    const gy = cy + groupR * Math.sin(ga);
-    for (let li = 0; li < 3; li++) {
-      const na = ((li * 120 - 90) * Math.PI) / 180;
-      positions.push({ x: gx + nodeR * Math.cos(na), y: gy + nodeR * Math.sin(na) });
-    }
-  });
-  return { positions, height: Math.max(180, 1.5 * groupR + 3.5 * nodeR + 40) };
-}
-
-/* ── Component ───────────────────────────────────────────── */
-
-function Inner() {
-  const stageRef = useRef(null);
-  const [width, setWidth] = useState(400);
-  const [hovered, setHovered] = useState(null);
-  const [showClique, setShowClique] = useState(false);
-
-  const measure = useCallback(() => {
-    if (stageRef.current) setWidth(Math.max(300, stageRef.current.getBoundingClientRect().width));
-  }, []);
-
-  useEffect(() => {
-    measure();
-    const ro = new ResizeObserver(measure);
-    if (stageRef.current) ro.observe(stageRef.current);
-    return () => ro.disconnect();
-  }, [measure]);
-
-  const { positions, height } = layout(width);
-  const nodeR = Math.min(Math.max(14, width * 0.038), 22);
-
-  const neighbours = id =>
-    EDGES.filter(([a, b]) => a === id || b === id).map(([a, b]) => (a === id ? b : a));
-
-  const isLit = id => {
-    if (showClique) return EXAMPLE_CLIQUE.includes(id);
-    if (hovered === null) return false;
-    return hovered === id || neighbours(hovered).includes(id);
-  };
-
-  const isEdgeLit = (a, b) => {
-    if (showClique) return EXAMPLE_CLIQUE.includes(a) && EXAMPLE_CLIQUE.includes(b);
-    if (hovered === null) return false;
-    return a === hovered || b === hovered;
-  };
-
-  const idle = hovered === null && !showClique;
-
-  return (
-    <div className="az-viz">
-      <div className="az-viz__head">
-        <span className="az-viz__label">3-SAT → clique reduction</span>
-        <div className="az-viz__tools">
-          <button
-            type="button"
-            aria-pressed={!showClique}
-            onClick={() => setShowClique(false)}
-            className={'az-viz-btn' + (!showClique ? ' az-viz-btn--on' : '')}
-          >
-            Full graph
-          </button>
-          <button
-            type="button"
-            aria-pressed={showClique}
-            onClick={() => { setShowClique(true); setHovered(null); }}
-            className={'az-viz-btn' + (showClique ? ' az-viz-btn--on' : '')}
-            style={{ '--btn-accent': CLIQUE_COLOR }}
-          >
-            Show 3-clique
-          </button>
-        </div>
-      </div>
-
-      <div className="az-viz-formula">
-        <span>φ =</span>
-        {CLAUSES.map((clause, ci) => (
-          <React.Fragment key={ci}>
-            <span className="az-viz-chip" style={{ '--tok': CLAUSE_COLORS[ci] }}>
-              ({clause.map(litLabel).join(' ∨ ')})
-            </span>
-            {ci < CLAUSES.length - 1 && <span>∧</span>}
-          </React.Fragment>
-        ))}
-      </div>
-
-      <div className="az-viz__body">
-        <div ref={stageRef}>
-          <svg width="100%" height={height} style={{ display: 'block' }} role="img"
-            aria-label="Graph where each literal is a node and edges join compatible literals from different clauses">
-            {EDGES.map(([a, b], ei) => {
-              const lit = isEdgeLit(a, b);
-              const stroke = showClique && lit
-                ? CLIQUE_COLOR
-                : lit && hovered !== null
-                  ? CLAUSE_COLORS[NODES[hovered].clause]
-                  : 'var(--az-border)';
-              return (
-                <line
-                  key={ei}
-                  x1={positions[a].x} y1={positions[a].y}
-                  x2={positions[b].x} y2={positions[b].y}
-                  stroke={stroke}
-                  strokeWidth={showClique && lit ? 2.5 : lit ? 2 : 1}
-                  opacity={idle ? 0.6 : lit ? 1 : 0.1}
-                  style={{ transition: 'opacity 0.2s ease, stroke 0.2s ease' }}
-                />
-              );
-            })}
-
-            {NODES.map(node => {
-              const p = positions[node.id];
-              const color = CLAUSE_COLORS[node.clause];
-              const inClique = showClique && EXAMPLE_CLIQUE.includes(node.id);
-              const isHov = hovered === node.id;
-              const dim = !idle && !isLit(node.id);
-              const ring = inClique ? CLIQUE_COLOR : color;
-
-              return (
-                <g
-                  key={node.id}
-                  onMouseEnter={() => !showClique && setHovered(node.id)}
-                  onMouseLeave={() => setHovered(null)}
-                  opacity={dim ? 0.22 : 1}
-                  style={{ cursor: showClique ? 'default' : 'pointer', transition: 'opacity 0.2s ease' }}
-                >
-                  <circle cx={p.x} cy={p.y} r={nodeR} fill="var(--az-surface)" />
-                  {(inClique || isHov) && (
-                    <circle cx={p.x} cy={p.y} r={nodeR} fill={ring} fillOpacity={0.14} />
-                  )}
-                  <circle
-                    cx={p.x} cy={p.y} r={nodeR}
-                    fill="none"
-                    stroke={ring}
-                    strokeWidth={inClique || isHov ? 2.5 : 1.5}
-                  />
-                  {inClique && (
-                    <circle cx={p.x} cy={p.y} r={nodeR + 5} fill="none" stroke={CLIQUE_COLOR} strokeWidth={1} opacity={0.35} />
-                  )}
-                  <text
-                    x={p.x} y={p.y + 1}
-                    textAnchor="middle" dominantBaseline="middle"
-                    fontSize={Math.max(9, nodeR * 0.58)}
-                    fontFamily="var(--ifm-font-family-monospace)"
-                    fontWeight={inClique || isHov ? 600 : 400}
-                    fill={ring}
-                    style={{ pointerEvents: 'none', userSelect: 'none' }}
-                  >
-                    {litLabel(node.lit)}
-                  </text>
-                  {node.lit === CLAUSES[node.clause][1] && (
-                    <text
-                      x={p.x} y={p.y - nodeR - 8}
-                      textAnchor="middle"
-                      fontSize={9}
-                      letterSpacing="0.1em"
-                      fontFamily="var(--ifm-font-family-monospace)"
-                      fill={color}
-                      style={{ pointerEvents: 'none', userSelect: 'none' }}
-                    >
-                      {CLAUSE_NAMES[node.clause].toUpperCase()}
-                    </text>
-                  )}
-                </g>
-              );
-            })}
-          </svg>
-        </div>
-
-        <div className="az-viz-legend">
-          {CLAUSE_NAMES.map((label, i) => (
-            <span className="az-viz-legend__item" key={label} style={{ '--dot': CLAUSE_COLORS[i] }}>
-              <span className="az-viz-legend__dot" />
-              {label}
-            </span>
-          ))}
-          {showClique && (
-            <span className="az-viz-legend__item" style={{ '--dot': CLIQUE_COLOR, color: CLIQUE_COLOR }}>
-              <span className="az-viz-legend__dot" />
-              3-clique (x₁=T, x₂=T, x₃=T)
-            </span>
-          )}
-        </div>
-
-        {showClique ? (
-          <div className="az-viz-note az-viz-note--ok">
-            The assignment <em>x₁=T, x₂=T, x₃=T</em> satisfies the formula. The three highlighted nodes — one per
-            clause — form a <em>3-clique</em>: every pair is joined, because no two of them contradict. That is the
-            reduction in action, a satisfying assignment is always a clique of size k.
-          </div>
-        ) : hovered !== null ? (
-          <div className="az-viz-note" style={{ '--note-accent': CLAUSE_COLORS[NODES[hovered].clause] }}>
-            <em>{litLabel(NODES[hovered].lit)}</em> sits in {CLAUSE_NAMES[NODES[hovered].clause]}. It joins{' '}
-            {neighbours(hovered).map((nid, i, arr) => (
-              <span key={nid} style={{ color: CLAUSE_COLORS[NODES[nid].clause] }}>
-                {litLabel(NODES[nid].lit)}{i < arr.length - 1 ? ', ' : ''}
-              </span>
-            ))}
-            {(() => {
-              const missing = NODES.filter(
-                n => n.clause !== NODES[hovered].clause && !neighbours(hovered).includes(n.id)
-              );
-              if (!missing.length) return '.';
-              return (
-                <>
-                  {' '}but not{' '}
-                  {missing.map((n, i) => (
-                    <span key={n.id} style={{ color: 'var(--az-no)' }}>
-                      {litLabel(n.lit)}{i < missing.length - 1 ? ', ' : ''}
-                    </span>
-                  ))}
-                  {' '}— those are contradictory: same variable, opposite sign.
-                </>
-              );
-            })()}
-          </div>
-        ) : (
-          <div className="az-viz-hint">
-            Hover a node to trace its edges, or show the 3-clique to see the satisfying assignment.
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+const assignment = nodes => [1, 2, 3]
+  .map(v => {
+    const n = nodes.find(m => m.lit.v === v);
+    return `x${SUB[v]}=${n ? (n.lit.neg ? 'F' : 'T') : 'any'}`;
+  })
+  .join(', ');
 
 export default function CliqueReduction() {
+  const [sel, setSel] = useState([]);
+  const [hover, setHover] = useState(null);
+  const toggle = id => setSel(s => (s.includes(id) ? s.filter(x => x !== id) : [...s, id]));
+
+  const problem = check(sel);
+  const nodes = sel.map(id => NODES[id]);
+  const complete = !problem && new Set(nodes.map(n => n.clause)).size === 3;
+  const near = hover === null ? [] : EDGES.filter(e => e.includes(hover)).flat();
+
+  const edgeProps = (a, b) => {
+    if (sel.includes(a) && sel.includes(b)) {
+      return { stroke: problem ? 'var(--fig-bad)' : 'var(--fig-accent)', strokeWidth: 2.5 };
+    }
+    if (hover !== null && (a === hover || b === hover)) return { stroke: 'var(--fig-ink)', strokeWidth: 1.25, opacity: 0.7 };
+    return { stroke: 'var(--fig-line-strong)', strokeWidth: 1, opacity: hover === null ? 1 : 0.5 };
+  };
+
+  let status = <>Click one literal from each clause</>;
+  let tone;
+  if (problem) { tone = 'bad'; status = <><b>Not a clique</b>: {problem}</>; }
+  else if (complete) { tone = 'good'; status = <><b>3-clique</b> · satisfying assignment {assignment(nodes)}</>; }
+  else if (sel.length) status = <>Clique of size <b>{sel.length}</b> so far</>;
+
   return (
-    <BrowserOnly fallback={<div className="az-viz__loading">Loading graph</div>}>
-      {() => <Inner />}
-    </BrowserOnly>
+    <Figure
+      title="3-SAT to Clique"
+      tools={
+        <>
+          <Button onClick={() => setSel(EXAMPLE)}>Example</Button>
+          <Button onClick={() => setSel([])} disabled={!sel.length}>Clear</Button>
+        </>
+      }
+      status={status}
+      tone={tone}
+    >
+      <div className="az-fig-formula">
+        φ = {CLAUSES.map(c => `(${c.map(lit).join(' ∨ ')})`).join(' ∧ ')}
+      </div>
+
+      <div className="az-fig-well">
+        <svg viewBox={`0 0 ${W} ${H}`} className="az-fig-svg" role="group" aria-label="One node per literal; edges join compatible literals in different clauses">
+          {EDGES.map(([a, b]) => (
+            <line key={`${a}-${b}`} x1={NODES[a].x} y1={NODES[a].y} x2={NODES[b].x} y2={NODES[b].y}
+              {...edgeProps(a, b)} style={{ transition: 'all 0.15s ease' }} />
+          ))}
+          {LABELS.map((p, c) => (
+            <text key={c} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize="10" letterSpacing="0.12em" fill="var(--fig-muted)">
+              CLAUSE {c + 1}
+            </text>
+          ))}
+          {NODES.map(n => {
+            const on = sel.includes(n.id);
+            const c = on ? (problem ? 'var(--fig-bad)' : 'var(--fig-accent)') : null;
+            const faded = hover !== null && hover !== n.id && !near.includes(n.id) && !on;
+            return (
+              <g key={n.id} {...svgButton(() => toggle(n.id), `${lit(n.lit)}, clause ${n.clause + 1}`, on)}
+                onMouseEnter={() => setHover(n.id)} onMouseLeave={() => setHover(null)}
+                onFocus={() => setHover(n.id)} onBlur={() => setHover(null)}>
+                <circle cx={n.x} cy={n.y} r={R} fill="var(--fig-bg)" />
+                <circle className="az-fig-node" cx={n.x} cy={n.y} r={R}
+                  fill={c ?? 'var(--fig-bg)'} fillOpacity={c ? 0.16 : 1}
+                  stroke={c ?? (faded ? 'var(--fig-line)' : 'var(--fig-line-strong)')} strokeWidth={on ? 2 : 1.25} />
+                <text x={n.x} y={n.y + 1} textAnchor="middle" dominantBaseline="middle" fontSize="13"
+                  fill={c ?? (faded ? 'var(--fig-muted)' : 'var(--fig-ink)')}>{lit(n.lit)}</text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </Figure>
   );
 }

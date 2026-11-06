@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import katex from 'katex';
+import { PhaseCard, usePhases } from '@site/src/components/PhasesGrid';
+import {
+  ArrowRight, BookOpen, Check, Code, FileText, Microscope, PenLine, Puzzle, Trophy, Zap,
+  type LucideIcon,
+} from 'lucide-react';
 
 /* ─── KaTeX helper ──────────────────────────────────────── */
 
@@ -18,43 +23,11 @@ const FLOATING_SYMBOLS = [
   'PSPACE', 'BPP', 'EXP', 'Ω(n)', 'Θ', '⊕', '¬', '∧', '∨',
 ];
 
-interface Phase {
-  num: string;
-  title: string;
-  slug: string;
-  color: string;
-  desc: string;
-  publishedPosts: number;
-  totalPosts: number;
-}
-
-const PHASES: Phase[] = [
-  { num: '01', title: 'Foundations', slug: '/p-vs-np/foundations', color: 'var(--az-phase-01)', desc: 'Algorithms, Turing machines, Big-O notation, and the formal definitions of P and NP.', publishedPosts: 10, totalPosts: 10 },
-  { num: '02', title: 'NP-Completeness', slug: '/p-vs-np/np-completeness', color: 'var(--az-phase-02)', desc: 'Reductions, Cook-Levin theorem, SAT, TSP, Graph Coloring, Sudoku, and the NP-Complete zoo.', publishedPosts: 6, totalPosts: 14 },
-  { num: '03', title: 'Complexity Zoo', slug: '/p-vs-np/complexity-zoo', color: 'var(--az-phase-03)', desc: "coNP, PSPACE, EXP, randomized algorithms, quantum computing, and Shor's algorithm.", publishedPosts: 0, totalPosts: 10 },
-  { num: '04', title: 'Failed Proofs', slug: '/p-vs-np/failed-proofs', color: 'var(--az-phase-04)', desc: 'Relativization, Natural Proofs, Algebrization, GCT and every barrier that blocks a proof.', publishedPosts: 0, totalPosts: 16 },
-  { num: '05', title: 'Real-World Impact', slug: '/p-vs-np/real-world-impact', color: 'var(--az-phase-05)', desc: 'RSA encryption, supply chains, protein folding, AI, and the cost of NP-Hardness.', publishedPosts: 0, totalPosts: 12 },
-  { num: '06', title: 'Heuristics', slug: '/p-vs-np/heuristics', color: 'var(--az-phase-06)', desc: 'Approximation algorithms, greedy strategies, simulated annealing, and genetic algorithms.', publishedPosts: 0, totalPosts: 12 },
-  { num: '07', title: 'Final Verdict', slug: '/p-vs-np/final-verdict', color: 'var(--az-phase-07)', desc: 'The scientific consensus, the consequences of both outcomes, open research, and what comes next.', publishedPosts: 0, totalPosts: 6 },
-];
-
-// Derived — update only the PHASES array above as you publish
-const TOTAL_PUBLISHED = PHASES.reduce((sum, p) => sum + p.publishedPosts, 0);
-const TOTAL_PLANNED = PHASES.reduce((sum, p) => sum + p.totalPosts, 0);
-
-const STATS = [
-  { value: '1', label: 'Active Project' },
-  { value: String(TOTAL_PUBLISHED), label: 'Posts Live' },
-  { value: String(TOTAL_PLANNED), label: 'Posts Planned' },
-  { value: '∞', label: 'More Coming' },
-];
-
-const ACHIEVEMENTS = [
-  { icon: '🏆', text: 'Perfect CS score in Matriculation' },
-  { icon: '🧩', text: 'Love solving a Rubik\'s Cube' },
-  { icon: '💻', text: 'Web development & graphic designing since age 14' },
-  { icon: '📖', text: 'Founder of Azeon' },
-  { icon: '👨🏻‍⚖️', text: 'Founder of TrueVerdict' }
+const ACHIEVEMENTS: { icon: LucideIcon; text: string }[] = [
+  { icon: Trophy, text: 'Perfect CS score in Matriculation' },
+  { icon: Puzzle, text: 'Rubik\'s Cube solver under 45 seconds' },
+  { icon: Code, text: 'Web development & graphic designing since age 14' },
+  { icon: BookOpen, text: 'Founder of Azeon' },
 ];
 
 const SAFE_ITEMS = [
@@ -139,9 +112,17 @@ function Hero() {
 /* ─── Stats Bar ─────────────────────────────────────────── */
 
 function StatsBar() {
+  const { totalPublished, totalPlanned } = usePhases();
+  const stats = [
+    { value: '1', label: 'Active Project' },
+    { value: String(totalPublished), label: 'Posts Live' },
+    { value: String(totalPlanned), label: 'Posts Planned' },
+    { value: '∞', label: 'More Coming' },
+  ];
+
   return (
     <div className="az-stats">
-      {STATS.map(({ value, label }) => (
+      {stats.map(({ value, label }) => (
         <div key={label} className="az-stats__item">
           <div className="az-stats__value">{value}</div>
           <div className="az-stats__label">{label}</div>
@@ -201,50 +182,10 @@ function WhatIsAzeon() {
   );
 }
 
-/* ─── Phase Card ────────────────────────────────────────── */
-
-function PhaseCard({ phase }: { phase: Phase }) {
-  const [hovered, setHovered] = useState(false);
-  const isLive = phase.publishedPosts > 0;
-
-  const badgeText = isLive
-    ? `${phase.publishedPosts} / ${phase.totalPosts} posts`
-    : 'Coming soon';
-
-  return (
-    <Link
-      to={isLive ? phase.slug : '#'}
-      className={`az-phase-card${!isLive ? ' az-phase-card--locked' : ''}`}
-      style={{
-        borderColor: hovered && isLive ? phase.color : undefined,
-        boxShadow: hovered && isLive ? `0 0 28px ${phase.color}22, inset 0 0 28px ${phase.color}06` : undefined,
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { if (!isLive) e.preventDefault(); }}
-    >
-      <div className="az-phase-card__top">
-        <span className="az-phase-card__num" style={{ color: hovered && isLive ? phase.color : undefined }}>
-          {phase.num}
-        </span>
-        <span className={`az-phase-card__badge${isLive ? ' az-phase-card__badge--live' : ''}`}>
-          {isLive && <span className="az-phase-card__badge-dot" />}
-          {badgeText}
-        </span>
-      </div>
-      <h3 className="az-phase-card__title">{phase.title}</h3>
-      <p className="az-phase-card__desc">{phase.desc}</p>
-      {isLive
-        ? <span className="az-phase-card__link" style={{ color: hovered ? phase.color : undefined }}>Read phase →</span>
-        : <span className="az-phase-card__link az-phase-card__link--soon">In progress</span>
-      }
-    </Link>
-  );
-}
-
 /* ─── Featured Project ──────────────────────────────────── */
 
 function FeaturedProject() {
+  const { phases, totalPublished, totalPlanned } = usePhases();
   return (
     <section className="az-section az-section--surface az-section--border">
       <div className="az-container">
@@ -252,7 +193,7 @@ function FeaturedProject() {
           <span className="az-eyebrow">// Featured Project — Active</span>
           <h2 className="az-h2">P vs NP Explained</h2>
           <p className="az-body az-featured__subtitle">
-            An 80-post curriculum on the most important open problem in computer science.
+            An {totalPlanned}-post curriculum on the most important open problem in computer science.
             No prerequisites. Starts from what an algorithm is, ends at the frontiers of
             complexity theory.
           </p>
@@ -261,14 +202,14 @@ function FeaturedProject() {
               <span className="az-featured__pill-dot" />
               Live
             </span>
-            <span className="az-featured__pill">{TOTAL_PUBLISHED} of {TOTAL_PLANNED} posts published</span>
-            <span className="az-featured__pill">7 phases</span>
+            <span className="az-featured__pill">{totalPublished} of {totalPlanned} posts published</span>
+            <span className="az-featured__pill">{phases.length} phases</span>
             <span className="az-featured__pill">$1,000,000 prize</span>
           </div>
         </div>
 
         <div className="az-phases__grid">
-          {PHASES.map(phase => <PhaseCard key={phase.num} phase={phase} />)}
+          {phases.map(phase => <PhaseCard key={phase.num} phase={phase} />)}
         </div>
 
         <div className="az-featured__cta">
@@ -303,7 +244,7 @@ function StakesSection() {
             <span className="az-stakes__label">The Protected World</span>
             {SAFE_ITEMS.map(item => (
               <div key={item} className="az-stakes__item">
-                <span className="az-stakes__icon">✓</span>
+                <Check className="az-stakes__icon" size={18} strokeWidth={2.25} aria-hidden="true" />
                 <span className="az-stakes__item-text">{item}</span>
               </div>
             ))}
@@ -313,7 +254,7 @@ function StakesSection() {
             <span className="az-stakes__label">The Shattered World</span>
             {DANGER_ITEMS.map(item => (
               <div key={item} className="az-stakes__item">
-                <span className="az-stakes__icon">⚡</span>
+                <Zap className="az-stakes__icon" size={18} strokeWidth={2.25} aria-hidden="true" />
                 <span className="az-stakes__item-text">{item}</span>
               </div>
             ))}
@@ -340,7 +281,7 @@ function ComingSoon() {
         </div>
         <div className="az-coming__grid">
           <div className="az-coming-card">
-            <div className="az-coming-card__icon">📄</div>
+            <div className="az-coming-card__icon"><FileText size={22} strokeWidth={1.75} aria-hidden="true" /></div>
             <div className="az-coming-card__type">Documentation</div>
             <div className="az-coming-card__title">Next Project</div>
             <div className="az-coming-card__desc">
@@ -349,16 +290,16 @@ function ComingSoon() {
             <div className="az-coming-card__status">Coming soon</div>
           </div>
           <div className="az-coming-card">
-            <div className="az-coming-card__icon">✍️</div>
+            <div className="az-coming-card__icon"><PenLine size={22} strokeWidth={1.75} aria-hidden="true" /></div>
             <div className="az-coming-card__type">Blog</div>
             <div className="az-coming-card__title">Essays & Thoughts</div>
             <div className="az-coming-card__desc">
               Short-form posts on ideas, problems, and things worth thinking about.
             </div>
-            <Link to="/blog" className="az-coming-card__link">Visit the blog</Link>
+            <Link to="/blog" className="az-coming-card__link">Visit the blog <ArrowRight size={13} strokeWidth={2} aria-hidden="true" /></Link>
           </div>
           <div className="az-coming-card">
-            <div className="az-coming-card__icon">🔬</div>
+            <div className="az-coming-card__icon"><Microscope size={22} strokeWidth={1.75} aria-hidden="true" /></div>
             <div className="az-coming-card__type">Research</div>
             <div className="az-coming-card__title">Open Questions</div>
             <div className="az-coming-card__desc">
@@ -388,9 +329,9 @@ function AboutSection() {
             <h3 className="az-id-card__name">Aziz</h3>
             <span className="az-id-card__role">Founder of Azeon</span>
             <div className="az-id-card__facts">
-              {ACHIEVEMENTS.map(({ icon, text }) => (
+              {ACHIEVEMENTS.map(({ icon: Icon, text }) => (
                 <div key={text} className="az-id-card__fact">
-                  <span className="az-id-card__fact-icon">{icon}</span>
+                  <Icon className="az-id-card__fact-icon" size={16} strokeWidth={2} aria-hidden="true" />
                   <span className="az-id-card__fact-text">{text}</span>
                 </div>
               ))}

@@ -1,0 +1,110 @@
+---
+sidebar_position: 4
+title: "Supply Chain Logistics"
+description: "Every parcel van starts the morning with a Traveling Salesman Problem plus extra rules. Companies can't solve it perfectly, so they solve it well, and the gap between 'good' and 'best' is measured in millions of kilometres."
+tags: [real-world-impact, logistics, vehicle-routing, tsp, delivery, supply-chain, heuristics]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import TSPRoutes from '@site/src/components/TSPRoutes';
+
+# Supply Chain Logistics
+
+There's a delivery rider who brings parcels to our street in Lahore. I watched him one afternoon from our gate, checking his phone between drops, going up one lane, skipping the next, then coming back to it later. At first I thought he was lost. Then I realised the order on his phone probably came from a routing algorithm, and he was following it, mostly, with a few changes of his own where he knew the lanes better than the map did.
+
+He was solving a version of the Traveling Salesman Problem from Post 20. So was the software that planned his day. Neither of them was solving it perfectly. This post is about why that's fine, and why the small gap between "good" and "best" is worth a lot of money.
+
+---
+
+## TSP Gets Real: Vehicle Routing
+
+Post 20's salesman has one vehicle, no deadlines and unlimited space. Real delivery has a lot more rules. The real-world version is called the **Vehicle Routing Problem**, first described by George Dantzig and John Ramser in 1959 as "the truck dispatching problem", for delivering petrol to service stations.
+
+It adds things like:
+
+- **Many vehicles:** split the stops between several vans, then route each one.
+- **Capacity:** each van can only carry so much.
+- **Time windows:** this customer is only home between 2 and 4.
+- **Driver rules:** breaks, maximum hours, a depot to return to.
+- **Traffic:** travel times that change through the day.
+
+Every one of those makes it harder, not easier. Plain TSP is already NP-Hard, and vehicle routing contains TSP as a special case (one van, no limits), so vehicle routing is NP-Hard too.
+
+---
+
+## Good Routes vs Best Routes
+
+Here's the TSP figure from Post 20 with one extra button: **Nearest neighbour**. It's the simplest routing rule there is: from wherever you are, drive to the closest stop you haven't visited yet. It's also roughly what many people do by instinct.
+
+<TSPRoutes heuristic />
+
+Try it at different sizes. With 5, 6 or 7 cities, nearest neighbour happens to find the best tour for these particular points. With 8 or 9, it ends up about 17 to 18% longer than the best. That's typical of greedy rules: they do fine until an early "closest" choice traps them into a long trip back at the end.
+
+A real routing system does much better than nearest neighbour, using the kinds of improvement methods we'll meet in Phase 6. But it still almost never proves its route is the best one. For a van with 120 stops, the number of possible orders is a number with nearly 200 digits.
+
+---
+
+## Why a Few Percent Is Worth So Much
+
+Here's what made this real for me. Suppose a smarter routing method makes each route just 1% shorter. That sounds like nothing.
+
+Now multiply. A big parcel company runs tens of thousands of vehicles every day, each driving a long route, every working day of the year. One percent of all that driving is an enormous distance. Less distance means less fuel, less driver time, less wear on vehicles and lower emissions.
+
+The best-known public example is UPS. Over several years in the 2010s it rolled out a routing system called **ORION** to its US drivers, and the company has said that it saves on the order of a hundred million miles of driving per year, along with millions of gallons of fuel. I can't check those numbers myself, so treat them as UPS's own estimate, but even if the real figure were half of that, the point stands: tiny percentage improvements on a hard problem are worth fortunes at scale.
+
+:::tip The real economics
+Companies don't need the **optimal** route. They need a route that's **better than their competitors'**, found **fast enough** to plan every van before the morning shift. That's a heuristic problem, not an exact one, and it's where the money is.
+:::
+
+---
+
+## Beyond the Van
+
+The same kind of problem shows up at every level of a supply chain:
+
+<Tabs>
+  <TabItem value="ships" label="Ships and containers" default>
+
+A shipping company decides which ports each ship visits, in which order, how many containers go where, and which ships run which loops. That combines routing, scheduling and packing, all NP-Hard ingredients, at a scale of global trade routes.
+
+  </TabItem>
+  <TabItem value="warehouse" label="Inside the warehouse">
+
+A picker walking a warehouse to collect the items for an order is solving a small TSP among the shelves. Deciding which items go on which shelves so that popular combinations are close together is another hard optimisation problem.
+
+  </TabItem>
+  <TabItem value="network" label="Where to build">
+
+Deciding where to put warehouses and depots, so every customer is close to one but you don't build too many, is called **facility location**. It's NP-Hard too, and it's decided once and lived with for years.
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Correcting My Plan
+
+My original note for this post said "show how the Traveling Salesman Problem dictates global shipping costs". That overstates it. Shipping costs are dominated by fuel prices, wages, ships and vehicles, ports, demand and a lot of things that have nothing to do with algorithms.
+
+What's true is narrower: within all those costs, **how well you route** is a significant lever you control, and it's a lever made of NP-Hard problems. Better algorithms don't set the price of shipping. They decide how efficiently a company uses everything it's already paying for.
+
+:::note What We Have Established
+Real delivery is the **Vehicle Routing Problem** (Dantzig and Ramser, 1959): TSP plus multiple vehicles, capacities, time windows and driver rules. It contains TSP, so it's NP-Hard.
+
+Simple rules like **nearest neighbour** are fast but can be noticeably worse than the best route (about 17–18% on the 8- and 9-city examples here). Companies use stronger heuristics and solvers to get close to optimal quickly, without proving optimality. Because operations are huge, small percentage improvements are worth a great deal; UPS has said its ORION system saves on the order of 100 million miles a year.
+
+Routing doesn't set shipping costs on its own, but it's a major lever companies control, and it's made of NP-Hard problems.
+:::
+
+---
+
+## Up Next
+
+Routing vans is hard. Scheduling people is harder. Post 55 is about airlines: every flight needs a qualified crew, every crew member has legal limits on hours and rest, and the whole thing has to be rebuilt when one storm cancels fifty flights. It's one of the biggest NP-Hard problems solved routinely anywhere.
+
+See you there. 🚀
+
+---
+
+*Azeon is an open documentation project by Aziz. If you find an error or want to suggest an improvement, open an issue on the GitHub repository linked in the sidebar.*
